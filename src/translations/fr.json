@@ -1,0 +1,349 @@
+{
+    "common": {
+        "update" : "Mettre a jour",
+        "save" : "Enregistrer",
+        "creatingResume": "Creating Resume...",
+        "startEditingResume": "Start Editing Resume",
+        "appName": "Créateur de CV",
+        "loading": "Chargement...",
+        "error": "Une erreur est survenue",
+        "required": "Ce champ est obligatoire",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "download": "Télécharger"
+    },
+    "certificates": {
+        "title": "Certificats",
+        "add": "Ajouter un certificat",
+        "remove": "Supprimer",
+        "name": "Nom du certificat",
+        "namePlaceholder": "ex: AWS Certified Solutions Architect",
+        "issuer": "Organisation émettrice",
+        "issuerPlaceholder": "ex: Amazon Web Services",
+        "issueDate": "Date d'émission",
+        "expiryDate": "Date d'expiration",
+        "credentialId": "ID de certification",
+        "credentialIdPlaceholder": "ex: ABC123XYZ",
+        "credentialURL": "URL de vérification",
+        "credentialURLPlaceholder": "https://..."
+    },
+    "resumes": {
+        "title": "Mes CV",
+        "createNew": "Créer un nouveau CV",
+        "noResumes": "Aucun CV pour le moment",
+        "noResumesDesc": "Créez votre premier CV en utilisant nos modèles professionnels",
+        "createFirst": "Créer votre premier CV",
+        "template": "Modèle",
+        "lastModified": "Dernière modification"
+    },
+    "templates": {
+        "title": "Choisir un modèle",
+        "subtitle": "Sélectionnez parmi notre collection de modèles professionnels pour commencer à créer votre CV",
+        "allCategories": "Tous",
+        "corporate": "Entreprise",
+        "creative": "Créatif",
+        "simple": "Simple",
+        "preview": "Aperçu",
+        "useTemplate": "Utiliser ce modèle"
+    },
+    "welcome": {
+        "title": "Créez Votre CV Professionnel Aujourd'hui",
+        "subtitle": "Démarquez-vous avec un CV magnifiquement conçu. Facile à créer, personnaliser et partager.",
+        "getStarted": "Créer votre CV",
+        "login": "Se connecter",
+        "register": "S'inscrire",
+        "features": {
+            "title": "Fonctionnalités",
+            "easy": "Facile à Utiliser",
+            "easyDesc": "Interface simple et intuitive pour créer des CV professionnels.",
+            "professional": "Modèles Professionnels",
+            "professionalDesc": "Choisissez parmi une variété de modèles conçus professionnellement.",
+            "ats": "Compatible ATS",
+            "atsDesc": "Optimisé pour les systèmes de suivi des candidatures pour améliorer vos chances.",
+            "export": "Export en PDF",
+            "exportDesc": "Téléchargez votre CV au format PDF, prêt à être partagé.",
+            "multilingual": "Multilingue",
+            "multilingualDesc": "Créez votre CV en différentes langues pour atteindre une audience mondiale."
+        },
+        "recruiter": {
+            "badge": "Mode Recruteur",
+            "heading": "Pensé aussi pour les équipes de recrutement",
+            "description": "Offrez aux recruteurs un accès direct aux CV, des filtres avancés et des outils de partage sécurisés pour collaborer plus vite.",
+            "testimonial": "“Je peux enfin évaluer les candidats sans courir après les PDF ou des CV obsolètes. Le hub recruteur a accéléré nos embauches.”",
+            "primaryCta": "Accéder au Hub Recruteur",
+            "secondaryCta": "Inviter mon équipe",
+            "cards": {
+                "talent": {
+                    "title": "QG Talents",
+                    "description": "Parcourez tous les CV de votre espace avec recherche intelligente, filtres par modèle et suivi d'activité."
+                },
+                "collaboration": {
+                    "title": "Collaboration d'Équipe",
+                    "description": "Partagez des liens sécurisés temporaires avec les managers et suivez les interactions sans exposer de données sensibles."
+                },
+                "preview": {
+                    "title": "Prévisualisation Instantanée",
+                    "description": "Ouvrez n'importe quel profil candidat dans un lecteur riche avec expériences, compétences et pièces jointes prêtes à être évaluées."
+                },
+                "templates": {
+                    "title": "Propositions de Modèles",
+                    "description": "Les recruteurs peuvent soumettre des modèles personnalisés et les faire valider par les administrateurs depuis un tableau de bord unique."
+                }
+            }
+        }
+    },
+    "auth": {
+        "login": {
+            "title": "Bon Retour",
+            "subtitle": "Connectez-vous à votre compte",
+            "email": "Adresse Email",
+            "password": "Mot de passe",
+            "rememberMe": "Se souvenir de moi",
+            "forgotPassword": "Mot de passe oublié ?",
+            "noAccount": "Pas encore de compte ?",
+            "register": "Inscrivez-vous ici",
+            "submit": "Se connecter"
+        },
+        "register": {
+            "title": "Créer un Compte",
+            "subtitle": "Commencez à créer votre CV professionnel",
+            "name": "Nom Complet",
+            "email": "Adresse Email",
+            "password": "Mot de passe",
+            "confirmPassword": "Confirmer le mot de passe",
+            "hasAccount": "Déjà un compte ?",
+            "login": "Connectez-vous ici",
+            "submit": "S'inscrire",
+            "terms": "J'accepte les conditions d'utilisation"
+        }
+    },
+    "nav": {
+        "preview": "Aperçu du CV",
+        "download": "Télécharger PDF",
+        "myResumes": "Mes CV",
+        "templates": "Modèles",
+        "profile": "Profil",
+        "logout": "Déconnexion",
+        "fullPage": "Plein Écran"
+    },
+    "preview": {
+        "professionalSummary": "Résumé Professionnel",
+        "workExperience": "Expérience Professionnelle",
+        "education": "Formation",
+        "skills": "Compétences",
+        "interests": "Intérêts",
+        "certifications": "Certifications",
+        "present": "En cours",
+        "fullPageView": "Vue Plein Écran",
+        "professionalTitle": "Titre Professionnel",
+        "yourName": "Votre Nom"
+    },
+    "personal": {
+        "title": "Informations de Base",
+        "fullName": "Nom Complet",
+        "fullNameHint": "Comment voulez-vous être appelé",
+        "fullNamePlaceholder": "ex., Jean Dupont",
+        "jobTitle": "Titre Professionnel",
+        "jobTitleHint": "Votre poste actuel ou souhaité",
+        "jobTitlePlaceholder": "ex., Ingénieur Logiciel Senior",
+        "email": "Adresse Email",
+        "emailHint": "Email professionnel de préférence",
+        "emailPlaceholder": "ex., jean.dupont@entreprise.com",
+        "phone": "Numéro de Téléphone",
+        "phoneHint": "Inclure l'indicatif du pays",
+        "phonePlaceholder": "ex., +33 6 12 34 56 78",
+        "location": "Localisation",
+        "locationHint": "Ville, Pays",
+        "locationPlaceholder": "ex., Paris, France",
+        "summary": "Résumé Professionnel",
+        "summaryHint": "Bref aperçu de votre carrière",
+        "summaryPlaceholder": "Rédigez un bref résumé professionnel..."
+    },
+    "experience": {
+        "title": "Expérience",
+        "company": "Nom de l'Entreprise",
+        "companyHint": "Où vous avez travaillé",
+        "companyPlaceholder": "ex., Google, Inc.",
+        "position": "Poste",
+        "positionHint": "Votre rôle dans l'entreprise",
+        "positionPlaceholder": "ex., Ingénieur Logiciel Senior",
+        "startDate": "Date de Début",
+        "startDateHint": "Quand vous avez commencé",
+        "endDate": "Date de Fin",
+        "endDateHint": "Laisser vide si poste actuel",
+        "description": "Réalisations Clés",
+        "descriptionHint": "Utilisez des puces pour plus de clarté",
+        "descriptionPlaceholder": "• Développé et lancé la fonctionnalité X qui a augmenté l'engagement des utilisateurs de Y%\n• Dirigé une équipe de X développeurs pour livrer le projet Y en avance\n• Réduit le temps de réponse du système de X%",
+        "addButton": "Ajouter une Expérience",
+        "removeButton": "Supprimer"
+    },
+    "education": {
+        "title": "Formation",
+        "school": "École/Université",
+        "schoolHint": "Où vous avez étudié",
+        "schoolPlaceholder": "ex., Université Paris-Saclay",
+        "degree": "Diplôme",
+        "degreeHint": "Type de diplôme obtenu",
+        "degreePlaceholder": "ex., Master",
+        "field": "Domaine d'Études",
+        "fieldHint": "Votre spécialisation",
+        "fieldPlaceholder": "ex., Informatique",
+        "startDate": "Date de Début",
+        "endDate": "Date de Fin",
+        "description": "Réalisations Notables",
+        "descriptionHint": "Cours pertinents, mentions, etc.",
+        "addButton": "Ajouter une Formation",
+        "removeButton": "Supprimer"
+    },
+    "skills": {
+        "title": "Compétences",
+        "name": "Nom de la Compétence",
+        "nameHint": "Ajoutez une compétence pertinente",
+        "namePlaceholder": "ex., JavaScript, Gestion de Projet",
+        "level": "Niveau de Maîtrise",
+        "levelHint": "Quel est votre niveau ?",
+        "category": "Catégorie",
+        "categoryHint": "Grouper les compétences similaires",
+        "categoryPlaceholder": "ex., Programmation, Soft Skills",
+        "addButton": "Ajouter une Compétence",
+        "removeButton": "Supprimer",
+        "levels": {
+            "beginner": "Débutant",
+            "intermediate": "Intermédiaire",
+            "advanced": "Avancé",
+            "expert": "Expert"
+        }
+    },
+    "hobbies": {
+        "title": "Loisirs & Intérêts",
+        "name": "Loisir/Intérêt",
+        "nameHint": "Ce que vous aimez faire",
+        "namePlaceholder": "ex., Photographie, Échecs",
+        "description": "Description",
+        "descriptionHint": "Brève explication de votre intérêt",
+        "descriptionPlaceholder": "Parlez-nous de votre loisir...",
+        "addButton": "Ajouter un Loisir",
+        "removeButton": "Supprimer"
+    },
+    "buttons": {
+        "save": "Enregistrer les Modifications"
+    },
+    "dashboard": {
+        "sections": {
+            "personalInfo": {
+                "title": "Informations Personnelles",
+                "fullName": "Nom Complet",
+                "fullNamePlaceholder": "Hamdaoui Wassim",
+                "fullNameHint": "Comment voulez-vous être appelé",
+                "jobTitle": "Titre Professionnel",
+                "jobTitlePlaceholder": "Ingénieur Logiciel Senior",
+                "jobTitleHint": "Votre poste actuel ou souhaité",
+                "email": "Adresse Email",
+                "emailPlaceholder": "ex.,hamdaouiwassim@gmail.com",
+                "emailHint": "Email professionnel de préférence",
+                "phone": "Numéro de Téléphone",
+                "phonePlaceholder": "ex., +33 6 12 34 56 78",
+                "phoneHint": "Inclure l'indicatif du pays",
+                "location": "Localisation",
+                "locationPlaceholder": "ex., Paris, France",
+                "locationHint": "Ville, Pays",
+                "summary": "Résumé Professionnel",
+                "summaryPlaceholder": "Rédigez un bref résumé professionnel...",
+                "summaryHint": "Bref aperçu de votre carrière"
+            },
+            "experiences": {
+                "title": "Expériences professionnelles",
+                "addExperience": "Ajouter une expérience",
+                "experience" :{
+                    "company" :"Nom de l'Entreprise",
+                    "companyHint": "Où vous avez travaillé",
+                    "companyPlaceholder": "ex., Google, Inc.",
+                    "position": "Poste",
+                    "positionHint": "Votre rôle dans l'entreprise",
+                    "positionPlaceholder": "ex., Ingénieur Logiciel Senior",
+                    "startDate": "Date de Début",
+                    "startDateHint": "Quand vous avez commencé",
+                    "endDate": "Date de Fin",
+                    "endDateHint": "Laisser vide si poste actuel",
+                    "description": "Réalisations Clés",
+                    "descriptionHint": "Utilisez des puces pour plus de clarté",
+                    "descriptionPlaceholder": "• Développé et lancé la fonctionnalité X qui a augmenté l'engagement des utilisateurs de Y%\n• Dirigé une équipe de X développeurs pour livrer le projet Y en avance\n• Réduit le temps de réponse du système de X%"
+
+                }
+            },
+            "educations": {
+                "title": "Educations",
+                "addEducation": "Ajouter une education",
+                "education" :{
+                    "institution" :"Etablisement",
+                    "institutionHint": "Votre Etablisement",
+                    "institutionPlaceholder": "Votre Etablisement",
+                    "degree": "Diplôme",
+                    "degreeHint":"Type de diplôme obtenu",
+                    "degreePlaceholder":"ex., Master",
+                    "startDate": "Date de Début",
+                    "startDateHint": "Quand vous avez commencé",
+                    "endDate": "Date de Fin",
+                    "endDateHint": "Laisser vide si poste actuel",
+                    "description": "Réalisations Clés",
+                    "descriptionHint": "Utilisez des puces pour plus de clarté",
+                    "descriptionPlaceholder": "• Développé et lancé la fonctionnalité X qui a augmenté l'engagement des utilisateurs de Y%\n• Dirigé une équipe de X développeurs pour livrer le projet Y en avance\n• Réduit le temps de réponse du système de X%"
+
+                }
+            },
+            "skills": {
+                "title": "Compétences",
+                "addSkill": "Ajouter une Compétence",
+                "skill": {
+                    "title": "Compétence",
+                    "name": "Nom de la Compétence",
+                    "nameHint": "Ajoutez une compétence pertinente",
+                    "namePlaceholder": "ex., JavaScript, Gestion de Projet",
+                    "proficiency": "Niveau de Maîtrise",
+                    "proficiencyHint": "Quel est votre niveau?",
+                    "selectProficiency": "Sélectionner le Niveau",
+                    "beginner": "Débutant",
+                    "intermediate": "Intermédiaire",
+                    "advanced": "Avancé",
+                    "expert": "Expert"
+                }
+            },
+            "hobbies": {
+                "title": "Loisirs & Intérêts",
+                "addHobby": "Ajouter un Loisir",
+                "hobby": {
+                    "title": "Loisir",
+                    "name": "Nom du Loisir",
+                    "nameHint": "Ajoutez un loisir ou un intérêt",
+                    "namePlaceholder": "ex., Photographie, Lecture, Voyage"
+                }
+            },
+            "certificates": {
+                "title": "Certificats",
+                "addCertificate": "Ajouter un Certificat",
+                "certificate": {
+                    "title": "Certificat",
+                    "name": "Nom du Certificat",
+                    "nameHint": "Nom du certificat",
+                    "namePlaceholder": "ex., AWS Certified Solutions Architect",
+                    "issuer": "Organisation Émettrice",
+                    "issuerHint": "Organisation qui a émis le certificat",
+                    "issuerPlaceholder": "ex., Amazon Web Services",
+                    "dateObtained": "Date d'Obtention",
+                    "dateObtainedHint": "Quand vous avez reçu le certificat"
+                }
+            }
+        }
+    },
+    "createResume": {
+        "title": "Créer un Nouveau CV",
+        "nameLabel" : "Nom du CV",
+        "namePlaceholder" : "ex: Mon CV Professionnel",
+        "templateLabel": "Modèle de CV",
+        "selectTemplate": "Sélectionner un Modèle",
+        "chooseTemplate": "Choisissez un modèle pour commencer à créer votre CV.",
+        "proceed": "Procéder à la Création"
+    }
+
+    
+}

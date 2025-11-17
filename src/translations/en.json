@@ -1,0 +1,357 @@
+{
+    "common": {
+        "update" : "Update",
+        "save" : "Save",
+        "creatingResume": "Creating Resume...",
+        "startEditingResume": "Start Editing Resume",
+        "appName": "CV Builder",
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "required": "This field is required",
+        "edit": "Edit",
+        "delete": "Delete",
+        "download": "Download"
+    },
+    "certificates": {
+        "title": "Certificates",
+        "add": "Add Certificate",
+        "remove": "Remove",
+        "name": "Certificate Name",
+        "namePlaceholder": "e.g., AWS Certified Solutions Architect",
+        "issuer": "Issuing Organization",
+        "issuerPlaceholder": "e.g., Amazon Web Services",
+        "issueDate": "Issue Date",
+        "expiryDate": "Expiry Date",
+        "credentialId": "Credential ID",
+        "credentialIdPlaceholder": "e.g., ABC123XYZ",
+        "credentialURL": "Credential URL",
+        "credentialURLPlaceholder": "https://..."
+    },
+    "resumes": {
+        "title": "My Resumes",
+        "createNew": "Create New Resume",
+        "noResumes": "No Resumes Yet",
+        "noResumesDesc": "Create your first resume using our professional templates",
+        "createFirst": "Create Your First Resume",
+        "template": "Template",
+        "lastModified": "Last Modified"
+    },
+    "templates": {
+        "title": "Choose a Template",
+        "subtitle": "Select from our collection of professional templates to start creating your resume",
+        "allCategories": "All",
+        "corporate": "Corporate",
+        "creative": "Creative",
+        "simple": "Simple",
+        "preview": "Preview",
+        "useTemplate": "Use Template"
+    },
+    "welcome": {
+        "title": "Create Your Professional Resume Today",
+        "subtitle": "Stand out from the crowd with a beautifully designed resume. Easy to create, customize, and share.",
+        "getStarted": "Create your CV now",
+        "login": "Login",
+        "register": "Register",
+        "features": {
+            "title": "Features",
+            "easy": "Easy to Use",
+            "easyDesc": "Simple and intuitive interface for creating professional CVs.",
+            "professional": "Professional Templates",
+            "professionalDesc": "Choose from a variety of professionally designed templates.",
+            "ats": "ATS Friendly",
+            "atsDesc": "Optimized for Applicant Tracking Systems to improve your chances.",
+            "export": "Export to PDF",
+            "exportDesc": "Download your CV in PDF format, ready to be shared.",
+            "multilingual": "Multiple Languages",
+            "multilingualDesc": "Create your CV in different languages to reach a global audience."
+        },
+        "recruiter": {
+            "badge": "Recruiter Mode",
+            "heading": "Built for hiring teams too",
+            "description": "Give recruiters direct access to curated resumes, advanced filters, and secure sharing tools to collaborate faster.",
+            "testimonial": "“I can finally evaluate candidates without chasing PDF attachments or outdated resumes. The recruiter hub changed our hiring speed.”",
+            "primaryCta": "Access Recruiter Hub",
+            "secondaryCta": "Invite my team",
+            "cards": {
+                "talent": {
+                    "title": "Talent HQ",
+                    "description": "Browse every resume in your workspace with smart search, template filters, and activity timelines."
+                },
+                "collaboration": {
+                    "title": "Team Collaboration",
+                    "description": "Share short-lived secure links with hiring managers and track interactions without exposing private data."
+                },
+                "preview": {
+                    "title": "Live Preview",
+                    "description": "Open any candidate profile in a rich viewer with experience, skills, and attachments ready to evaluate."
+                },
+                "templates": {
+                    "title": "Template Proposals",
+                    "description": "Recruiters can submit branded template ideas and get them approved by admins in a single dashboard."
+                }
+            }
+        }
+    },
+    "auth": {
+        "login": {
+            "title": "Welcome Back",
+            "subtitle": "Login to your account",
+            "email": "Email Address",
+            "password": "Password",
+            "rememberMe": "Remember me",
+            "forgotPassword": "Forgot Password?",
+            "noAccount": "Don't have an account?",
+            "register": "Register here",
+            "submit": "Login"
+        },
+        "register": {
+            "title": "Create Account",
+            "subtitle": "Start building your professional CV",
+            "name": "Full Name",
+            "email": "Email Address",
+            "password": "Password",
+            "confirmPassword": "Confirm Password",
+            "hasAccount": "Already have an account?",
+            "login": "Login here",
+            "submit": "Register",
+            "terms": "I agree to the Terms and Conditions"
+        }
+    },
+    "nav": {
+        "preview": "CV Preview",
+        "download": "Download PDF",
+        "myResumes": "My Resumes",
+        "templates": "Templates",
+        "profile": "Profile",
+        "logout": "Logout",
+        "fullPage": "Full Page"
+    },
+    "preview": {
+        "professionalSummary": "Professional Summary",
+        "workExperience": "Work Experience",
+        "education": "Education",
+        "skills": "Skills",
+        "interests": "Interests",
+        "certifications": "Certifications",
+        "present": "Present",
+        "fullPageView": "Full Page View",
+        "professionalTitle": "Professional Title",
+        "yourName": "Your Name"
+    },
+    "personal": {
+        "title": "Basic Information",
+        "fullName": "Full Name",
+        "fullNameHint": "How you want to be addressed",
+        "fullNamePlaceholder": "e.g., John Doe",
+        "jobTitle": "Professional Title",
+        "jobTitleHint": "Your current or desired role",
+        "jobTitlePlaceholder": "e.g., Senior Software Engineer",
+        "email": "Email Address",
+        "emailHint": "Professional email preferred",
+        "emailPlaceholder": "e.g., john.doe@company.com",
+        "phone": "Phone Number",
+        "phoneHint": "Include country code",
+        "phonePlaceholder": "e.g., +1 (555) 000-0000",
+        "location": "Location",
+        "locationHint": "City, Country",
+        "locationPlaceholder": "e.g., San Francisco, United States",
+        "summary": "Professional Summary",
+        "summaryHint": "Brief overview of your career",
+        "summaryPlaceholder": "Write a brief professional summary..."
+    },
+    "experience": {
+        "title": "Experience",
+        "company": "Company Name",
+        "companyHint": "Where you worked",
+        "companyPlaceholder": "e.g., Google, Inc.",
+        "position": "Position",
+        "positionHint": "Your role at the company",
+        "positionPlaceholder": "e.g., Senior Software Engineer",
+        "startDate": "Start Date",
+        "startDateHint": "When you joined",
+        "endDate": "End Date",
+        "endDateHint": "Leave empty if current",
+        "description": "Key Achievements",
+        "descriptionHint": "Use bullet points for better readability",
+        "descriptionPlaceholder": "• Developed and launched feature X that increased user engagement by Y%\n• Led a team of X developers to deliver project Y ahead of schedule\n• Reduced system response time by X% through optimization",
+        "addButton": "Add Experience",
+        "removeButton": "Remove"
+    },
+    "education": {
+        "title": "Education",
+        "school": "School/University",
+        "schoolHint": "Where you studied",
+        "schoolPlaceholder": "e.g., Stanford University",
+        "degree": "Degree",
+        "degreeHint": "Type of degree earned",
+        "degreePlaceholder": "e.g., Bachelor of Science",
+        "field": "Field of Study",
+        "fieldHint": "Your major or specialization",
+        "fieldPlaceholder": "e.g., Computer Science",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "description": "Notable Achievements",
+        "descriptionHint": "Relevant coursework, honors, etc.",
+        "addButton": "Add Education",
+        "removeButton": "Remove"
+    },
+    "skills": {
+        "title": "Skills",
+        "name": "Skill Name",
+        "nameHint": "Add a relevant skill",
+        "namePlaceholder": "e.g., JavaScript, Project Management",
+        "level": "Proficiency Level",
+        "levelHint": "How skilled are you?",
+        "category": "Category",
+        "categoryHint": "Group similar skills",
+        "categoryPlaceholder": "e.g., Programming, Soft Skills",
+        "addButton": "Add Skill",
+        "removeButton": "Remove",
+        "levels": {
+            "beginner": "Beginner",
+            "intermediate": "Intermediate",
+            "advanced": "Advanced",
+            "expert": "Expert"
+        }
+    },
+    "hobbies": {
+        "title": "Hobbies & Interests",
+        "name": "Hobby/Interest",
+        "nameHint": "What you enjoy doing",
+        "namePlaceholder": "e.g., Photography, Chess",
+        "description": "Description",
+        "descriptionHint": "Brief explanation of your interest",
+        "descriptionPlaceholder": "Tell us more about your hobby...",
+        "addButton": "Add Hobby",
+        "removeButton": "Remove"
+    },
+    "buttons": {
+        "save": "Save Changes"
+    },
+    "dashboard": {
+        "sections": {
+            "personalInfo": {
+                "title": "Informations Personnelles",
+                "fullName": "Nom Complet",
+                "fullNamePlaceholder": "Hamdaoui Wassim",
+                "fullNameHint": "How you want to be addressed",
+                "jobTitle": "Professional Title",
+                "jobTitlePlaceholder": "Senior Software Engineer",
+                "jobTitleHint": "Your current or desired role",
+                "email": "Email Address",
+                "emailPlaceholder": "e.g.,hamdaouiwassim@gmail.com",
+                "emailHint": "Professional email preferred",
+                "phone": "Phone Number",
+                "phonePlaceholder": "e.g., +1 (555) 000-0000",
+                "phoneHint": "Include country code",
+                "location": "Location",
+                "locationPlaceholder": "e.g., San Francisco, United States",
+                "locationHint": "City, Country",
+                "summary": "Professional Summary",
+                "summaryPlaceholder": "Write a brief professional summary...",
+                "summaryHint": "Brief overview of your career"
+                
+                
+            },
+            "experiences": {
+                "title": "Professional experiences",
+                "addExperience": "Add Experience",
+                "experience": {
+                    "title": "Professional Experience",
+                    "company": "Company Name",
+                    "companyHint": "Where you worked",
+                    "companyPlaceholder": "e.g., Google, Inc.",
+                    "position": "Position",
+                    "positionHint": "Your role at the company",
+                    "positionPlaceholder": "e.g., Senior Software Engineer",
+                    "startDate": "Start Date",
+                    "startDateHint": "When you joined",
+                    "endDate": "End Date",
+                    "endDateHint": "Leave empty if current",
+                    "description": "Key Achievements",
+                    "descriptionHint": "Use bullet points for better readability",
+                    "descriptionPlaceholder": "• Developed and launched feature X that increased user engagement by Y%\n• Led a team of X developers to deliver project Y ahead of schedule\n• Reduced system response time by X% through optimization",
+                    "addButton": "Add Experience"
+
+                }
+            },
+             "educations": {
+                "title": "Educations",
+                "addEducation" : "Add Education",
+                "education" :{
+                    "institution" :"institution",
+                    "institutionHint": "Votre Etablisement",
+                    "institutionPlaceholder": "Votre Etablisement",
+                    "degree": "Diplôme",
+                    "degreeHint":"Type de diplôme obtenu",
+                    "degreePlaceholder":"ex., Master",
+                    "startDate": "Date de Début",
+                    "startDateHint": "Quand vous avez commencé",
+                    "endDate": "Date de Fin",
+                    "endDateHint": "Laisser vide si poste actuel",
+                    "description": "Réalisations Clés",
+                    "descriptionHint": "Utilisez des puces pour plus de clarté",
+                    "descriptionPlaceholder": "• Développé et lancé la fonctionnalité X qui a augmenté l'engagement des utilisateurs de Y%\n• Dirigé une équipe de X développeurs pour livrer le projet Y en avance\n• Réduit le temps de réponse du système de X%"
+
+                }
+            },
+            "skills": {
+                "title": "Skills",
+                "addSkill": "Add Skill",
+                "skill": {
+                    "title": "Skill",
+                    "name": "Skill Name",
+                    "nameHint": "Add a relevant skill",
+                    "namePlaceholder": "e.g., JavaScript, Project Management",
+                    "proficiency": "Proficiency Level",
+                    "proficiencyHint": "How skilled are you?",
+                    "selectProficiency": "Select Proficiency",
+                    "beginner": "Beginner",
+                    "intermediate": "Intermediate",
+                    "advanced": "Advanced",
+                    "expert": "Expert"
+                }
+            },
+            "hobbies": {
+                "title": "Hobbies & Interests",
+                "addHobby": "Add Hobby",
+                "hobby": {
+                    "title": "Hobby",
+                    "name": "Hobby Name",
+                    "nameHint": "Add a hobby or interest",
+                    "namePlaceholder": "e.g., Photography, Reading, Travel"
+                }
+            },
+            "certificates": {
+                "title": "Certificates",
+                "addCertificate": "Add Certificate",
+                "certificate": {
+                    "title": "Certificate",
+                    "name": "Certificate Name",
+                    "nameHint": "Name of the certificate",
+                    "namePlaceholder": "e.g., AWS Certified Solutions Architect",
+                    "issuer": "Issuing Organization",
+                    "issuerHint": "Organization that issued the certificate",
+                    "issuerPlaceholder": "e.g., Amazon Web Services",
+                    "dateObtained": "Date Obtained",
+                    "dateObtainedHint": "When you received the certificate"
+                }
+            }
+        }
+    },
+    "createResume": {
+        "title": "Create Your Resume",
+        "nameLabel" : "Resume Name",
+        "namePlaceholder": "e.g., John_Doe_Resume",
+        "templateLabel": "Resume Template",
+        "subtitle": "Fill in the details to build your professional resume",
+        "personalInfo": "Personal Information",
+        "experience": "Experience",
+        "education": "Education",
+        "skills": "Skills",
+        "hobbies": "Hobbies & Interests",
+        "certificates": "Certificates",
+        "saveButton": "Save Resume",
+        "previewButton": "Preview Resume"
+    }
+}

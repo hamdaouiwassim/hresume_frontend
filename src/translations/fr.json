@@ -140,6 +140,10 @@
             "noCard": "Pas de carte bancaire",
             "instant": "Téléchargement instantané"
         },
+        "stats": {
+            "candidates": "Candidats",
+            "resumes": "CV Créés"
+        },
         "features": {
             "title": "Fonctionnalités",
             "subtitle": "Tout ce dont vous avez besoin pour créer un CV professionnel remarquable",
@@ -153,6 +157,13 @@
             "exportDesc": "Téléchargez votre CV au format PDF, prêt à être partagé.",
             "multilingual": "Multilingue",
             "multilingualDesc": "Créez votre CV en différentes langues pour atteindre une audience mondiale."
+        },
+        "reviews": {
+            "title": "Ce Que Disent Nos Utilisateurs",
+            "subtitle": "Ne nous croyez pas sur parole. Découvrez ce que nos utilisateurs pensent de leur expérience avec HResume.",
+            "verifiedUser": "Utilisateur Vérifié",
+            "ctaText": "Partagez votre expérience avec HResume",
+            "ctaButton": "Laisser un Avis"
         },
         "finalCta": {
             "title": "Prêt à créer votre CV professionnel ?",
@@ -219,6 +230,7 @@
         "myResumes": "Mes CV",
         "templates": "Modèles",
         "profile": "Profil",
+        "review": "Laisser un Avis",
         "settings": "Paramètres",
         "logout": "Déconnexion",
         "fullPage": "Plein Écran",
@@ -680,6 +692,106 @@
         "note": {
             "title": "Tarifs futurs ?",
             "description": "Nous pourrions proposer plus tard des options premium pour les équipes et recruteurs, mais le créateur de CV principal restera gratuit pendant notre croissance. Vous serez prévenu bien à l'avance avant tout changement."
+        }
+    },
+    "review": {
+        "title": "Partagez Votre Expérience",
+        "subtitle": "Vos commentaires nous aident à nous améliorer et aident les autres à découvrir HResume. Nous aimerions connaître votre expérience !",
+        "ratingLabel": "Comment évaluez-vous votre expérience ?",
+        "titleLabel": "Titre de l'Avis",
+        "titlePlaceholder": "ex., Excellente plateforme pour créer des CV",
+        "commentLabel": "Votre Avis",
+        "commentPlaceholder": "Parlez-nous de votre expérience avec HResume. Qu'avez-vous aimé ? Que pourrait-on améliorer ?",
+        "publicLabel": "Rendre cet avis public",
+        "publicDescription": "Permettre aux autres de voir votre avis sur notre plateforme. Vous pourrez modifier cela plus tard.",
+        "submitButton": "Soumettre l'Avis",
+        "updateButton": "Mettre à Jour l'Avis",
+        "submitting": "Envoi en cours...",
+        "successMessage": "Merci pour votre avis !",
+        "successTitle": "Merci !",
+        "successDescription": "Votre avis a été soumis avec succès. Nous apprécions vos commentaires !",
+        "alreadySubmittedTitle": "Avis Déjà Soumis",
+        "alreadySubmittedMessage": "Vous avez déjà soumis un avis. Merci pour vos commentaires !",
+        "publicStatus": "Cet avis est public",
+        "privateStatus": "Cet avis est privé",
+        "noTitle": "Aucun titre fourni",
+        "noComment": "Aucun commentaire fourni",
+        "errorMessage": "Échec de l'envoi de l'avis. Veuillez réessayer.",
+        "encouragementTitle": "Votre Avis Compte !",
+        "encouragementText": "En partageant votre expérience, vous nous aidez à améliorer HResume et aidez les autres chercheurs d'emploi à découvrir un excellent outil pour créer des CV professionnels. Merci de prendre le temps !",
+        "ratingLabels": {
+            "excellent": "Excellent",
+            "veryGood": "Très Bien",
+            "good": "Bien",
+            "fair": "Moyen",
+            "poor": "Médiocre"
+        },
+        "validation": {
+            "ratingRequired": "Veuillez sélectionner une note",
+            "titleRequired": "Le titre est obligatoire",
+            "titleMinLength": "Le titre doit contenir au moins 3 caractères",
+            "commentRequired": "Le commentaire est obligatoire",
+            "commentMinLength": "L'avis doit contenir au moins 10 caractères"
+        },
+        "characters": "caractères",
+        "minCharacters": "minimum 10"
+    },
+    "blog": {
+        "title": "Blog",
+        "subtitle": "Restez informé des derniers conseils, informations et actualités sur la création de CV et le développement de carrière.",
+        "searchPlaceholder": "Rechercher des articles de blog...",
+        "noPosts": "Aucun article de blog trouvé.",
+        "previous": "Précédent",
+        "next": "Suivant",
+        "page": "Page",
+        "of": "sur",
+        "backToBlog": "Retour au Blog",
+        "notFound": "Article de Blog Introuvable",
+        "notFoundMessage": "L'article de blog que vous recherchez n'existe pas.",
+        "views": "vues"
+    },
+    "admin": {
+        "blog": {
+            "title": "Gestion du Blog",
+            "subtitle": "Créer et gérer les articles de blog",
+            "newPost": "Nouvel Article",
+            "searchPlaceholder": "Rechercher des articles...",
+            "allStatus": "Tous les Statuts",
+            "published": "Publié",
+            "draft": "Brouillon",
+            "fetchError": "Échec du chargement des articles de blog",
+            "createSuccess": "Article de blog créé avec succès",
+            "updateSuccess": "Article de blog mis à jour avec succès",
+            "deleteSuccess": "Article de blog supprimé avec succès",
+            "saveError": "Échec de l'enregistrement de l'article de blog",
+            "deleteError": "Échec de la suppression de l'article de blog",
+            "titleLabel": "Titre",
+            "excerptLabel": "Résumé",
+            "excerptPlaceholder": "Résumé bref de l'article...",
+            "contentLabel": "Contenu",
+            "contentPlaceholder": "Écrivez le contenu de votre article de blog ici (HTML pris en charge)...",
+            "featuredImageLabel": "URL de l'Image en Vedette",
+            "statusLabel": "Statut",
+            "publishedAtLabel": "Publié Le",
+            "cancel": "Annuler",
+            "save": "Enregistrer",
+            "saving": "Enregistrement...",
+            "editPost": "Modifier l'Article",
+            "deleteConfirmTitle": "Supprimer l'Article de Blog",
+            "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cet article de blog ? Cette action ne peut pas être annulée.",
+            "delete": "Supprimer",
+            "edit": "Modifier",
+            "view": "Voir",
+            "author": "Auteur",
+            "status": "Statut",
+            "publishedAt": "Publié Le",
+            "views": "Vues",
+            "actions": "Actions",
+            "noPosts": "Aucun article de blog trouvé",
+            "validation": {
+                "titleRequired": "Le titre est obligatoire",
+                "contentRequired": "Le contenu est obligatoire"
+            }
         }
     }
 }

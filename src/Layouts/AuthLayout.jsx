@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FileText, User, Settings, LogOut, ChevronDown, Menu, X, Shield, Briefcase } from 'lucide-react';
+import { FileText, User, Settings, LogOut, ChevronDown, Menu, X, Shield, Briefcase, Heart } from 'lucide-react';
 import LanguageToggle from '../components/LanguageToggle';
 import { logout } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
@@ -116,6 +116,14 @@ export default function AuthLayout({ children }) {
                                                 <User className="h-4 w-4 mr-2.5" />
                                             {navStrings.profile || 'Profile'}
                                         </Link>
+                                        <Link
+                                            to="/review"
+                                                onClick={toggleDropdown}
+                                                className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 hover:text-pink-600 transition-all duration-200"
+                                        >
+                                                <Heart className="h-4 w-4 mr-2.5" />
+                                            {navStrings.review || 'Leave a Review'}
+                                        </Link>
                                         {/* <Link
                                             to="/settings"
                                                 onClick={toggleDropdown}
@@ -227,6 +235,14 @@ export default function AuthLayout({ children }) {
                                 >
                                     <User className="h-4 w-4 mr-2.5" />
                                     {navStrings.profile || 'Profile'}
+                                </Link>
+                                <Link
+                                    to="/review"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 hover:text-pink-600 transition-all duration-200"
+                                >
+                                    <Heart className="h-4 w-4 mr-2.5" />
+                                    {navStrings.review || 'Leave a Review'}
                                 </Link>
                                 <Link
                                     to="/settings"

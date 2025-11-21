@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Users, Layout, User, LogOut, Menu, X, BarChart3, Settings } from 'lucide-react';
+import { Shield, Users, Layout, User, LogOut, Menu, X, BarChart3, Settings, FileText } from 'lucide-react';
 import LanguageToggle from '../components/LanguageToggle';
 import { logout } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
@@ -85,6 +85,17 @@ export default function AdminLayout({ children }) {
                                 >
                                     <Layout className="h-4 w-4 mr-2" />
                                     Templates
+                                </Link>
+                                <Link
+                                    to="/admin/blog"
+                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                        isActive('/admin/blog')
+                                            ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/50'
+                                            : 'text-gray-600 hover:text-purple-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Blog
                                 </Link>
                             </div>
                         </div>
@@ -203,6 +214,17 @@ export default function AdminLayout({ children }) {
                             }`}
                         >
                             Templates
+                        </Link>
+                        <Link
+                            to="/admin/blog"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
+                                isActive('/admin/blog')
+                                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                                    : 'text-gray-600 hover:bg-gray-100 hover:text-purple-600'
+                            }`}
+                        >
+                            Blog
                         </Link>
                         <Link
                             to="/admin/profile"

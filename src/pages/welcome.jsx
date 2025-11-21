@@ -1,9 +1,12 @@
 
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import GuestLayout from "../Layouts/GuestLayout";
-import homebg from "../assets/home-bg.jpg";
+import homebg from "../assets/home-bg.webp";
 import { FileText, Layout, Rocket, CheckCircle, Award, ArrowRight, PlayCircle, Sparkles, Briefcase, Users, Eye, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import ReviewsCarousel from '../components/ReviewsCarousel';
+import { getStats } from '../services/statsService';
 import './welcome.css';
 export default function Welcome() {
   const { t } = useLanguage();
@@ -12,6 +15,34 @@ export default function Welcome() {
   const trustStrings = t?.welcome?.trust || {};
   const finalCta = t?.welcome?.finalCta || {};
   const featuresSubtitle = t?.welcome?.features?.subtitle;
+  const [stats, setStats] = useState({ total_candidates: 0, total_resumes: 0 });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await getStats();
+      if (response.data.status && response.data.data) {
+        setStats(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
+  const formatNumber = (num) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M+';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K+';
+    }
+    return num.toString();
+  };
 
   
   return (
@@ -50,11 +81,11 @@ export default function Welcome() {
                   <div className="mt-10 flex flex-wrap gap-4">
                     <Link 
                       to="/register" 
-                      className="cta-primary inline-flex items-center px-8 py-4 text-white rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+                      className="cta-primary inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 text-white rounded-xl text-sm sm:text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                     >
-                      <Rocket className="h-5 w-5 mr-2" />
+                      <Rocket className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                       {t.welcome.getStarted}
-                      <ArrowRight className="h-5 w-5 ml-2" />
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
                     </Link>
                     {/* <Link
                       to="/register/recruiter"
@@ -72,7 +103,7 @@ export default function Welcome() {
                   )}
                   
                   {/* Trust indicators */}
-                  <div className="mt-8 flex items-center gap-6 text-sm text-gray-600 mb-8">
+                  <div className="mt-8 flex items-center gap-6 text-sm text-gray-600 mb-8 flex-wrap">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-500" />
                       <span>{trustStrings.free || "Free to use"}</span>
@@ -108,6 +139,79 @@ export default function Welcome() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Stats Section - After Hero */}
+        <div className="relative bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 py-20 -mt-16 overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            {isLoadingStats ? (
+              <div className="flex items-center justify-center gap-12 sm:gap-16 md:gap-20 flex-wrap">
+                <div className="text-center animate-pulse">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-200 to-purple-200 rounded-3xl mb-4 mx-auto"></div>
+                  <div className="h-10 w-32 bg-gray-200 rounded-lg mb-3 mx-auto"></div>
+                  <div className="h-5 w-24 bg-gray-200 rounded mx-auto"></div>
+                </div>
+                <div className="text-center animate-pulse">
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-200 to-pink-200 rounded-3xl mb-4 mx-auto"></div>
+                  <div className="h-10 w-32 bg-gray-200 rounded-lg mb-3 mx-auto"></div>
+                  <div className="h-5 w-24 bg-gray-200 rounded mx-auto"></div>
+                </div>
+              </div>
+            ) : stats.total_candidates > 0 ? (
+              <div className="flex items-center justify-center gap-8 sm:gap-12 md:gap-16 lg:gap-20 flex-wrap">
+                {/* Candidates Stat */}
+                <div className="group text-center transform transition-all duration-500 hover:scale-110">
+                  <div className="relative inline-flex items-center justify-center mb-6">
+                    {/* Animated glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 group-hover:blur-3xl transition-all duration-500 animate-pulse-slow"></div>
+                    {/* Icon container */}
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl group-hover:shadow-blue-500/50 transition-all duration-500 transform group-hover:rotate-6">
+                      <Users className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 text-white" />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <span className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-blue-600 via-blue-700 via-purple-600 to-purple-700 bg-clip-text text-transparent leading-none">
+                      {formatNumber(stats.total_candidates)}
+                    </span>
+                  </div>
+                  <p className="text-base sm:text-lg md:text-xl text-gray-700 font-bold tracking-wide uppercase">
+                    {t?.welcome?.stats?.candidates || "Candidates"}
+                  </p>
+                </div>
+
+                {/* Divider */}
+                {stats.total_resumes > 0 && (
+                  <div className="hidden md:block w-1 h-32 bg-gradient-to-b from-transparent via-blue-300 via-purple-300 to-transparent rounded-full"></div>
+                )}
+
+                {/* Resumes Stat */}
+                {stats.total_resumes > 0 && (
+                  <div className="group text-center transform transition-all duration-500 hover:scale-110">
+                    <div className="relative inline-flex items-center justify-center mb-6">
+                      {/* Animated glow effect */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 group-hover:blur-3xl transition-all duration-500 animate-pulse-slow"></div>
+                      {/* Icon container */}
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 rounded-3xl flex items-center justify-center shadow-2xl group-hover:shadow-pink-500/50 transition-all duration-500 transform group-hover:-rotate-6">
+                        <FileText className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 text-white" />
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <span className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-purple-600 via-pink-600 via-pink-700 to-pink-800 bg-clip-text text-transparent leading-none">
+                        {formatNumber(stats.total_resumes)}
+                      </span>
+                    </div>
+                    <p className="text-base sm:text-lg md:text-xl text-gray-700 font-bold tracking-wide uppercase">
+                      {t?.welcome?.stats?.resumes || "Resumes Created"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -170,6 +274,9 @@ export default function Welcome() {
               </div>
             </div>
             
+            {/* Reviews Carousel Section */}
+            <ReviewsCarousel />
+            
             {/* Final CTA Section */}
             <div className="mt-20 text-center">
               <div className="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-1 rounded-2xl">
@@ -188,17 +295,17 @@ export default function Welcome() {
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <Link 
                       to="/register" 
-                      className="cta-primary inline-flex items-center px-10 py-4 text-white rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+                      className="cta-primary inline-flex items-center px-6 sm:px-8 md:px-10 py-3 sm:py-4 text-white rounded-xl text-sm sm:text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                     >
-                      <Rocket className="h-5 w-5 mr-2" />
+                      <Rocket className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                       {finalCta.candidate || "Candidate signup"}
-                      <ArrowRight className="h-5 w-5 ml-2" />
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
                     </Link>
                     <Link 
                       to="/register/recruiter" 
-                      className="inline-flex items-center px-10 py-4 rounded-xl text-lg font-semibold text-slate-900 bg-white border border-slate-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+                      className="inline-flex items-center px-6 sm:px-8 md:px-10 py-3 sm:py-4 rounded-xl text-sm sm:text-base md:text-lg font-semibold text-slate-900 bg-white border border-slate-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                     >
-                      <Briefcase className="h-5 w-5 mr-2" />
+                      <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                       {finalCta.recruiter || "Recruiter signup"}
                     </Link>
                   </div>
@@ -274,13 +381,13 @@ export default function Welcome() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   to="/login"
-                  className="inline-flex items-center px-8 py-3 rounded-xl bg-white text-slate-900 font-semibold shadow-lg"
+                  className="inline-flex items-center px-6 sm:px-8 py-3 rounded-xl bg-white text-slate-900 text-sm sm:text-base md:text-lg font-semibold shadow-lg"
                 >
                   {recruiterContent.primaryCta || "Access Recruiter Hub"}
                 </Link>
                 <Link
                   to="/register/recruiter"
-                  className="inline-flex items-center px-8 py-3 rounded-xl border border-white text-white font-semibold hover:bg-white/10 transition"
+                  className="inline-flex items-center px-6 sm:px-8 py-3 rounded-xl border border-white text-white text-sm sm:text-base md:text-lg font-semibold hover:bg-white/10 transition"
                 >
                   {recruiterContent.secondaryCta || "Invite my team"}
                 </Link>

@@ -1,17 +1,18 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import GuestLayout from "../Layouts/GuestLayout";
-import { MailCheck, RefreshCw, ShieldCheck } from "lucide-react";
-import { resendVerificationEmail } from "../services/authService";
+import { MailCheck, RefreshCw, ShieldCheck, LogOut } from "lucide-react";
+import { resendVerificationEmail, logout } from "../services/authService";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "sonner";
 
 export default function VerifyEmail() {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [cooldown, setCooldown] = useState(0);
   const [isSending, setIsSending] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const targetEmail = useMemo(() => {
     return location.state?.email || user?.email || "";
@@ -45,6 +46,25 @@ export default function VerifyEmail() {
       toast.error(error.response?.data?.message || "Unable to resend verification email.");
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+      localStorage.clear();
+      setUser(null);
+      toast.success("Logged out successfully.");
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if API call fails, clear local storage and redirect
+      localStorage.clear();
+      setUser(null);
+      navigate("/login", { replace: true });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -106,6 +126,26 @@ export default function VerifyEmail() {
                 You can send another email in {cooldown}s.
               </p>
             )}
+            
+            {/* Logout Button */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="w-full inline-flex items-center justify-center gap-3 rounded-2xl border-2 border-slate-300 text-slate-700 py-3 font-semibold hover:bg-slate-50 hover:border-slate-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoggingOut ? (
+                <>
+                  <RefreshCw className="h-5 w-5 animate-spin" />
+                  Logging out...
+                </>
+              ) : (
+                <>
+                  <LogOut className="h-5 w-5" />
+                  Logout
+                </>
+              )}
+            </button>
           </div>
 
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5 flex gap-3 text-sm text-emerald-800">

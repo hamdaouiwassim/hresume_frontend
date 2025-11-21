@@ -130,6 +130,11 @@ export default function GuestLayout({ children }) {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link to="/blog" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                                        Blog
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link to="/examples" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
                                         Resume Examples
                                     </Link>

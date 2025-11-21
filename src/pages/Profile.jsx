@@ -8,6 +8,14 @@ import { toast } from "sonner";
 
 export default function Profile() {
   const { t } = useLanguage();
+  const profileStrings = t?.profile || {};
+  const notifications = profileStrings.notifications || {};
+  const validationStrings = profileStrings.validation || {};
+  const fieldStrings = profileStrings.fields || {};
+  const passwordStrings = profileStrings.password || {};
+  const avatarStrings = profileStrings.avatar || {};
+  const buttonStrings = profileStrings.buttons || {};
+  const statusStrings = profileStrings.status || {};
   const { user, setUser } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: "",
@@ -45,7 +53,7 @@ export default function Profile() {
         setUser(userData);
       }
     } catch (error) {
-      toast.error("Failed to load profile");
+      toast.error(notifications.loadError || "Failed to load profile");
     } finally {
       setIsLoadingProfile(false);
     }
@@ -75,13 +83,13 @@ export default function Profile() {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error(notifications.invalidFileType || "Please select an image file");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB");
+      toast.error(notifications.fileTooLarge || "Image size should be less than 5MB");
       return;
     }
 
@@ -99,22 +107,22 @@ export default function Profile() {
     const newErrors = {};
     
     if (!formData.name || formData.name.trim() === "") {
-      newErrors.name = ["Name is required"];
+      newErrors.name = [validationStrings.nameRequired || "Name is required"];
     }
     
     if (!formData.email || formData.email.trim() === "") {
-      newErrors.email = ["Email is required"];
+      newErrors.email = [validationStrings.emailRequired || "Email is required"];
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = ["Please enter a valid email address"];
+      newErrors.email = [validationStrings.emailInvalid || "Please enter a valid email address"];
     }
 
     // Password validation (only if password is provided)
     if (formData.password) {
       if (formData.password.length < 8) {
-        newErrors.password = ["Password must be at least 8 characters"];
+        newErrors.password = [validationStrings.passwordLength || "Password must be at least 8 characters"];
       }
       if (formData.password !== formData.password_confirmation) {
-        newErrors.password_confirmation = ["Passwords do not match"];
+        newErrors.password_confirmation = [validationStrings.passwordMismatch || "Passwords do not match"];
       }
     }
 
@@ -179,7 +187,7 @@ export default function Profile() {
           password_confirmation: "",
         }));
         setIsChanged(false);
-        toast.success("Profile updated successfully!");
+        toast.success(notifications.updateSuccess || "Profile updated successfully!");
         
         // Clean up preview URL if it was created
         if (formData.avatar && formData.avatar.startsWith('blob:')) {
@@ -190,7 +198,7 @@ export default function Profile() {
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       }
-      toast.error(error.response?.data?.message || "Failed to update profile");
+      toast.error(error.response?.data?.message || notifications.updateError || "Failed to update profile");
     } finally {
       setIsLoading(false);
     }
@@ -213,8 +221,12 @@ export default function Profile() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
-          <p className="text-gray-600">Manage your account information and preferences</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {profileStrings.title || "Profile Settings"}
+          </h1>
+          <p className="text-gray-600">
+            {profileStrings.subtitle || "Manage your account information and preferences"}
+          </p>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -231,7 +243,7 @@ export default function Profile() {
                   <label
                     htmlFor="avatar-upload"
                     className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-blue-700 transition-colors shadow-lg"
-                    title="Change avatar"
+                    title={avatarStrings.changeTooltip || "Change avatar"}
                   >
                     <Camera className="h-4 w-4" />
                     <input
@@ -245,7 +257,7 @@ export default function Profile() {
                 </div>
                 <div className="text-center sm:text-left flex-1">
                   <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                    {formData.name || "Your Name"}
+                    {formData.name || avatarStrings.nameFallback || "Your Name"}
                   </h2>
                   <p className="text-gray-600 text-sm mb-2">{formData.email}</p>
                   <label
@@ -253,7 +265,7 @@ export default function Profile() {
                     className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
                   >
                     <Camera className="h-4 w-4 mr-1" />
-                    Change Profile Picture
+                    {avatarStrings.changeCta || "Change Profile Picture"}
                   </label>
                 </div>
               </div>
@@ -265,7 +277,7 @@ export default function Profile() {
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                   <User className="h-4 w-4 inline mr-1" />
-                  Full Name
+                  {fieldStrings.name?.label || "Full Name"}
                 </label>
                 <input
                   type="text"
@@ -276,7 +288,7 @@ export default function Profile() {
                   className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                     errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
                   }`}
-                  placeholder="Enter your full name"
+                  placeholder={fieldStrings.name?.placeholder || "Enter your full name"}
                 />
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-600">{errors.name[0]}</p>
@@ -287,7 +299,7 @@ export default function Profile() {
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   <Mail className="h-4 w-4 inline mr-1" />
-                  Email Address
+                  {fieldStrings.email?.label || "Email Address"}
                 </label>
                 <input
                   type="email"
@@ -298,7 +310,7 @@ export default function Profile() {
                   className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                     errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
                   }`}
-                  placeholder="Enter your email"
+                  placeholder={fieldStrings.email?.placeholder || "Enter your email"}
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email[0]}</p>
@@ -309,16 +321,16 @@ export default function Profile() {
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                   <Lock className="h-5 w-5 mr-2" />
-                  Change Password
+                  {passwordStrings.sectionTitle || "Change Password"}
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Leave blank if you don't want to change your password
+                  {passwordStrings.helper || "Leave blank if you don't want to change your password"}
                 </p>
 
                 {/* New Password */}
                 <div className="mb-4">
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                    New Password
+                    {passwordStrings.newLabel || "New Password"}
                   </label>
                   <div className="relative">
                     <input
@@ -330,7 +342,7 @@ export default function Profile() {
                       className={`w-full px-4 py-2.5 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                         errors.password ? "border-red-300 bg-red-50" : "border-gray-300"
                       }`}
-                      placeholder="Enter new password"
+                      placeholder={passwordStrings.newPlaceholder || "Enter new password"}
                     />
                     <button
                       type="button"
@@ -348,7 +360,7 @@ export default function Profile() {
                 {/* Confirm Password */}
                 <div>
                   <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirm New Password
+                    {passwordStrings.confirmLabel || "Confirm New Password"}
                   </label>
                   <div className="relative">
                     <input
@@ -360,7 +372,7 @@ export default function Profile() {
                       className={`w-full px-4 py-2.5 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                         errors.password_confirmation ? "border-red-300 bg-red-50" : "border-gray-300"
                       }`}
-                      placeholder="Confirm new password"
+                      placeholder={passwordStrings.confirmPlaceholder || "Confirm new password"}
                     />
                     <button
                       type="button"
@@ -383,7 +395,7 @@ export default function Profile() {
                 {isChanged && (
                   <span className="flex items-center text-blue-600">
                     <CheckCircle className="h-4 w-4 mr-1" />
-                    You have unsaved changes
+                    {statusStrings.unsaved || "You have unsaved changes"}
                   </span>
                 )}
               </div>
@@ -399,12 +411,12 @@ export default function Profile() {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
+                    {buttonStrings.saving || "Saving..."}
                   </>
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                    {buttonStrings.save || "Save Changes"}
                   </>
                 )}
               </button>

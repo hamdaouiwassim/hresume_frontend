@@ -4,10 +4,13 @@ import { FileText, User, Settings, LogOut, ChevronDown, Menu, X, Shield, Briefca
 import LanguageToggle from '../components/LanguageToggle';
 import { logout } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 
 export default function AuthLayout({ children }) {
     const { user , setUser } = useContext(AuthContext);
+    const { t } = useLanguage();
+    const navStrings = t?.nav || {};
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
@@ -61,7 +64,7 @@ export default function AuthLayout({ children }) {
                                             : 'text-gray-600 hover:text-blue-600 hover:bg-gray-100'
                                     }`}
                                 >
-                                    My Resumes
+                                    {navStrings.myResumes || 'My Resumes'}
                                 </Link>
                                 {/* <Link 
                                     to="/templates"
@@ -111,7 +114,7 @@ export default function AuthLayout({ children }) {
                                                 className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600 transition-all duration-200"
                                         >
                                                 <User className="h-4 w-4 mr-2.5" />
-                                            Profile
+                                            {navStrings.profile || 'Profile'}
                                         </Link>
                                         {/* <Link
                                             to="/settings"
@@ -130,7 +133,7 @@ export default function AuthLayout({ children }) {
                                                         className="flex items-center px-3 py-2 text-sm text-purple-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-600 transition-all duration-200 font-semibold"
                                                     >
                                                         <Shield className="h-4 w-4 mr-2.5" />
-                                                        Admin Panel
+                                                        {navStrings.adminPanel || 'Admin Panel'}
                                                     </Link>
                                                 </>
                                             )}
@@ -141,7 +144,7 @@ export default function AuthLayout({ children }) {
                                                     className="flex items-center px-3 py-2 text-sm text-sky-700 hover:bg-gradient-to-r hover:from-sky-50 hover:to-indigo-50 hover:text-sky-600 transition-all duration-200 font-semibold"
                                                 >
                                                     <Briefcase className="h-4 w-4 mr-2.5" />
-                                                    Recruiter Hub
+                                                    {navStrings.recruiterHub || 'Recruiter Hub'}
                                                 </Link>
                                             )}
                                             <div className="border-t border-gray-200 my-1"></div>
@@ -150,7 +153,7 @@ export default function AuthLayout({ children }) {
                                                 className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200"
                                         >
                                                 <LogOut className="h-4 w-4 mr-2.5" />
-                                            Sign out
+                                            {navStrings.logout || 'Sign out'}
                                         </button>
                                     </div>
                                     </>
@@ -188,8 +191,8 @@ export default function AuthLayout({ children }) {
                                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                                     : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
                             }`}
-                            >
-                                My Resumes
+                                >
+                                {navStrings.myResumes || 'My Resumes'}
                             </Link>
                             <Link
                                 to="/templates"
@@ -199,8 +202,8 @@ export default function AuthLayout({ children }) {
                                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                                     : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
                             }`}
-                            >
-                                Templates
+                                >
+                                {navStrings.templates || 'Templates'}
                             </Link>
                         
                         {/* Mobile user menu */}
@@ -223,7 +226,7 @@ export default function AuthLayout({ children }) {
                                     className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600 transition-all duration-200"
                                 >
                                     <User className="h-4 w-4 mr-2.5" />
-                                    Profile
+                                    {navStrings.profile || 'Profile'}
                                 </Link>
                                 <Link
                                     to="/settings"
@@ -231,7 +234,7 @@ export default function AuthLayout({ children }) {
                                     className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600 transition-all duration-200"
                                 >
                                     <Settings className="h-4 w-4 mr-2.5" />
-                                    Settings
+                                    {navStrings.settings || 'Settings'}
                                 </Link>
                                 {user.is_admin && (
                                     <Link
@@ -240,7 +243,7 @@ export default function AuthLayout({ children }) {
                                         className="flex items-center px-3 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-600 transition-all duration-200"
                                     >
                                         <Shield className="h-4 w-4 mr-2.5" />
-                                        Admin Panel
+                                        {navStrings.adminPanel || 'Admin Panel'}
                                     </Link>
                                 )}
                                 {user.is_recruiter && (
@@ -250,7 +253,7 @@ export default function AuthLayout({ children }) {
                                         className="flex items-center px-3 py-2 rounded-lg text-sm font-semibold text-sky-700 hover:bg-gradient-to-r hover:from-sky-50 hover:to-indigo-50 hover:text-sky-600 transition-all duration-200"
                                     >
                                         <Briefcase className="h-4 w-4 mr-2.5" />
-                                        Recruiter Hub
+                                        {navStrings.recruiterHub || 'Recruiter Hub'}
                                     </Link>
                                 )}
                                 <div className="border-t border-gray-200 my-1.5"></div>
@@ -259,7 +262,7 @@ export default function AuthLayout({ children }) {
                                     className="flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-all duration-200"
                                 >
                                     <LogOut className="h-4 w-4 mr-2.5" />
-                                    Sign out
+                                    {navStrings.logout || 'Sign out'}
                                 </button>
                             </div>
                         </div>

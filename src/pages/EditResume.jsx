@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import {
   Camera,
@@ -41,8 +41,8 @@ import ShowHobby from "../components/ShowHobby";
 import NewHobby from "../components/NewHobby";
 import ShowCertificate from "../components/ShowCertificate";
 import NewCertificate from "../components/NewCertificate";
-
-
+import { buildResumeTemplateData } from "../utils/resumeTemplateMapper";
+import ResumeTemplatePreview from "../components/ResumeTemplatePreview";
 export default function EditResume() {
     // 1. Destructure the 'id' parameter from the URL
   const { id } = useParams();
@@ -77,7 +77,7 @@ const fetchResumeData = useCallback(async () => {
         console.log("Resume ID from URL:", id);
         const response = await getByResumeId(id);
         const basicInfo = response.data.data.basic_info || {};
-        const { full_name , job_title , phone, professional_summary , email , location, avatar } = basicInfo;
+        const { full_name , job_title , phone, professional_summary , email , location, avatar, linkedin, github } = basicInfo;
         const { experiences } = response.data.data;
         const { educations } = response.data.data;
         const { skills } = response.data.data;
@@ -92,6 +92,8 @@ const fetchResumeData = useCallback(async () => {
           professional_summary,
           email,
           location,
+          linkedin: linkedin || "",
+          github: github || "",
           avatar: avatar || prev.avatar,
           experiences: experiences || [],
           educations: educations || [],
@@ -111,6 +113,9 @@ const fetchResumeData = useCallback(async () => {
   }, [fetchResumeData,showNewExperience,showNewEducation,showNewSkill,showNewHobby,showNewCertificate]);
 
   const { t, language } = useLanguage();
+  const locale = language === "fr" ? "fr-FR" : "en-US";
+  const localeCode = language === "fr" ? "fr" : "en";
+  const shareStrings = t?.share || {};
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -164,6 +169,14 @@ const fetchResumeData = useCallback(async () => {
 
   const downloadRequirementMessage =
     "Complete your basic info and add at least one experience and one education before downloading.";
+
+  const resumePreviewData = useMemo(
+    () =>
+      buildResumeTemplateData(formData, locale, {
+        present: t?.preview?.present,
+      }),
+    [formData, locale, t?.preview?.present]
+  );
 
   const openSection = (section) => {
     // Only open the section if it's not already open, and close all others
@@ -248,8 +261,6 @@ const fetchResumeData = useCallback(async () => {
     }
   };
 
-  const cvPreviewRef = useRef(null);
-
   // Load existing shareable link
   const loadShareableLink = async () => {
     setIsLoadingLink(true);
@@ -275,10 +286,12 @@ const fetchResumeData = useCallback(async () => {
       const response = await generateShareableLink(id, expiresInDays);
       if (response.data.status) {
         setShareableLink(response.data.data);
-        toast.success("Shareable link generated successfully!");
+        toast.success(shareStrings.successGenerate || "Shareable link generated successfully!");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to generate shareable link");
+      toast.error(
+        error.response?.data?.message || shareStrings.generateError || "Failed to generate shareable link"
+      );
     } finally {
       setIsGeneratingLink(false);
     }
@@ -291,10 +304,12 @@ const fetchResumeData = useCallback(async () => {
       const response = await generateShareableLink(id, expiresInDays);
       if (response.data.status) {
         setShareableLink(response.data.data);
-        toast.success("New shareable link generated!");
+        toast.success(shareStrings.successGenerate || "Shareable link generated successfully!");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to generate shareable link");
+      toast.error(
+        error.response?.data?.message || shareStrings.generateError || "Failed to generate shareable link"
+      );
     } finally {
       setIsGeneratingLink(false);
     }
@@ -305,11 +320,11 @@ const fetchResumeData = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(shareableLink.url);
       setLinkCopied(true);
-      toast.success("Link copied to clipboard!");
+      toast.success(shareStrings.copySuccess || "Link copied to clipboard!");
       setTimeout(() => setLinkCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy share link", error);
-      toast.error("Failed to copy link");
+      toast.error(shareStrings.copyError || "Failed to copy link");
     }
   };
 
@@ -320,10 +335,12 @@ const fetchResumeData = useCallback(async () => {
       const response = await deactivateShareableLink(id);
       if (response.data.status) {
         setShareableLink(null);
-        toast.success("Shareable link deactivated");
+        toast.success(shareStrings.successDeactivate || "Shareable link deactivated");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to deactivate link");
+      toast.error(
+        error.response?.data?.message || shareStrings.deactivateError || "Failed to deactivate link"
+      );
     } finally {
       setIsGeneratingLink(false);
     }
@@ -334,190 +351,26 @@ const fetchResumeData = useCallback(async () => {
       toast.error(downloadRequirementMessage);
       return;
     }
-    const content = cvPreviewRef.current;
-    if (!content) return;
 
     try {
-      // Show loading state
       toast.loading("Generating PDF...", { id: "pdf-generation" });
 
-      // Wait for all images to load before generating PDF
-      const images = content.querySelectorAll("img");
-      await Promise.all(
-        Array.from(images).map(
-          (img) =>
-            new Promise((resolve) => {
-              if (img.complete && img.naturalHeight !== 0) {
-                resolve();
-              } else {
-                img.onload = () => resolve();
-                img.onerror = () => resolve(); // Continue even if image fails
-                // Timeout after 5 seconds to prevent hanging
-                setTimeout(() => resolve(), 5000);
-              }
-            })
-        )
-      );
-
-      // Small delay to ensure everything is rendered
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      // Clone the content to avoid modifying the original
-      const clonedContent = content.cloneNode(true);
-
-      // Ensure all colors and padding are properly set with inline styles for PDF
-      const skillBadges = clonedContent.querySelectorAll('.bg-gray-100');
-      skillBadges.forEach(badge => {
-        badge.style.backgroundColor = '#f3f4f6';
-        badge.style.color = '#1f2937';
-        // Explicitly set padding to match px-3 py-1 (12px horizontal, 4px vertical)
-        badge.style.paddingTop = '4px';
-        badge.style.paddingBottom = '4px';
-        badge.style.paddingLeft = '12px';
-        badge.style.paddingRight = '12px';
+      const filename = `${
+        formData.full_name ? formData.full_name.replace(/\s+/g, "_") : "cv"
+      }.pdf`;
+      const resumePayload = buildResumeTemplateData(formData, locale, {
+        present: t?.preview?.present,
       });
 
-      // Ensure text colors are preserved
-      const textElements = clonedContent.querySelectorAll('.text-gray-800, .text-gray-700, .text-gray-600, .text-gray-900');
-      textElements.forEach(el => {
-        const computedStyle = window.getComputedStyle(el);
-        if (!el.style.color) {
-          el.style.color = computedStyle.color;
-        }
+      const response = await generatePDF({
+        resume: resumePayload,
+        filename,
+        locale: localeCode,
       });
 
-      // Fix image borders - remove borders and shadows for clean circular images
-      const imageElements = clonedContent.querySelectorAll('img');
-      imageElements.forEach(img => {
-        // Remove all borders from images (especially avatar)
-        img.style.border = 'none';
-        img.style.borderWidth = '0';
-        img.style.borderColor = 'transparent';
-        // Remove box shadows
-        img.style.boxShadow = 'none';
-        img.style.filter = 'none';
-        // Remove any background colors
-        img.style.backgroundColor = 'transparent';
-        // Ensure image is visible
-        img.style.opacity = '1';
-        img.style.visibility = 'visible';
-        img.style.display = 'block';
-        // Remove border classes
-        img.classList.remove('border-2', 'border-4', 'border-gray-200', 'border-white');
-        img.classList.remove('shadow-lg', 'shadow');
-      });
-
-      // Add page-break CSS styles directly to the cloned content
-      const style = document.createElement('style');
-      style.textContent = `
-        [data-cv-preview="true"] {
-          padding: 32px !important;
-          box-sizing: border-box;
-        }
-        /* Ensure badge padding and colors match exactly */
-        .bg-gray-100 {
-          background-color: #f3f4f6 !important;
-          color: #1f2937 !important;
-          padding-top: 4px !important;
-          padding-bottom: 4px !important;
-          padding-left: 12px !important;
-          padding-right: 12px !important;
-        }
-        /* Prevent cutting within paragraphs and text elements */
-        p {
-          orphans: 2;
-          widows: 2;
-          page-break-inside: avoid;
-        }
-        /* Prevent headings from being alone at bottom of page */
-        h1, h2, h3 {
-          page-break-after: avoid;
-          orphans: 3;
-          widows: 3;
-        }
-        /* Prevent images from being cut */
-        img {
-          page-break-inside: avoid;
-          break-inside: avoid;
-          max-width: 100%;
-          height: auto;
-          border: none !important;
-          box-shadow: none !important;
-          background-color: transparent !important;
-        }
-        /* Allow sections to break naturally but keep content together */
-        .mb-8 {
-          page-break-inside: auto;
-          break-inside: auto;
-        }
-        /* Prevent cutting within experience/education items */
-        .space-y-6 > div,
-        .space-y-5 > div {
-          page-break-inside: avoid;
-          break-inside: avoid;
-        }
-      `;
-      
-      // Create a temporary container with the style and content
-      const tempContainer = document.createElement('div');
-      tempContainer.appendChild(style);
-      tempContainer.appendChild(clonedContent);
-
-      // Convert computed styles to inline styles for better PDF rendering
-      const allElements = clonedContent.querySelectorAll('*');
-      allElements.forEach(el => {
-        if (el.nodeType === Node.ELEMENT_NODE) {
-          const computedStyles = window.getComputedStyle(el);
-          // Copy important style properties to inline styles
-          const styleProps = [
-            'color', 'backgroundColor', 'fontSize', 'fontWeight', 'fontFamily',
-            'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
-            'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
-            'border', 'borderColor', 'borderWidth', 'borderStyle', 'borderRadius',
-            'textAlign', 'lineHeight', 'display', 'flexDirection', 'gap',
-            'width', 'height', 'maxWidth', 'maxHeight'
-          ];
-          
-          styleProps.forEach(prop => {
-            const value = computedStyles.getPropertyValue(prop);
-            if (value && value !== 'initial' && value !== 'normal' && !el.style[prop]) {
-              // Convert camelCase to kebab-case for CSS property names
-              const kebabProp = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
-              el.style.setProperty(kebabProp, value);
-            }
-          });
-        }
-      });
-
-      // Get the HTML string with Tailwind CSS included
-      const htmlString = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-              ${style.textContent}
-              /* Additional print styles */
-              @media print {
-                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-              }
-            </style>
-          </head>
-          <body style="margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif;">
-            ${clonedContent.outerHTML}
-          </body>
-        </html>
-      `;
-
-      // Generate PDF on server
-      const filename = `${formData.name ? formData.name.replace(/\s+/g, "_") : "cv"}.pdf`;
-      const response = await generatePDF(htmlString, filename);
-
-      // Create blob from response and download
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
@@ -529,7 +382,8 @@ const fetchResumeData = useCallback(async () => {
     } catch (error) {
       console.error("PDF generation error:", error);
       toast.error(
-        error.response?.data?.message || "There was an error generating the PDF. Please try again.",
+        error.response?.data?.message ||
+          "There was an error generating the PDF. Please try again.",
         { id: "pdf-generation" }
       );
     }
@@ -1331,10 +1185,10 @@ const fetchResumeData = useCallback(async () => {
                       loadShareableLink();
                     }}
                     className={buttonVariants.purple}
-                    title="Share CV"
+                    title={shareStrings.buttonTitle || "Share CV"}
                   >
                     <Share2 className="h-4 w-4" />
-                    Share
+                    {shareStrings.button || "Share"}
                   </button>
                   <button
                     onClick={handleDownload}
@@ -1351,11 +1205,10 @@ const fetchResumeData = useCallback(async () => {
                   </button>
                 </div>
               </div>
-              <div
-                ref={cvPreviewRef}
-                className="bg-white rounded-lg p-8 print:bg-white"
-                data-cv-preview="true"
-              >
+            <ResumeTemplatePreview resume={resumePreviewData} />
+
+            {false && (
+            <div className="bg-white rounded-lg p-8 print:bg-white" data-cv-preview="true">
                 {/* Header Section */}
                 <div className="mb-8 pb-6 border-b-2 border-gray-200">
                   <div className="flex items-start justify-between gap-6">
@@ -1580,6 +1433,7 @@ const fetchResumeData = useCallback(async () => {
                   </div>
                 )}
               </div>
+            )}
             </div>
             </div>
           </div>
@@ -1632,241 +1486,11 @@ const fetchResumeData = useCallback(async () => {
               {/* Full Page Preview Content */}
               <div className="p-8 max-h-[calc(100vh-200px)] overflow-y-auto">
                 <div
-                  className="bg-white rounded-lg p-8 mx-auto"
-                  style={{ maxWidth: '210mm', minHeight: '297mm' }}
+                  className="bg-white rounded-lg mx-auto"
+                  style={{ width: '210mm', minHeight: '297mm' }}
                 >
-                  {/* Header Section */}
-                  <div className="mb-8 pb-6 border-b-2 border-gray-200">
-                    <div className="flex items-start justify-between gap-6">
-                      <div className="flex-1">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                          {formData.full_name || t.preview.yourName}
-                        </h1>
-                        <p className="text-lg text-gray-600 mb-4">
-                          {formData.job_title || t.preview.professionalTitle}
-                        </p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                          {formData.email && (
-                            <span className="flex items-center">
-                              <span className="mr-1">📧</span>
-                              {formData.email}
-                            </span>
-                          )}
-                          {formData.phone && (
-                            <span className="flex items-center">
-                              <span className="mr-1">📱</span>
-                              {formData.phone}
-                            </span>
-                          )}
-                          {formData.location && (
-                            <span className="flex items-center">
-                              <span className="mr-1">📍</span>
-                              {formData.location}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {formData.avatar && (
-                        <img
-                          src={formData.avatar}
-                          alt="Profile"
-                          className="h-28 w-28 rounded-full object-cover flex-shrink-0"
-                          style={{ border: 'none' }}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Professional Summary Section */}
-                  {formData.professional_summary && (
-                    <div className="mb-8">
-                      <h2 className="text-xl font-bold text-gray-900 mb-3">
-                        {t.preview.professionalSummary}
-                      </h2>
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                        {formData.professional_summary}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Work Experience Section */}
-                  {formData.experiences && formData.experiences.length > 0 && (
-                    <div className="mb-8">
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                        {t.preview.workExperience}
-                      </h2>
-                      <div className="space-y-6">
-                        {formData.experiences.map((exp, index) => (
-                          <div key={index} className="border-l-2 border-gray-300 pl-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                              <div>
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                  {exp.position}
-                                </h3>
-                                <p className="text-base text-gray-700 font-medium">
-                                  {exp.company}
-                                </p>
-                              </div>
-                              <div className="text-sm text-gray-600 whitespace-nowrap mt-1 sm:mt-0">
-                                {exp.startDate && (
-                                  <span>
-                                  {new Date(exp.startDate).toLocaleDateString(
-                                language === "fr" ? "fr-FR" : "en-US",
-                                    { month: "short", year: "numeric" }
-                              )}
-                                </span>
-                              )}
-                              {exp.startDate && exp.endDate && " - "}
-                              {exp.endDate ? (
-                                <span>
-                                  {new Date(exp.endDate).toLocaleDateString(
-                                      language === "fr" ? "fr-FR" : "en-US",
-                                      { month: "short", year: "numeric" }
-                                    )}
-                                </span>
-                              ) : (
-                                  exp.startDate && <span>{t.preview.present}</span>
-                              )}
-                              </div>
-                            </div>
-                            {exp.description && (
-                              <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-                                {exp.description}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Education Section */}
-                  {formData.educations && formData.educations.length > 0 && (
-                    <div className="mb-8">
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                        {t.preview.education}
-                      </h2>
-                      <div className="space-y-6">
-                        {formData.educations.map((edu, index) => (
-                          <div key={index} className="border-l-2 border-gray-300 pl-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                              <div>
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                  {edu.degree}
-                                </h3>
-                                <p className="text-base text-gray-700 font-medium">
-                                  {edu.institution}
-                                </p>
-                              </div>
-                              <div className="text-sm text-gray-600 whitespace-nowrap mt-1 sm:mt-0">
-                                {edu.start_date && (
-                                  <span>
-                                    {new Date(edu.start_date).toLocaleDateString(
-                                      language === "fr" ? "fr-FR" : "en-US",
-                                      { month: "short", year: "numeric" }
-                                    )}
-                                  </span>
-                                )}
-                                {edu.start_date && edu.end_date && " - "}
-                                {edu.end_date ? (
-                                  <span>
-                                    {new Date(edu.end_date).toLocaleDateString(
-                                      language === "fr" ? "fr-FR" : "en-US",
-                                      { month: "short", year: "numeric" }
-                                    )}
-                                  </span>
-                                ) : (
-                                  edu.start_date && <span>{t.preview.present}</span>
-                                )}
-                              </div>
-                            </div>
-                            {edu.description && (
-                              <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-                                {edu.description}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Skills Section */}
-                  {formData.skills && formData.skills.length > 0 && (
-                    <div className="mb-8">
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                        {t.preview.skills}
-                      </h2>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.skills.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 rounded-md text-sm font-medium"
-                            style={{ backgroundColor: '#f3f4f6', color: '#1f2937' }}
-                          >
-                            {skill.name}
-                            {skill.proficiency && (
-                              <span className="ml-1" style={{ color: '#6b7280' }}>
-                                ({skill.proficiency})
-                              </span>
-                          )}
-                          </span>
-                        ))}
-                        </div>
-                    </div>
-                  )}
-
-                  {/* Hobbies Section */}
-                  {formData.hobbies && formData.hobbies.length > 0 && (
-                    <div className="mb-8">
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                        {t.preview.interests}
-                      </h2>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.hobbies.map((hobby, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 rounded-md text-sm font-medium"
-                            style={{ backgroundColor: '#f3f4f6', color: '#1f2937' }}
-                          >
-                            {hobby.name}
-                          </span>
-                      ))}
-                    </div>
-                  </div>
-                  )}
-
-                  {/* Certifications Section */}
-                  {formData.certificates && formData.certificates.length > 0 && (
-                    <div className="mb-8">
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                        {t.preview.certifications}
-                      </h2>
-                      <div className="space-y-4">
-                        {formData.certificates.map((cert, index) => (
-                          <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                              <h3 className="text-base font-semibold text-gray-900">
-                                {cert.name}
-                              </h3>
-                              {cert.issuer && (
-                                <p className="text-sm text-gray-600">{cert.issuer}</p>
-                )}
-              </div>
-                            {cert.date_obtained && (
-                              <p className="text-gray-500 text-sm whitespace-nowrap mt-1 sm:mt-0">
-                                {new Date(cert.date_obtained).toLocaleDateString(
-                                  language === "fr" ? "fr-FR" : "en-US",
-                                  { month: "short", year: "numeric" }
-                                )}
-                              </p>
-                            )}
-            </div>
-                        ))}
-          </div>
-        </div>
-                  )}
-      </div>
+                  <ResumeTemplatePreview resume={resumePreviewData} />
+                </div>
               </div>
             </div>
           </div>
@@ -1891,13 +1515,13 @@ const fetchResumeData = useCallback(async () => {
                     <Share2 className="h-5 w-5 text-purple-600" />
                   </div>
                   <h2 className="text-xl font-semibold text-gray-900">
-                    Share Your CV
+                    {shareStrings.modalTitle || "Share Your CV"}
                   </h2>
                 </div>
                 <button
                   onClick={() => setShowShareModal(false)}
                   className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
-                  title="Close"
+                  title={shareStrings.close || "Close"}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1912,23 +1536,24 @@ const fetchResumeData = useCallback(async () => {
                 ) : !shareableLink ? (
                   <>
                     <p className="text-gray-600 mb-4">
-                      Generate a secure temporary link to share your CV with others. The link will expire after the selected number of days.
+                      {shareStrings.description ||
+                        "Generate a secure temporary link to share your CV with others. The link will expire after the selected number of days."}
                     </p>
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Link expires in (days)
+                        {shareStrings.expiresLabel || "Link expires in (days)"}
                       </label>
                       <select
                         value={expiresInDays}
                         onChange={(e) => setExpiresInDays(Number(e.target.value))}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      >
-                        <option value={1}>1 day</option>
-                        <option value={7}>7 days</option>
-                        <option value={30}>30 days</option>
-                        <option value={90}>90 days</option>
-                        <option value={365}>1 year</option>
-                      </select>
+                        >
+                          <option value={1}>{shareStrings.days?.["1"] || "1 day"}</option>
+                          <option value={7}>{shareStrings.days?.["7"] || "7 days"}</option>
+                          <option value={30}>{shareStrings.days?.["30"] || "30 days"}</option>
+                          <option value={90}>{shareStrings.days?.["90"] || "90 days"}</option>
+                          <option value={365}>{shareStrings.days?.["365"] || "1 year"}</option>
+                        </select>
                     </div>
                     <button
                       onClick={handleGenerateLink}
@@ -1940,12 +1565,12 @@ const fetchResumeData = useCallback(async () => {
                       {isGeneratingLink ? (
                         <>
                           <Loader2 className="h-5 w-5 animate-spin" />
-                          Generating...
+                          {shareStrings.generating || "Generating..."}
                         </>
                       ) : (
                         <>
                           <Link2 className="h-5 w-5" />
-                          Generate Shareable Link
+                          {shareStrings.generate || "Generate Shareable Link"}
                         </>
                       )}
                     </button>
@@ -1954,9 +1579,12 @@ const fetchResumeData = useCallback(async () => {
                   <>
                     <div className="mb-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-purple-900">Shareable Link</span>
+                        <span className="text-sm font-medium text-purple-900">
+                          {shareStrings.shareableLink || "Shareable Link"}
+                        </span>
                         <span className="text-xs text-purple-600">
-                          Expires: {new Date(shareableLink.expires_at).toLocaleDateString()}
+                          {(shareStrings.expires || "Expires") + ": "}
+                          {new Date(shareableLink.expires_at).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -1968,11 +1596,14 @@ const fetchResumeData = useCallback(async () => {
                         />
                         <button
                           onClick={handleCopyLink}
-                        className={`${buttonBase} px-3 py-2 bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-400 focus:ring-offset-white`}
-                          title="Copy link"
+                          className={`${buttonBase} px-3 py-2 bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-400 focus:ring-offset-white`}
+                          title={shareStrings.copy || "Copy link"}
                         >
                           {linkCopied ? (
-                            <Check className="h-4 w-4" />
+                            <>
+                              <Check className="h-4 w-4" />
+                              <span className="sr-only">{shareStrings.copied || "Copied!"}</span>
+                            </>
                           ) : (
                             <Copy className="h-4 w-4" />
                           )}
@@ -1985,7 +1616,7 @@ const fetchResumeData = useCallback(async () => {
                         className={`${buttonVariants.purple} flex-1 justify-center`}
                       >
                         <ExternalLink className="h-4 w-4" />
-                        Open Link
+                        {shareStrings.open || "Open Link"}
                       </button>
                       <button
                         onClick={handleDeactivateLink}
@@ -1997,10 +1628,10 @@ const fetchResumeData = useCallback(async () => {
                         {isGeneratingLink ? (
                           <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Deactivating...
+                            {shareStrings.deactivating || "Deactivating..."}
                           </>
                         ) : (
-                          'Deactivate Link'
+                          shareStrings.deactivate || "Deactivate Link"
                         )}
                       </button>
                     </div>
@@ -2012,7 +1643,7 @@ const fetchResumeData = useCallback(async () => {
                           isGeneratingLink ? disabledButtonClasses : ""
                         }`}
                       >
-                        Generate New Link
+                        {shareStrings.newLink || "Generate New Link"}
                       </button>
                     )}
                   </>

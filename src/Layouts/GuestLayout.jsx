@@ -125,7 +125,7 @@ export default function GuestLayout({ children }) {
                             </h3>
                             <ul className="mt-4 space-y-4">
                                 <li>
-                                    <Link to="/templates" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                                    <Link to="/templates/public" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
                                         Resume Templates
                                     </Link>
                                 </li>

@@ -27,6 +27,11 @@ import Forbidden from './pages/errors/Forbidden';
 import TrackRequest from './pages/TrackRequest';
 import SocialCallback from './pages/SocialCallback';
 import VerifyEmail from './pages/VerifyEmail';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import FAQ from './pages/FAQ';
+import ContactUs from './pages/ContactUs';
+import ResumeTemplates from './pages/ResumeTemplates';
+import Pricing from './pages/Pricing';
 
 function App() {
   return (
@@ -41,6 +46,11 @@ function App() {
           <Route path="/auth/social-callback" element={<SocialCallback />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/track-request" element={<TrackRequest />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/templates/public" element={<ResumeTemplates />} />
+          <Route path="/pricing" element={<Pricing />} />
                       
 
           <Route path="/resume/edit/:id" element={<PrivateRoute><EditResume />  </PrivateRoute>} />

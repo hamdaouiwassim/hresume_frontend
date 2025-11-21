@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import GuestLayout from "../Layouts/GuestLayout";
-import { UserCheck, Lock, Mail, ArrowLeft } from 'lucide-react';
+import { UserCheck, Lock, Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import { register } from '../services/authService';
 import { toast } from 'sonner';
 import { AuthContext } from '../context/AuthContext';
@@ -14,7 +14,8 @@ export default function Register() {
     password_confirmation: ''
   });
 
-  const [errors,setErrors] =useState({});
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const handleChange = (e) => {
@@ -30,29 +31,30 @@ const { user, setUser } = useContext(AuthContext);
   if (user) return <Navigate to="/verify-email" replace />;
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-    const res = await register(formData);
-    const newUser = res.data.user;
-    const token = res.data.token;
+      const res = await register(formData);
+      const newUser = res.data.user;
+      const token = res.data.token;
 
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(newUser));
-    setUser({ token, ...newUser });
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(newUser));
+      setUser({ token, ...newUser });
 
-    toast.success("Account created! Please verify your email to continue.");
+      toast.success("Account created! Please verify your email to continue.");
 
-    navigate('/verify-email', {
-      state: { email: newUser.email, from: 'register' },
-      replace: true,
-    });
+      navigate('/verify-email', {
+        state: { email: newUser.email, from: 'register' },
+        replace: true,
+      });
     } catch (error) {
-      if (error.response && error.response.data &&  error.response.data.errors) {
+      if (error.response && error.response.data && error.response.data.errors) {
         setErrors(error.response.data.errors);
       }
       toast.error(error.response?.data?.message || "❌ Can't create your account");
+    } finally {
+      setIsSubmitting(false);
     }
-   
-    // Handle registration logic here
   };
 
   return (
@@ -172,9 +174,11 @@ const { user, setUser } = useContext(AuthContext);
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:-translate-y-1"
+                disabled={isSubmitting}
+                className="group relative w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:-translate-y-1 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Create Account
+                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isSubmitting ? "Creating Account..." : "Create Account"}
               </button>
             </div>
           </form>

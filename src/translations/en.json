@@ -12,6 +12,37 @@
         "delete": "Delete",
         "download": "Download"
     },
+    "share": {
+        "button": "Share",
+        "buttonTitle": "Share CV",
+        "modalTitle": "Share Your CV",
+        "description": "Generate a secure temporary link to share your CV with others. The link will expire after the selected number of days.",
+        "expiresLabel": "Link expires in (days)",
+        "days": {
+            "1": "1 day",
+            "7": "7 days",
+            "30": "30 days",
+            "90": "90 days",
+            "365": "1 year"
+        },
+        "generate": "Generate Shareable Link",
+        "generating": "Generating...",
+        "shareableLink": "Shareable Link",
+        "expires": "Expires",
+        "open": "Open Link",
+        "copy": "Copy link",
+        "copied": "Copied!",
+        "deactivate": "Deactivate Link",
+        "deactivating": "Deactivating...",
+        "newLink": "Generate New Link",
+        "close": "Close",
+        "successGenerate": "Shareable link generated successfully!",
+        "successDeactivate": "Shareable link deactivated",
+        "copySuccess": "Link copied to clipboard!",
+        "copyError": "Failed to copy link",
+        "generateError": "Failed to generate shareable link",
+        "deactivateError": "Failed to deactivate link"
+    },
     "certificates": {
         "title": "Certificates",
         "add": "Add Certificate",
@@ -46,14 +77,72 @@
         "preview": "Preview",
         "useTemplate": "Use Template"
     },
+    "resumeTemplates": {
+        "badge": "Professional Templates",
+        "title": "Resume Templates",
+        "subtitle": "Choose from our collection of professional, ATS-friendly resume templates",
+        "currentStatus": {
+            "title": "Current Template Availability",
+            "message": "At the moment, we offer 1 ATS-friendly template designed to help your resume pass through Applicant Tracking Systems. We're working hard to expand our collection with more professional templates in the near future.",
+            "comingSoon": "More templates coming soon!"
+        },
+        "features": {
+            "ats": {
+                "title": "ATS-Friendly",
+                "description": "Optimized to pass through Applicant Tracking Systems used by most employers"
+            },
+            "professional": {
+                "title": "Professional Design",
+                "description": "Clean, modern layouts that make a great first impression"
+            },
+            "customizable": {
+                "title": "Fully Customizable",
+                "description": "Easily customize colors, fonts, and layout to match your style"
+            }
+        },
+        "preview": {
+            "title": "Our Current Template",
+            "description": "Our ATS-friendly template is designed to help your resume stand out while ensuring it can be properly parsed by automated systems.",
+            "templateName": "ATS-Friendly Professional Template",
+            "templateDescription": "A clean, professional template optimized for both human readers and ATS systems",
+            "tags": {
+                "ats": "ATS-Friendly",
+                "professional": "Professional",
+                "modern": "Modern"
+            },
+            "cta": "Get Started Free"
+        },
+        "future": {
+            "title": "More Templates Coming Soon",
+            "description": "We're continuously working on expanding our template collection. In the future, you'll be able to choose from a variety of styles including:",
+            "types": {
+                "corporate": "Corporate",
+                "corporateDesc": "Traditional and professional designs for corporate environments",
+                "creative": "Creative",
+                "creativeDesc": "Bold and unique designs for creative professionals",
+                "minimal": "Minimal",
+                "minimalDesc": "Clean and simple designs that focus on content"
+            },
+            "footer": "Stay tuned for updates! We'll notify you when new templates are available.",
+            "cta": "Create your free account to be notified"
+        }
+    },
     "welcome": {
         "title": "Create Your Professional Resume Today",
         "subtitle": "Stand out from the crowd with a beautifully designed resume. Easy to create, customize, and share.",
-        "getStarted": "Create your CV now",
+        "heroBadge": "Professional CV Builder",
+        "getStarted": "Create your CV now — it's free",
         "login": "Login",
         "register": "Register",
+        "freeDescription": "Totally free service — no subscriptions, no hidden fees, no credit card required.",
+        "trust": {
+            "free": "Free to use",
+            "noCard": "No credit card",
+            "instant": "Instant download"
+        },
         "features": {
             "title": "Features",
+            "subtitle": "Everything you need to create a professional resume that stands out",
             "easy": "Easy to Use",
             "easyDesc": "Simple and intuitive interface for creating professional CVs.",
             "professional": "Professional Templates",
@@ -64,6 +153,13 @@
             "exportDesc": "Download your CV in PDF format, ready to be shared.",
             "multilingual": "Multiple Languages",
             "multilingualDesc": "Create your CV in different languages to reach a global audience."
+        },
+        "finalCta": {
+            "title": "Ready to create your professional resume?",
+            "subtitle": "Join thousands of professionals who trust our platform",
+            "freeNote": "Our service is 100% free forever.",
+            "candidate": "Candidate signup",
+            "recruiter": "Recruiter signup"
         },
         "recruiter": {
             "badge": "Recruiter Mode",
@@ -123,8 +219,11 @@
         "myResumes": "My Resumes",
         "templates": "Templates",
         "profile": "Profile",
+        "settings": "Settings",
         "logout": "Logout",
-        "fullPage": "Full Page"
+        "fullPage": "Full Page",
+        "adminPanel": "Admin Panel",
+        "recruiterHub": "Recruiter Hub"
     },
     "preview": {
         "professionalSummary": "Professional Summary",
@@ -134,6 +233,7 @@
         "interests": "Interests",
         "certifications": "Certifications",
         "present": "Present",
+        "graduated": "Graduated",
         "fullPageView": "Full Page View",
         "professionalTitle": "Professional Title",
         "yourName": "Your Name"
@@ -353,5 +453,243 @@
         "certificates": "Certificates",
         "saveButton": "Save Resume",
         "previewButton": "Preview Resume"
+    },
+    "profile": {
+        "title": "Profile Settings",
+        "subtitle": "Manage your account information and preferences",
+        "avatar": {
+            "changeTooltip": "Change avatar",
+            "changeCta": "Change Profile Picture",
+            "nameFallback": "Your Name"
+        },
+        "fields": {
+            "name": {
+                "label": "Full Name",
+                "placeholder": "Enter your full name"
+            },
+            "email": {
+                "label": "Email Address",
+                "placeholder": "Enter your email"
+            }
+        },
+        "password": {
+            "sectionTitle": "Change Password",
+            "helper": "Leave blank if you don't want to change your password",
+            "newLabel": "New Password",
+            "newPlaceholder": "Enter new password",
+            "confirmLabel": "Confirm New Password",
+            "confirmPlaceholder": "Confirm new password"
+        },
+        "status": {
+            "unsaved": "You have unsaved changes"
+        },
+        "buttons": {
+            "save": "Save Changes",
+            "saving": "Saving..."
+        },
+        "notifications": {
+            "loadError": "Failed to load profile",
+            "invalidFileType": "Please select an image file",
+            "fileTooLarge": "Image size should be less than 5MB",
+            "updateSuccess": "Profile updated successfully!",
+            "updateError": "Failed to update profile"
+        },
+        "validation": {
+            "nameRequired": "Name is required",
+            "emailRequired": "Email is required",
+            "emailInvalid": "Please enter a valid email address",
+            "passwordLength": "Password must be at least 8 characters",
+            "passwordMismatch": "Passwords do not match"
+        }
+    },
+    "privacy": {
+        "title": "Privacy Policy",
+        "lastUpdated": "Last updated:",
+        "introduction": {
+            "title": "Introduction",
+            "content": "At HResume, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our resume builder service."
+        },
+        "informationWeCollect": {
+            "title": "Information We Collect",
+            "personalData": {
+                "title": "Personal Information",
+                "content": "We collect information that you provide directly to us, including your name, email address, phone number, and any other information you choose to include in your resume."
+            },
+            "usageData": {
+                "title": "Usage Data",
+                "content": "We automatically collect certain information about your device and how you interact with our service, including IP address, browser type, pages visited, and time spent on pages."
+            },
+            "cookies": {
+                "title": "Cookies and Tracking",
+                "content": "We use cookies and similar tracking technologies to enhance your experience, analyze usage patterns, and assist in our marketing efforts."
+            }
+        },
+        "howWeUse": {
+            "title": "How We Use Your Information",
+            "points": [
+                "To provide, maintain, and improve our resume builder service",
+                "To process your requests and transactions",
+                "To send you technical notices, updates, and support messages",
+                "To respond to your comments, questions, and requests",
+                "To monitor and analyze trends, usage, and activities",
+                "To detect, prevent, and address technical issues and security threats"
+            ]
+        },
+        "dataSharing": {
+            "title": "Data Sharing and Disclosure",
+            "intro": "We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:",
+            "circumstances": [
+                "With your explicit consent",
+                "To comply with legal obligations or respond to legal requests",
+                "To protect our rights, privacy, safety, or property",
+                "With service providers who assist us in operating our platform (under strict confidentiality agreements)"
+            ]
+        },
+        "dataSecurity": {
+            "title": "Data Security",
+            "content": "We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security."
+        },
+        "yourRights": {
+            "title": "Your Rights",
+            "intro": "You have the right to:",
+            "rights": [
+                "Access and receive a copy of your personal data",
+                "Rectify inaccurate or incomplete data",
+                "Request deletion of your personal data",
+                "Object to processing of your personal data",
+                "Request restriction of processing",
+                "Data portability (receive your data in a structured format)"
+            ]
+        },
+        "contact": {
+            "title": "Contact Us",
+            "content": "If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us at:",
+            "email": "Email: contact@hresume.pro"
+        },
+        "changes": {
+            "title": "Changes to This Privacy Policy",
+            "content": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the 'Last updated' date. You are advised to review this Privacy Policy periodically for any changes."
+        }
+    },
+    "faq": {
+        "title": "Frequently Asked Questions",
+        "subtitle": "Find answers to common questions about our resume builder service",
+        "noQuestions": "No questions available at the moment.",
+        "contact": {
+            "title": "Still have questions?",
+            "content": "If you can't find the answer you're looking for, feel free to reach out to our support team.",
+            "email": "Email: support@hresume.com"
+        },
+        "questions": [
+            {
+                "question": "Is HResume really free?",
+                "answer": "Yes! HResume is completely free to use. There are no hidden fees, no subscriptions, and no credit card required. You can create, edit, and download as many resumes as you want without any cost."
+            },
+            {
+                "question": "How do I create a resume?",
+                "answer": "Creating a resume is easy! Simply sign up for a free account, choose a professional template, and start filling in your information. You can add your work experience, education, skills, and more. The interface is intuitive and guides you through each step."
+            },
+            {
+                "question": "Can I download my resume as a PDF?",
+                "answer": "Absolutely! Once you've completed your resume, you can download it as a high-quality PDF file. The PDF is formatted professionally and ready to share with employers or upload to job boards."
+            },
+            {
+                "question": "Are the resume templates ATS-friendly?",
+                "answer": "Yes, our resume templates are designed to be ATS (Applicant Tracking System) friendly. This means they are optimized to be easily read and parsed by automated recruitment systems, increasing your chances of getting noticed by employers."
+            },
+            {
+                "question": "Can I edit my resume after creating it?",
+                "answer": "Yes, you can edit your resume at any time. Simply log in to your account, select the resume you want to edit, and make your changes. All your data is saved automatically, so you can update your resume whenever needed."
+            },
+            {
+                "question": "How do I share my resume with others?",
+                "answer": "You can share your resume in two ways: 1) Download the PDF and send it via email or messaging apps, or 2) Use our secure sharing feature to generate a temporary link that you can share with recruiters or employers. The link can be set to expire after a specified number of days for added security."
+            },
+            {
+                "question": "Is my data secure?",
+                "answer": "We take your privacy and data security seriously. Your personal information is encrypted and stored securely. We never share your data with third parties, and you can delete your account and all associated data at any time. For more details, please review our Privacy Policy."
+            },
+            {
+                "question": "Can I create multiple resumes?",
+                "answer": "Yes! You can create as many resumes as you need. This is especially useful if you're applying for different types of jobs and want to tailor your resume for each position. Each resume is saved separately in your account."
+            },
+            {
+                "question": "What languages are supported?",
+                "answer": "Currently, HResume supports English and French. You can switch between languages at any time, and all interface elements, including section labels and buttons, will be translated accordingly."
+            },
+            {
+                "question": "Do I need to create an account?",
+                "answer": "Yes, creating a free account is required to save and manage your resumes. However, the registration process is quick and simple - just provide your name, email, and create a password. No credit card or payment information is needed."
+            },
+            {
+                "question": "Can recruiters use HResume?",
+                "answer": "Yes! HResume offers a dedicated Recruiter Hub where recruiters can browse resumes, use advanced filters, share secure links with hiring managers, and collaborate with their team. Recruiters can also submit template proposals for approval."
+            },
+            {
+                "question": "What if I need help or have a question?",
+                "answer": "If you need assistance, you can reach out to our support team at contact@hresume.pro. We're here to help and typically respond within 24-48 hours. You can also check this FAQ page for answers to common questions."
+            }
+        ]
+    },
+        "contact": {
+        "title": "Contact Us",
+        "subtitle": "Have a question or need help? We're here to assist you. Send us a message and we'll get back to you as soon as possible.",
+        "info": {
+            "title": "Get in Touch",
+            "emailLabel": "Email",
+                "email": "contact@hresume.pro",
+            "phoneLabel": "Phone",
+            "phone": "+216 92 045 389",
+            "addressLabel": "Address",
+            "address": "Skanes, Monastir - Tunisia",
+            "responseTime": "We typically respond within 24-48 hours during business days."
+        },
+        "form": {
+            "title": "Send us a Message",
+            "nameLabel": "Name",
+            "namePlaceholder": "Your full name",
+            "emailLabel": "Email",
+            "emailPlaceholder": "your.email@example.com",
+            "subjectLabel": "Subject",
+            "subjectPlaceholder": "What is this regarding?",
+            "messageLabel": "Message",
+            "messagePlaceholder": "Tell us how we can help you...",
+            "submitButton": "Send Message",
+            "submitting": "Sending...",
+            "successMessage": "Thank you! Your message has been sent successfully. We'll get back to you soon.",
+            "errorMessage": "Oops! Something went wrong. Please try again later."
+        },
+        "validation": {
+            "nameRequired": "Name is required",
+            "emailRequired": "Email is required",
+            "emailInvalid": "Please enter a valid email address",
+            "subjectRequired": "Subject is required",
+            "messageRequired": "Message is required",
+            "messageMinLength": "Message must be at least 10 characters"
+        }
+    },
+    "pricing": {
+        "title": "Transparent Pricing",
+        "subtitle": "All our services are 100% free right now. Build unlimited resumes, export polished PDFs, and share them without paying a cent.",
+        "badge": "Free For Now",
+        "heroCta": "Create Free Account",
+        "plan": {
+            "name": "HResume Free",
+            "price": "$0",
+            "per": "per month",
+            "description": "Access every feature while we remain in public beta. No credit card or hidden fees.",
+            "features": [
+                "Unlimited resumes & templates",
+                "One-click PDF export",
+                "Live preview with translations",
+                "Shareable public links",
+                "Recruiter-friendly layouts"
+            ],
+            "button": "Start for Free"
+        },
+        "note": {
+            "title": "Future pricing?",
+            "description": "We may introduce premium add-ons for teams and recruiters later, but the core resume builder will stay free while we grow. You’ll receive plenty of notice before anything changes."
+        }
     }
 }

@@ -12,6 +12,37 @@
         "delete": "Supprimer",
         "download": "Télécharger"
     },
+    "share": {
+        "button": "Partager",
+        "buttonTitle": "Partager le CV",
+        "modalTitle": "Partager votre CV",
+        "description": "Générez un lien temporaire sécurisé pour partager votre CV. Le lien expirera après le nombre de jours sélectionné.",
+        "expiresLabel": "Le lien expire dans (jours)",
+        "days": {
+            "1": "1 jour",
+            "7": "7 jours",
+            "30": "30 jours",
+            "90": "90 jours",
+            "365": "1 an"
+        },
+        "generate": "Générer un lien partageable",
+        "generating": "Génération...",
+        "shareableLink": "Lien partageable",
+        "expires": "Expire le",
+        "open": "Ouvrir le lien",
+        "copy": "Copier le lien",
+        "copied": "Copié !",
+        "deactivate": "Désactiver le lien",
+        "deactivating": "Désactivation...",
+        "newLink": "Générer un nouveau lien",
+        "close": "Fermer",
+        "successGenerate": "Lien partageable généré avec succès !",
+        "successDeactivate": "Lien partageable désactivé",
+        "copySuccess": "Lien copié dans le presse-papiers !",
+        "copyError": "Impossible de copier le lien",
+        "generateError": "Échec de la génération du lien partageable",
+        "deactivateError": "Échec de la désactivation du lien"
+    },
     "certificates": {
         "title": "Certificats",
         "add": "Ajouter un certificat",
@@ -46,14 +77,72 @@
         "preview": "Aperçu",
         "useTemplate": "Utiliser ce modèle"
     },
+    "resumeTemplates": {
+        "badge": "Modèles Professionnels",
+        "title": "Modèles de CV",
+        "subtitle": "Choisissez parmi notre collection de modèles de CV professionnels et compatibles ATS",
+        "currentStatus": {
+            "title": "Disponibilité Actuelle des Modèles",
+            "message": "Pour le moment, nous proposons 1 modèle compatible ATS conçu pour aider votre CV à passer les systèmes de suivi des candidatures. Nous travaillons dur pour étoffer notre collection avec plus de modèles professionnels dans un avenir proche.",
+            "comingSoon": "Plus de modèles à venir bientôt !"
+        },
+        "features": {
+            "ats": {
+                "title": "Compatible ATS",
+                "description": "Optimisé pour passer les systèmes de suivi des candidatures utilisés par la plupart des employeurs"
+            },
+            "professional": {
+                "title": "Design Professionnel",
+                "description": "Mises en page propres et modernes qui font une excellente première impression"
+            },
+            "customizable": {
+                "title": "Entièrement Personnalisable",
+                "description": "Personnalisez facilement les couleurs, les polices et la mise en page pour correspondre à votre style"
+            }
+        },
+        "preview": {
+            "title": "Notre Modèle Actuel",
+            "description": "Notre modèle compatible ATS est conçu pour aider votre CV à se démarquer tout en garantissant qu'il peut être correctement analysé par les systèmes automatisés.",
+            "templateName": "Modèle Professionnel Compatible ATS",
+            "templateDescription": "Un modèle propre et professionnel optimisé pour les lecteurs humains et les systèmes ATS",
+            "tags": {
+                "ats": "Compatible ATS",
+                "professional": "Professionnel",
+                "modern": "Moderne"
+            },
+            "cta": "Commencer Gratuitement"
+        },
+        "future": {
+            "title": "Plus de Modèles à Venir",
+            "description": "Nous travaillons continuellement à l'expansion de notre collection de modèles. À l'avenir, vous pourrez choisir parmi une variété de styles, notamment :",
+            "types": {
+                "corporate": "Entreprise",
+                "corporateDesc": "Designs traditionnels et professionnels pour les environnements d'entreprise",
+                "creative": "Créatif",
+                "creativeDesc": "Designs audacieux et uniques pour les professionnels créatifs",
+                "minimal": "Minimal",
+                "minimalDesc": "Designs propres et simples qui se concentrent sur le contenu"
+            },
+            "footer": "Restez à l'écoute pour les mises à jour ! Nous vous informerons lorsque de nouveaux modèles seront disponibles.",
+            "cta": "Créez votre compte gratuit pour être notifié"
+        }
+    },
     "welcome": {
         "title": "Créez Votre CV Professionnel Aujourd'hui",
         "subtitle": "Démarquez-vous avec un CV magnifiquement conçu. Facile à créer, personnaliser et partager.",
-        "getStarted": "Créer votre CV",
+        "heroBadge": "Créateur de CV Professionnel",
+        "getStarted": "Créez votre CV gratuitement",
         "login": "Se connecter",
         "register": "S'inscrire",
+        "freeDescription": "Service entièrement gratuit — sans abonnement, sans frais cachés et sans carte bancaire.",
+        "trust": {
+            "free": "Gratuit à utiliser",
+            "noCard": "Pas de carte bancaire",
+            "instant": "Téléchargement instantané"
+        },
         "features": {
             "title": "Fonctionnalités",
+            "subtitle": "Tout ce dont vous avez besoin pour créer un CV professionnel remarquable",
             "easy": "Facile à Utiliser",
             "easyDesc": "Interface simple et intuitive pour créer des CV professionnels.",
             "professional": "Modèles Professionnels",
@@ -64,6 +153,13 @@
             "exportDesc": "Téléchargez votre CV au format PDF, prêt à être partagé.",
             "multilingual": "Multilingue",
             "multilingualDesc": "Créez votre CV en différentes langues pour atteindre une audience mondiale."
+        },
+        "finalCta": {
+            "title": "Prêt à créer votre CV professionnel ?",
+            "subtitle": "Rejoignez des milliers de professionnels qui nous font confiance",
+            "freeNote": "Notre service est 100 % gratuit, pour toujours.",
+            "candidate": "Inscription candidat",
+            "recruiter": "Inscription recruteur"
         },
         "recruiter": {
             "badge": "Mode Recruteur",
@@ -123,8 +219,11 @@
         "myResumes": "Mes CV",
         "templates": "Modèles",
         "profile": "Profil",
+        "settings": "Paramètres",
         "logout": "Déconnexion",
-        "fullPage": "Plein Écran"
+        "fullPage": "Plein Écran",
+        "adminPanel": "Panneau d'administration",
+        "recruiterHub": "Espace recruteur"
     },
     "preview": {
         "professionalSummary": "Résumé Professionnel",
@@ -134,6 +233,7 @@
         "interests": "Intérêts",
         "certifications": "Certifications",
         "present": "En cours",
+        "graduated": "Diplômé",
         "fullPageView": "Vue Plein Écran",
         "professionalTitle": "Titre Professionnel",
         "yourName": "Votre Nom"
@@ -343,7 +443,243 @@
         "selectTemplate": "Sélectionner un Modèle",
         "chooseTemplate": "Choisissez un modèle pour commencer à créer votre CV.",
         "proceed": "Procéder à la Création"
+    },
+    "profile": {
+        "title": "Paramètres du profil",
+        "subtitle": "Gérez les informations de votre compte et vos préférences",
+        "avatar": {
+            "changeTooltip": "Changer l'avatar",
+            "changeCta": "Modifier la photo de profil",
+            "nameFallback": "Votre nom"
+        },
+        "fields": {
+            "name": {
+                "label": "Nom complet",
+                "placeholder": "Entrez votre nom complet"
+            },
+            "email": {
+                "label": "Adresse email",
+                "placeholder": "Entrez votre email"
+            }
+        },
+        "password": {
+            "sectionTitle": "Changer le mot de passe",
+            "helper": "Laissez vide si vous ne souhaitez pas changer votre mot de passe",
+            "newLabel": "Nouveau mot de passe",
+            "newPlaceholder": "Saisissez un nouveau mot de passe",
+            "confirmLabel": "Confirmez le nouveau mot de passe",
+            "confirmPlaceholder": "Confirmez le nouveau mot de passe"
+        },
+        "status": {
+            "unsaved": "Vous avez des modifications non enregistrées"
+        },
+        "buttons": {
+            "save": "Enregistrer les modifications",
+            "saving": "Enregistrement..."
+        },
+        "notifications": {
+            "loadError": "Échec du chargement du profil",
+            "invalidFileType": "Veuillez sélectionner un fichier image",
+            "fileTooLarge": "La taille de l'image doit être inférieure à 5 Mo",
+            "updateSuccess": "Profil mis à jour avec succès !",
+            "updateError": "Échec de la mise à jour du profil"
+        },
+        "validation": {
+            "nameRequired": "Le nom est obligatoire",
+            "emailRequired": "L'email est obligatoire",
+            "emailInvalid": "Veuillez saisir une adresse email valide",
+            "passwordLength": "Le mot de passe doit comporter au moins 8 caractères",
+            "passwordMismatch": "Les mots de passe ne correspondent pas"
+        }
+    },
+    "privacy": {
+        "title": "Politique de Confidentialité",
+        "lastUpdated": "Dernière mise à jour :",
+        "introduction": {
+            "title": "Introduction",
+            "content": "Chez HResume, nous nous engageons à protéger votre vie privée et à assurer la sécurité de vos informations personnelles. Cette Politique de Confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez notre service de création de CV."
+        },
+        "informationWeCollect": {
+            "title": "Informations que Nous Collectons",
+            "personalData": {
+                "title": "Informations Personnelles",
+                "content": "Nous collectons les informations que vous nous fournissez directement, notamment votre nom, votre adresse e-mail, votre numéro de téléphone et toute autre information que vous choisissez d'inclure dans votre CV."
+            },
+            "usageData": {
+                "title": "Données d'Utilisation",
+                "content": "Nous collectons automatiquement certaines informations sur votre appareil et la façon dont vous interagissez avec notre service, notamment l'adresse IP, le type de navigateur, les pages visitées et le temps passé sur les pages."
+            },
+            "cookies": {
+                "title": "Cookies et Suivi",
+                "content": "Nous utilisons des cookies et des technologies de suivi similaires pour améliorer votre expérience, analyser les modèles d'utilisation et aider nos efforts marketing."
+            }
+        },
+        "howWeUse": {
+            "title": "Comment Nous Utilisons Vos Informations",
+            "points": [
+                "Pour fournir, maintenir et améliorer notre service de création de CV",
+                "Pour traiter vos demandes et transactions",
+                "Pour vous envoyer des avis techniques, des mises à jour et des messages de support",
+                "Pour répondre à vos commentaires, questions et demandes",
+                "Pour surveiller et analyser les tendances, l'utilisation et les activités",
+                "Pour détecter, prévenir et résoudre les problèmes techniques et les menaces de sécurité"
+            ]
+        },
+        "dataSharing": {
+            "title": "Partage et Divulgation des Données",
+            "intro": "Nous ne vendons, n'échangeons ni ne louons vos informations personnelles à des tiers. Nous ne pouvons partager vos informations que dans les circonstances suivantes :",
+            "circumstances": [
+                "Avec votre consentement explicite",
+                "Pour se conformer aux obligations légales ou répondre aux demandes légales",
+                "Pour protéger nos droits, notre vie privée, notre sécurité ou nos biens",
+                "Avec des prestataires de services qui nous aident à exploiter notre plateforme (sous des accords de confidentialité stricts)"
+            ]
+        },
+        "dataSecurity": {
+            "title": "Sécurité des Données",
+            "content": "Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles appropriées pour protéger vos informations personnelles contre l'accès non autorisé, l'altération, la divulgation ou la destruction. Cependant, aucune méthode de transmission sur Internet ou de stockage électronique n'est sécurisée à 100%, et nous ne pouvons garantir une sécurité absolue."
+        },
+        "yourRights": {
+            "title": "Vos Droits",
+            "intro": "Vous avez le droit de :",
+            "rights": [
+                "Accéder et recevoir une copie de vos données personnelles",
+                "Rectifier des données inexactes ou incomplètes",
+                "Demander la suppression de vos données personnelles",
+                "Vous opposer au traitement de vos données personnelles",
+                "Demander la restriction du traitement",
+                "Portabilité des données (recevoir vos données dans un format structuré)"
+            ]
+        },
+        "contact": {
+            "title": "Contactez-Nous",
+            "content": "Si vous avez des questions concernant cette Politique de Confidentialité ou souhaitez exercer vos droits, veuillez nous contacter à :",
+            "email": "Email : contact@hresume.pro"
+        },
+        "changes": {
+            "title": "Modifications de Cette Politique de Confidentialité",
+            "content": "Nous pouvons mettre à jour cette Politique de Confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle Politique de Confidentialité sur cette page et en mettant à jour la date de 'Dernière mise à jour'. Il vous est conseillé de consulter périodiquement cette Politique de Confidentialité pour tout changement."
+        }
+    },
+    "faq": {
+        "title": "Questions Fréquemment Posées",
+        "subtitle": "Trouvez des réponses aux questions courantes sur notre service de création de CV",
+        "noQuestions": "Aucune question disponible pour le moment.",
+        "contact": {
+            "title": "Vous avez encore des questions ?",
+            "content": "Si vous ne trouvez pas la réponse que vous cherchez, n'hésitez pas à contacter notre équipe de support.",
+            "email": "Email : support@hresume.com"
+        },
+        "questions": [
+            {
+                "question": "HResume est-il vraiment gratuit ?",
+                "answer": "Oui ! HResume est entièrement gratuit. Il n'y a pas de frais cachés, pas d'abonnements et aucune carte bancaire n'est requise. Vous pouvez créer, modifier et télécharger autant de CV que vous le souhaitez sans aucun coût."
+            },
+            {
+                "question": "Comment créer un CV ?",
+                "answer": "Créer un CV est facile ! Inscrivez-vous simplement pour un compte gratuit, choisissez un modèle professionnel et commencez à remplir vos informations. Vous pouvez ajouter votre expérience professionnelle, votre formation, vos compétences et bien plus encore. L'interface est intuitive et vous guide à chaque étape."
+            },
+            {
+                "question": "Puis-je télécharger mon CV en PDF ?",
+                "answer": "Absolument ! Une fois que vous avez terminé votre CV, vous pouvez le télécharger sous forme de fichier PDF de haute qualité. Le PDF est formaté professionnellement et prêt à être partagé avec des employeurs ou téléchargé sur des sites d'emploi."
+            },
+            {
+                "question": "Les modèles de CV sont-ils compatibles avec les ATS ?",
+                "answer": "Oui, nos modèles de CV sont conçus pour être compatibles avec les systèmes ATS (Applicant Tracking System). Cela signifie qu'ils sont optimisés pour être facilement lus et analysés par les systèmes de recrutement automatisés, augmentant ainsi vos chances d'être remarqué par les employeurs."
+            },
+            {
+                "question": "Puis-je modifier mon CV après l'avoir créé ?",
+                "answer": "Oui, vous pouvez modifier votre CV à tout moment. Connectez-vous simplement à votre compte, sélectionnez le CV que vous souhaitez modifier et apportez vos modifications. Toutes vos données sont enregistrées automatiquement, vous pouvez donc mettre à jour votre CV quand vous le souhaitez."
+            },
+            {
+                "question": "Comment partager mon CV avec d'autres personnes ?",
+                "answer": "Vous pouvez partager votre CV de deux façons : 1) Téléchargez le PDF et envoyez-le par e-mail ou via des applications de messagerie, ou 2) Utilisez notre fonctionnalité de partage sécurisé pour générer un lien temporaire que vous pouvez partager avec des recruteurs ou des employeurs. Le lien peut être configuré pour expirer après un nombre de jours spécifié pour une sécurité accrue."
+            },
+            {
+                "question": "Mes données sont-elles sécurisées ?",
+                "answer": "Nous prenons votre vie privée et la sécurité de vos données au sérieux. Vos informations personnelles sont cryptées et stockées en toute sécurité. Nous ne partageons jamais vos données avec des tiers, et vous pouvez supprimer votre compte et toutes les données associées à tout moment. Pour plus de détails, veuillez consulter notre Politique de Confidentialité."
+            },
+            {
+                "question": "Puis-je créer plusieurs CV ?",
+                "answer": "Oui ! Vous pouvez créer autant de CV que nécessaire. C'est particulièrement utile si vous postulez pour différents types d'emplois et souhaitez adapter votre CV pour chaque poste. Chaque CV est enregistré séparément dans votre compte."
+            },
+            {
+                "question": "Quelles langues sont prises en charge ?",
+                "answer": "Actuellement, HResume prend en charge l'anglais et le français. Vous pouvez basculer entre les langues à tout moment, et tous les éléments de l'interface, y compris les libellés de section et les boutons, seront traduits en conséquence."
+            },
+            {
+                "question": "Dois-je créer un compte ?",
+                "answer": "Oui, la création d'un compte gratuit est nécessaire pour enregistrer et gérer vos CV. Cependant, le processus d'inscription est rapide et simple - il suffit de fournir votre nom, votre e-mail et de créer un mot de passe. Aucune carte bancaire ou information de paiement n'est requise."
+            },
+            {
+                "question": "Les recruteurs peuvent-ils utiliser HResume ?",
+                "answer": "Oui ! HResume propose un Espace Recruteur dédié où les recruteurs peuvent parcourir les CV, utiliser des filtres avancés, partager des liens sécurisés avec les responsables du recrutement et collaborer avec leur équipe. Les recruteurs peuvent également soumettre des propositions de modèles pour approbation."
+            },
+            {
+                "question": "Que faire si j'ai besoin d'aide ou si j'ai une question ?",
+                "answer": "Si vous avez besoin d'assistance, vous pouvez contacter notre équipe de support à contact@hresume.pro. Nous sommes là pour vous aider et répondons généralement dans les 24 à 48 heures. Vous pouvez également consulter cette page FAQ pour obtenir des réponses aux questions courantes."
+            }
+        ]
+    },
+        "contact": {
+        "title": "Contactez-Nous",
+        "subtitle": "Vous avez une question ou besoin d'aide ? Nous sommes là pour vous aider. Envoyez-nous un message et nous vous répondrons dans les plus brefs délais.",
+        "info": {
+            "title": "Restons en Contact",
+            "emailLabel": "Email",
+                "email": "contact@hresume.pro",
+            "phoneLabel": "Téléphone",
+            "phone": "+216 92 045 389",
+            "addressLabel": "Adresse",
+            "address": "Skanes, Monastir - Tunisie",
+            "responseTime": "Nous répondons généralement dans les 24 à 48 heures pendant les jours ouvrables."
+        },
+        "form": {
+            "title": "Envoyez-nous un Message",
+            "nameLabel": "Nom",
+            "namePlaceholder": "Votre nom complet",
+            "emailLabel": "Email",
+            "emailPlaceholder": "votre.email@exemple.com",
+            "subjectLabel": "Sujet",
+            "subjectPlaceholder": "De quoi s'agit-il ?",
+            "messageLabel": "Message",
+            "messagePlaceholder": "Dites-nous comment nous pouvons vous aider...",
+            "submitButton": "Envoyer le Message",
+            "submitting": "Envoi en cours...",
+            "successMessage": "Merci ! Votre message a été envoyé avec succès. Nous vous répondrons bientôt.",
+            "errorMessage": "Oups ! Quelque chose s'est mal passé. Veuillez réessayer plus tard."
+        },
+        "validation": {
+            "nameRequired": "Le nom est obligatoire",
+            "emailRequired": "L'email est obligatoire",
+            "emailInvalid": "Veuillez saisir une adresse email valide",
+            "subjectRequired": "Le sujet est obligatoire",
+            "messageRequired": "Le message est obligatoire",
+            "messageMinLength": "Le message doit contenir au moins 10 caractères"
+        }
+    },
+    "pricing": {
+        "title": "Tarification Transparente",
+        "subtitle": "Tous nos services sont 100 % gratuits pour le moment. Créez des CV illimités, exportez des PDF soignés et partagez-les sans rien payer.",
+        "badge": "Gratuit pour le moment",
+        "heroCta": "Créer un compte gratuit",
+        "plan": {
+            "name": "HResume Gratuit",
+            "price": "0 €",
+            "per": "par mois",
+            "description": "Accédez à toutes les fonctionnalités tant que nous restons en bêta publique. Aucune carte bancaire requise.",
+            "features": [
+                "CV et modèles illimités",
+                "Export PDF en un clic",
+                "Aperçu en direct avec traductions",
+                "Liens de partage sécurisés",
+                "Mises en page adaptées aux recruteurs"
+            ],
+            "button": "Commencer gratuitement"
+        },
+        "note": {
+            "title": "Tarifs futurs ?",
+            "description": "Nous pourrions proposer plus tard des options premium pour les équipes et recruteurs, mais le créateur de CV principal restera gratuit pendant notre croissance. Vous serez prévenu bien à l'avance avant tout changement."
+        }
     }
-
-    
 }

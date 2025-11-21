@@ -9,6 +9,9 @@ export default function Welcome() {
   const { t } = useLanguage();
   const recruiterContent = t?.welcome?.recruiter || {};
   const recruiterCards = recruiterContent.cards || {};
+  const trustStrings = t?.welcome?.trust || {};
+  const finalCta = t?.welcome?.finalCta || {};
+  const featuresSubtitle = t?.welcome?.features?.subtitle;
 
   
   return (
@@ -27,11 +30,13 @@ export default function Welcome() {
           <div className="container mx-auto px-4 relative z-10">
             <div className="flex flex-wrap items-center">
               <div className="w-full lg:w-6/12 px-4">
-                <div className="pt-32 sm:pt-0 animate-slide-in">
+                <div className="lg-pt-32 sm:pt-0 animate-slide-in pt-6">
                   {/* Sparkles decoration */}
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="h-6 w-6 text-blue-600 animate-pulse-slow" />
-                    <span className="text-blue-600 font-semibold">Professional CV Builder</span>
+                    <span className="text-blue-600 font-semibold">
+                      {t?.welcome?.heroBadge || "Professional CV Builder"}
+                    </span>
                   </div>
                   
                   <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -59,20 +64,26 @@ export default function Welcome() {
                       Recruiter signup
                     </Link> */}
                   </div>
+
+                  {t.welcome.freeDescription && (
+                    <p className="mt-3 text-sm text-gray-600">
+                      {t.welcome.freeDescription}
+                    </p>
+                  )}
                   
                   {/* Trust indicators */}
-                  <div className="mt-8 flex items-center gap-6 text-sm text-gray-600">
+                  <div className="mt-8 flex items-center gap-6 text-sm text-gray-600 mb-8">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span>Free to use</span>
+                      <span>{trustStrings.free || "Free to use"}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span>No credit card</span>
+                      <span>{trustStrings.noCard || "No credit card"}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span>Instant download</span>
+                      <span>{trustStrings.instant || "Instant download"}</span>
                     </div>
                   </div>
                 </div>
@@ -108,7 +119,7 @@ export default function Welcome() {
                 {t.welcome.features.title}
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Everything you need to create a professional resume that stands out
+                {featuresSubtitle || "Everything you need to create a professional resume that stands out"}
               </p>
             </div>
             
@@ -163,15 +174,24 @@ export default function Welcome() {
             <div className="mt-20 text-center">
               <div className="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-1 rounded-2xl">
                 <div className="bg-white rounded-xl px-12 py-8">
-                  <h3 className="text-3xl font-bold text-gray-900 mb-4">Ready to create your professional resume?</h3>
-                  <p className="text-xl text-gray-600 mb-8">Join thousands of professionals who trust our platform</p>
+                  <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                    {finalCta.title || "Ready to create your professional resume?"}
+                  </h3>
+                  <p className="text-xl text-gray-600 mb-2">
+                    {finalCta.subtitle || "Join thousands of professionals who trust our platform"}
+                  </p>
+                  {finalCta.freeNote && (
+                    <p className="text-base text-gray-500 mb-6">
+                      {finalCta.freeNote}
+                    </p>
+                  )}
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <Link 
                       to="/register" 
                       className="cta-primary inline-flex items-center px-10 py-4 text-white rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                     >
                       <Rocket className="h-5 w-5 mr-2" />
-                      Candidate signup
+                      {finalCta.candidate || "Candidate signup"}
                       <ArrowRight className="h-5 w-5 ml-2" />
                     </Link>
                     <Link 
@@ -179,7 +199,7 @@ export default function Welcome() {
                       className="inline-flex items-center px-10 py-4 rounded-xl text-lg font-semibold text-slate-900 bg-white border border-slate-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                     >
                       <Briefcase className="h-5 w-5 mr-2" />
-                      Recruiter signup
+                      {finalCta.recruiter || "Recruiter signup"}
                     </Link>
                   </div>
                 </div>

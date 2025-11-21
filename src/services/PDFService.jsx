@@ -1,11 +1,16 @@
 import axiosInstance from "../api/axiosInstance";
 
-export const generatePDF = async (html, filename = "resume.pdf") => {
+export const generatePDF = async ({
+  resume,
+  html,
+  filename = "resume.pdf",
+  locale = "en",
+}) => {
   return axiosInstance.post(
     "/generate-pdf",
-    { html, filename },
+    { resume, html, filename, locale },
     {
-      responseType: "blob", // Important: get PDF as blob
+      responseType: "blob",
     }
   );
 };

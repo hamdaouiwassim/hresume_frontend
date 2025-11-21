@@ -22,11 +22,17 @@ export default function Blog() {
   const fetchPosts = async () => {
     try {
       setIsLoading(true);
-      const response = await getBlogPosts({
+      const params = {
         per_page: 12,
         page: currentPage,
-        search: searchTerm || undefined,
-      });
+      };
+      
+      // Only add search parameter if it has a value
+      if (searchTerm && searchTerm.trim()) {
+        params.search = searchTerm.trim();
+      }
+      
+      const response = await getBlogPosts(params);
       
       if (response.data.status) {
         setPosts(response.data.data.data || []);

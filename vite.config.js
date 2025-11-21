@@ -15,13 +15,10 @@ export default defineConfig({
         },
       },
     },
-    // Enable minification
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.log in production
-      },
-    },
+    // Enable minification (using esbuild - built-in and faster)
+    minify: 'esbuild',
+    // Note: esbuild doesn't support drop_console directly
+    // If you need to remove console.log, consider using a plugin or post-build script
     // Optimize chunk size
     chunkSizeWarningLimit: 1000,
   },

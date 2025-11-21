@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { Users, Search, Trash2, Loader2, Shield, Calendar, Mail, FileText, Briefcase, Building2 } from 'lucide-react';
+import { Users, Search, Trash2, Loader2, Shield, Calendar, Mail, FileText, Briefcase, Building2, CheckCircle, XCircle } from 'lucide-react';
 import { getAdminUsers, deleteAdminUser, updateAdminUser } from '../../services/adminService';
 import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -15,6 +15,7 @@ export default function UsersList() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
+    const [verificationFilter, setVerificationFilter] = useState('');
     const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, user: null });
     const [isDeleting, setIsDeleting] = useState(false);
     const [pagination, setPagination] = useState({
@@ -32,7 +33,7 @@ export default function UsersList() {
 
     useEffect(() => {
         fetchUsers();
-    }, [searchQuery, roleFilter]);
+    }, [searchQuery, roleFilter, verificationFilter]);
 
     const fetchUsers = async (page = 1) => {
         try {
@@ -41,7 +42,8 @@ export default function UsersList() {
                 per_page: 15,
                 page: page,
                 ...(searchQuery && { search: searchQuery }),
-                ...(roleFilter && { role: roleFilter })
+                ...(roleFilter && { role: roleFilter }),
+                ...(verificationFilter && { verification_status: verificationFilter })
             };
             const response = await getAdminUsers(params);
             if (response.data.status) {
@@ -184,8 +186,8 @@ export default function UsersList() {
                         <p className="text-gray-600">Manage all users and their activity</p>
                     </div>
 
-                    {/* Search Bar */}
-                    <div className="mb-6">
+                    {/* Search Bar and Filters */}
+                    <div className="mb-6 space-y-4">
                         <div className="relative max-w-md">
                             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                             <input
@@ -196,21 +198,74 @@ export default function UsersList() {
                                 className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 shadow-sm"
                             />
                         </div>
-                        {roleFilter && (
-                            <div className="mt-2 flex items-center gap-2 text-xs text-gray-600">
-                                <span className="font-semibold uppercase">Role filter:</span>
-                                <span className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 capitalize">
-                                    {roleFilter}
-                                </span>
+                        
+                        {/* Filters */}
+                        <div className="flex flex-wrap items-center gap-4">
+                            {/* Role Filter */}
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-medium text-gray-700">Role:</label>
+                                <select
+                                    value={roleFilter}
+                                    onChange={(e) => {
+                                        setRoleFilter(e.target.value);
+                                        if (e.target.value) {
+                                            navigate(`/admin/users?role=${e.target.value}`);
+                                        } else {
+                                            navigate('/admin/users');
+                                        }
+                                    }}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                                >
+                                    <option value="">All Roles</option>
+                                    <option value="candidate">Candidate</option>
+                                    <option value="recruiter">Recruiter</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+
+                            {/* Verification Status Filter */}
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-medium text-gray-700">Verification:</label>
+                                <select
+                                    value={verificationFilter}
+                                    onChange={(e) => setVerificationFilter(e.target.value)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                                >
+                                    <option value="">All</option>
+                                    <option value="verified">Verified</option>
+                                    <option value="unverified">Unverified</option>
+                                </select>
+                            </div>
+
+                            {/* Clear Filters Button */}
+                            {(roleFilter || verificationFilter) && (
                                 <button
                                     onClick={() => {
                                         setRoleFilter('');
+                                        setVerificationFilter('');
                                         navigate('/admin/users');
                                     }}
-                                    className="text-blue-600 hover:underline font-medium"
+                                    className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                                 >
-                                    Clear
+                                    Clear Filters
                                 </button>
+                            )}
+                        </div>
+
+                        {/* Active Filters Display */}
+                        {(roleFilter || verificationFilter) && (
+                            <div className="flex items-center gap-2 flex-wrap text-xs">
+                                <span className="font-semibold text-gray-600">Active filters:</span>
+                                {roleFilter && (
+                                    <span className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 capitalize">
+                                        Role: {roleFilter}
+                                    </span>
+                                )}
+                                {verificationFilter && (
+                                    <span className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 capitalize">
+                                        Verification: {verificationFilter}
+                                    </span>
+                                )}
                             </div>
                         )}
                     </div>
@@ -222,6 +277,7 @@ export default function UsersList() {
                                 <thead className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200">
                                     <tr>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Recruiter Status</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Resumes</th>
@@ -248,6 +304,19 @@ export default function UsersList() {
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {user.email_verified_at ? (
+                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                                        Verified
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                                                        <XCircle className="h-3 w-3 mr-1" />
+                                                        Unverified
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex flex-wrap items-center gap-2">

@@ -2,8 +2,14 @@ import axiosInstance from "../api/axiosInstance";
 
 // Get all published blog posts (public)
 export const getBlogPosts = (params = {}) => {
-  const queryString = new URLSearchParams(params).toString();
-  return axiosInstance.get(`/blog?${queryString}`);
+  // Filter out undefined, null, and empty string values
+  const filteredParams = Object.fromEntries(
+    Object.entries(params).filter(([_, value]) => 
+      value !== undefined && value !== null && value !== ''
+    )
+  );
+  const queryString = new URLSearchParams(filteredParams).toString();
+  return axiosInstance.get(`/blog${queryString ? `?${queryString}` : ''}`);
 };
 
 // Get a single blog post by slug (public)
@@ -13,8 +19,14 @@ export const getBlogPost = (slug) => {
 
 // Admin: Get all blog posts (including drafts)
 export const getAdminBlogPosts = (params = {}) => {
-  const queryString = new URLSearchParams(params).toString();
-  return axiosInstance.get(`/admin/blog?${queryString}`);
+  // Filter out undefined, null, and empty string values
+  const filteredParams = Object.fromEntries(
+    Object.entries(params).filter(([_, value]) => 
+      value !== undefined && value !== null && value !== ''
+    )
+  );
+  const queryString = new URLSearchParams(filteredParams).toString();
+  return axiosInstance.get(`/admin/blog${queryString ? `?${queryString}` : ''}`);
 };
 
 // Admin: Get a single blog post

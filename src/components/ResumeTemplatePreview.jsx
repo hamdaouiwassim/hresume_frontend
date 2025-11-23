@@ -11,6 +11,7 @@ const ResumeTemplatePreview = ({ resume = {} }) => {
   const skills = resume.skills || [];
   const interests = resume.interests || [];
   const certifications = resume.certifications || [];
+  const languages = resume.languages || [];
 
   const contactLine = [
     contact.location,
@@ -27,34 +28,54 @@ const ResumeTemplatePreview = ({ resume = {} }) => {
           .pdf-template-preview {
             font-family: 'Inter', 'DejaVu Sans', 'Helvetica Neue', Arial, sans-serif;
             background: #ffffff;
-            padding: 18px 24px 24px;
+            padding: 12px 16px 16px;
             color: #111;
             line-height: 1.5;
+          }
+          @media (min-width: 640px) {
+            .pdf-template-preview {
+              padding: 18px 24px 24px;
+            }
           }
           .pdf-template-preview * {
             box-sizing: border-box;
           }
           .pdf-template-preview h1 {
-            font-size: 32px;
+            font-size: 24px;
             letter-spacing: 0.08em;
             text-align: center;
             margin: 0 0 6px;
           }
+          @media (min-width: 640px) {
+            .pdf-template-preview h1 {
+              font-size: 32px;
+            }
+          }
           .pdf-template-preview .tagline {
             text-align: center;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             margin: 0 0 4px;
           }
+          @media (min-width: 640px) {
+            .pdf-template-preview .tagline {
+              font-size: 14px;
+            }
+          }
           .pdf-template-preview .contact-line {
             text-align: center;
-            font-size: 12px;
+            font-size: 10px;
             color: #374151;
             margin: 0 0 20px;
           }
+          @media (min-width: 640px) {
+            .pdf-template-preview .contact-line {
+              font-size: 12px;
+            }
+          }
           .pdf-template-preview h2 {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -62,16 +83,47 @@ const ResumeTemplatePreview = ({ resume = {} }) => {
             margin: 26px 0 12px;
             padding-bottom: 6px;
           }
+          @media (min-width: 640px) {
+            .pdf-template-preview h2 {
+              font-size: 15px;
+            }
+          }
           .pdf-template-preview h3 {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
             margin: 0;
           }
+          @media (min-width: 640px) {
+            .pdf-template-preview h3 {
+              font-size: 14px;
+            }
+          }
           .pdf-template-preview .subheading {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #374151;
             margin: 0;
+          }
+          @media (min-width: 640px) {
+            .pdf-template-preview .subheading {
+              font-size: 12px;
+            }
+          }
+          .pdf-template-preview p {
+            font-size: 12px;
+          }
+          @media (min-width: 640px) {
+            .pdf-template-preview p {
+              font-size: 14px;
+            }
+          }
+          .pdf-template-preview ul li {
+            font-size: 12px;
+          }
+          @media (min-width: 640px) {
+            .pdf-template-preview ul li {
+              font-size: 14px;
+            }
           }
           .pdf-template-preview ul {
             margin: 8px 0 12px 18px;
@@ -201,6 +253,17 @@ const ResumeTemplatePreview = ({ resume = {} }) => {
           <ul className="list-simple">
             {certifications.map((cert, idx) => (
               <li key={`cert-${idx}`}>{cert}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {languages.length > 0 && (
+        <>
+          <h2>{labels.languages || "Languages"}</h2>
+          <ul className="list-simple">
+            {languages.map((lang, idx) => (
+              <li key={`lang-${idx}`}>{lang}</li>
             ))}
           </ul>
         </>

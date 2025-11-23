@@ -244,6 +244,7 @@
         "skills": "Compétences",
         "interests": "Intérêts",
         "certifications": "Certifications",
+        "languages": "Langues",
         "present": "En cours",
         "graduated": "Diplômé",
         "fullPageView": "Vue Plein Écran",
@@ -443,6 +444,23 @@
                     "issuerPlaceholder": "ex., Amazon Web Services",
                     "dateObtained": "Date d'Obtention",
                     "dateObtainedHint": "Quand vous avez reçu le certificat"
+                }
+            },
+            "languages": {
+                "title": "Langues",
+                "addLanguage": "Ajouter une Langue",
+                "language": {
+                    "title": "Langue",
+                    "language": "Nom de la Langue",
+                    "languageHint": "Langue que vous parlez",
+                    "languagePlaceholder": "ex., Anglais, Français, Espagnol",
+                    "proficiency": "Niveau de Maîtrise",
+                    "proficiencyHint": "Votre niveau de maîtrise",
+                    "selectProficiency": "Sélectionner le Niveau",
+                    "native": "Natif",
+                    "fluent": "Courant",
+                    "intermediate": "Intermédiaire",
+                    "basic": "Basique"
                 }
             }
         }

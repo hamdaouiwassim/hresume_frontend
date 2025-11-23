@@ -23,6 +23,7 @@ import {
   Eye,
   ChevronRight,
   ChevronDown,
+  Globe,
 } from "lucide-react";
 import { generatePDF } from "../services/PDFService";
 import { useLanguage } from "../context/LanguageContext";
@@ -41,6 +42,8 @@ import ShowHobby from "../components/ShowHobby";
 import NewHobby from "../components/NewHobby";
 import ShowCertificate from "../components/ShowCertificate";
 import NewCertificate from "../components/NewCertificate";
+import ShowLanguage from "../components/ShowLanguage";
+import NewLanguage from "../components/NewLanguage";
 import { buildResumeTemplateData } from "../utils/resumeTemplateMapper";
 import ResumeTemplatePreview from "../components/ResumeTemplatePreview";
 export default function EditResume() {
@@ -52,6 +55,7 @@ export default function EditResume() {
   const [showNewSkill,setShowNewSkill]=useState(false);
   const [showNewHobby,setShowNewHobby]=useState(false);
   const [showNewCertificate,setShowNewCertificate]=useState(false);
+  const [showNewLanguage,setShowNewLanguage]=useState(false);
   const [isFullPagePreview, setIsFullPagePreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareableLink, setShareableLink] = useState(null);
@@ -83,6 +87,7 @@ const fetchResumeData = useCallback(async () => {
         const { skills } = response.data.data;
         const { hobbies } = response.data.data;
         const { certificates } = response.data.data;
+        const { languages } = response.data.data;
          
         setFormData((prev) => ({
           ...prev,
@@ -100,6 +105,7 @@ const fetchResumeData = useCallback(async () => {
           skills: skills || [],
           hobbies: hobbies || [],
           certificates: certificates || [],
+          languages: languages || [],
         }));
 
       } catch (error) {
@@ -110,7 +116,7 @@ const fetchResumeData = useCallback(async () => {
     // Fetch resume data using the 'id' and populate formData
    fetchResumeData();
     // Example: fetchResumeData(id);
-  }, [fetchResumeData,showNewExperience,showNewEducation,showNewSkill,showNewHobby,showNewCertificate]);
+  }, [fetchResumeData,showNewExperience,showNewEducation,showNewSkill,showNewHobby,showNewCertificate,showNewLanguage]);
 
   const { t, language } = useLanguage();
   const locale = language === "fr" ? "fr-FR" : "en-US";
@@ -132,6 +138,7 @@ const fetchResumeData = useCallback(async () => {
     skills: [],
     hobbies: [],
     certificates: [],
+    languages: [],
   });
 
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
@@ -140,6 +147,7 @@ const fetchResumeData = useCallback(async () => {
   const [isSkillsOpen, setIsSkillsOpen] = useState(false);
   const [isHobbiesOpen, setIsHobbiesOpen] = useState(false);
   const [isCertificatesOpen, setIsCertificatesOpen] = useState(false);
+  const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
 
   const hasBasicInfo = useMemo(() => {
     return [
@@ -192,6 +200,8 @@ const fetchResumeData = useCallback(async () => {
       setIsHobbiesOpen(true);
     } else if (section === "certificates") {
       setIsCertificatesOpen(true);
+    } else if (section === "languages") {
+      setIsLanguagesOpen(true);
     }
     
     // Close all other sections
@@ -212,6 +222,9 @@ const fetchResumeData = useCallback(async () => {
     }
     if (section !== "certificates") {
       setIsCertificatesOpen(false);
+    }
+    if (section !== "languages") {
+      setIsLanguagesOpen(false);
     }
   };
 
@@ -236,6 +249,9 @@ const fetchResumeData = useCallback(async () => {
     } else if (section === "certificates") {
       isCurrentlyOpen = isCertificatesOpen;
       setIsCertificatesOpen(prev => !prev);
+    } else if (section === "languages") {
+      isCurrentlyOpen = isLanguagesOpen;
+      setIsLanguagesOpen(prev => !prev);
     }
     
     // Close all other sections only if we're opening a new one (not closing the current one)
@@ -257,6 +273,9 @@ const fetchResumeData = useCallback(async () => {
       }
       if (section !== "certificates") {
         setIsCertificatesOpen(false);
+      }
+      if (section !== "languages") {
+        setIsLanguagesOpen(false);
       }
     }
   };
@@ -503,6 +522,12 @@ const fetchResumeData = useCallback(async () => {
     fetchResumeData();
   };
 
+  const handleLanguageSave = () => {
+    setIsLanguagesOpen(true);
+    setShowNewLanguage(false);
+    fetchResumeData();
+  };
+
   // Experience handlers
   const addExperience = () => {
     setShowNewExperience(true);
@@ -531,6 +556,11 @@ const fetchResumeData = useCallback(async () => {
   const addCertificate = () => {
     setShowNewCertificate(true);
     openSection("certificates");
+  };
+
+  const addLanguage = () => {
+    setShowNewLanguage(true);
+    openSection("languages");
   };
 
   
@@ -577,11 +607,18 @@ const fetchResumeData = useCallback(async () => {
       iconOpen: "bg-indigo-500 text-white shadow-indigo-200",
       chevron: "text-indigo-600",
     },
+    languages: {
+      openContainer:
+        "border-cyan-500 bg-gradient-to-br from-cyan-50 via-white to-white shadow-lg shadow-cyan-100",
+      iconOpen: "bg-cyan-500 text-white shadow-cyan-200",
+      chevron: "text-cyan-600",
+    },
   };
 
   const sectionLabels = {
     personal: t.preview?.sectionLabelPersonal || "01 Personal Info",
     experience: t.preview?.sectionLabelExperience || "02 Experience",
+    languages: t.preview?.sectionLabelLanguages || "07 Languages",
     education: t.preview?.sectionLabelEducation || "03 Education",
     skills: t.preview?.sectionLabelSkills || "04 Skills",
     hobbies: t.preview?.sectionLabelHobbies || "05 Hobbies",
@@ -611,15 +648,15 @@ const fetchResumeData = useCallback(async () => {
     }`;
 
   const buttonBase =
-    "inline-flex items-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-flex items-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 text-xs sm:text-sm";
   const buttonVariants = {
-    primary: `${buttonBase} px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl focus:ring-blue-500 focus:ring-offset-white`,
-    secondary: `${buttonBase} px-4 py-2.5 bg-white text-slate-800 border border-slate-200 hover:border-slate-300 hover:bg-white focus:ring-slate-400 focus:ring-offset-white`,
-    outline: `${buttonBase} px-4 py-2.5 border border-slate-300 text-slate-600 bg-white hover:bg-slate-50 focus:ring-slate-400 focus:ring-offset-white`,
-    muted: `${buttonBase} px-4 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-400 focus:ring-offset-white`,
-    purple: `${buttonBase} px-4 py-2.5 border border-purple-300 text-purple-700 bg-white hover:bg-purple-50 focus:ring-purple-300 focus:ring-offset-white`,
-    blueSolid: `${buttonBase} px-4 py-2.5 bg-blue-600 text-white shadow-lg hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-white`,
-    danger: `${buttonBase} px-4 py-2.5 border border-red-200 text-red-600 bg-white hover:border-red-300 focus:ring-red-400 focus:ring-offset-white`,
+    primary: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl focus:ring-blue-500 focus:ring-offset-white`,
+    secondary: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 bg-white text-slate-800 border border-slate-200 hover:border-slate-300 hover:bg-white focus:ring-slate-400 focus:ring-offset-white`,
+    outline: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 border border-slate-300 text-slate-600 bg-white hover:bg-slate-50 focus:ring-slate-400 focus:ring-offset-white`,
+    muted: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-400 focus:ring-offset-white`,
+    purple: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 border border-purple-300 text-purple-700 bg-white hover:bg-purple-50 focus:ring-purple-300 focus:ring-offset-white`,
+    blueSolid: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 bg-blue-600 text-white shadow-lg hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-white`,
+    danger: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 border border-red-200 text-red-600 bg-white hover:border-red-300 focus:ring-red-400 focus:ring-offset-white`,
   };
   const disabledButtonClasses = "opacity-50 cursor-not-allowed pointer-events-none";
 
@@ -1160,6 +1197,72 @@ const fetchResumeData = useCallback(async () => {
                 </div>
               </div>
 
+              {/* Languages Section */}
+              <div className={getAccordionClasses("languages", isLanguagesOpen)}>
+                <button
+                  type="button"
+                  onClick={() => toggleSection("languages")}
+                  className={getAccordionButtonClasses(isLanguagesOpen)}
+                  aria-expanded={isLanguagesOpen}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={getAccordionIconClasses("languages", isLanguagesOpen)}>
+                      <Globe className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                        {sectionLabels.languages}
+                      </p>
+                      <h2 className="text-lg font-semibold">
+                        {t.dashboard.sections.languages.title}
+                      </h2>
+                    </div>
+                  </div>
+                  <ChevronDown className={getChevronClasses("languages", isLanguagesOpen)} />
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-500 ${
+                    isLanguagesOpen ? "max-h-[3000px]" : "max-h-0"
+                  }`}
+                >
+                  <div
+                    className={`px-6 pb-6 transition-all duration-300 ${
+                      isLanguagesOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={addLanguage}
+                      className={`mt-2 mb-4 ${buttonBase} border border-cyan-200 bg-cyan-50/80 text-cyan-700 px-4 py-2 text-sm hover:bg-cyan-100 focus:ring-cyan-300 focus:ring-offset-white`}
+                    >
+                      {t.dashboard.sections.languages.addLanguage}
+                    </button>
+
+                    {showNewLanguage && (
+                      <NewLanguage
+                        index={formData.languages ? formData.languages.length : 0}
+                        hide={() => setShowNewLanguage(false)}
+                        resumeId={id}
+                        onSave={handleLanguageSave}
+                      />
+                    )}
+
+                    {formData.languages &&
+                      formData.languages.map((language, index) => (
+                        <ShowLanguage
+                          key={language.id || index}
+                          lang={language}
+                          index={index}
+                          hide={() => setShowNewLanguage(false)}
+                          resumeId={id}
+                          onSave={handleLanguageSave}
+                          onDelete={handleLanguageSave}
+                        />
+                      ))}
+                  </div>
+                </div>
+              </div>
+
               
             </form>
           </div>
@@ -1170,25 +1273,25 @@ const fetchResumeData = useCallback(async () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2 flex-wrap gap-1 sm:gap-0">
                   <button
                     onClick={() => setIsFullPagePreview(true)}
-                    className={buttonVariants.outline}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm`}
                     title="Full page preview"
                   >
-                    <Maximize2 className="h-4 w-4" />
-                    {t.nav.fullPage}
+                    <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{t.nav.fullPage}</span>
                   </button>
                   <button
                     onClick={() => {
                       setShowShareModal(true);
                       loadShareableLink();
                     }}
-                    className={buttonVariants.purple}
+                    className={`${buttonVariants.purple} text-xs sm:text-sm`}
                     title={shareStrings.buttonTitle || "Share CV"}
                   >
-                    <Share2 className="h-4 w-4" />
-                    {shareStrings.button || "Share"}
+                    <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{shareStrings.button || "Share"}</span>
                   </button>
                   <button
                     onClick={handleDownload}
@@ -1196,12 +1299,12 @@ const fetchResumeData = useCallback(async () => {
                     title={
                       downloadRequirementsMet ? undefined : downloadRequirementMessage
                     }
-                    className={`${buttonVariants.blueSolid} ${
+                    className={`${buttonVariants.blueSolid} text-xs sm:text-sm ${
                       !downloadRequirementsMet ? disabledButtonClasses : ""
                     }`}
                   >
-                    <Download className="h-4 w-4" />
-                    {t.nav.download}
+                    <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{t.nav.download}</span>
                   </button>
                 </div>
               </div>
@@ -1429,6 +1532,41 @@ const fetchResumeData = useCallback(async () => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Languages Section */}
+                {formData.languages && formData.languages.length > 0 && (
+                  <div className="mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                      {t.preview.languages}
+                    </h2>
+                    <div className="space-y-3">
+                      {formData.languages.map((lang, index) => {
+                        const getProficiencyColor = (proficiency) => {
+                          switch (proficiency) {
+                            case 'Native':
+                              return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                            case 'Fluent':
+                              return 'bg-blue-100 text-blue-700 border-blue-200';
+                            case 'Intermediate':
+                              return 'bg-amber-100 text-amber-700 border-amber-200';
+                            case 'Basic':
+                              return 'bg-gray-100 text-gray-700 border-gray-200';
+                            default:
+                              return 'bg-gray-100 text-gray-700 border-gray-200';
+                          }
+                        };
+                        return (
+                          <div key={index} className="flex justify-between items-center py-2">
+                            <span className="font-semibold text-gray-900 text-base">{lang.language}</span>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getProficiencyColor(lang.proficiency)}`}>
+                              {lang.proficiency}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -244,6 +244,7 @@
         "skills": "Skills",
         "interests": "Interests",
         "certifications": "Certifications",
+        "languages": "Languages",
         "present": "Present",
         "graduated": "Graduated",
         "fullPageView": "Full Page View",
@@ -447,6 +448,23 @@
                     "issuerPlaceholder": "e.g., Amazon Web Services",
                     "dateObtained": "Date Obtained",
                     "dateObtainedHint": "When you received the certificate"
+                }
+            },
+            "languages": {
+                "title": "Languages",
+                "addLanguage": "Add Language",
+                "language": {
+                    "title": "Language",
+                    "language": "Language Name",
+                    "languageHint": "Language you speak",
+                    "languagePlaceholder": "e.g., English, French, Spanish",
+                    "proficiency": "Proficiency Level",
+                    "proficiencyHint": "Your level of proficiency",
+                    "selectProficiency": "Select Proficiency",
+                    "native": "Native",
+                    "fluent": "Fluent",
+                    "intermediate": "Intermediate",
+                    "basic": "Basic"
                 }
             }
         }

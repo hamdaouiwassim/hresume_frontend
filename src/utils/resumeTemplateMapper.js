@@ -101,6 +101,18 @@ export const buildResumeTemplateData = (
         .filter(Boolean)
     : [];
 
+  const languages = Array.isArray(data.languages)
+    ? data.languages
+        .map((lang) => {
+          if (typeof lang === "string") return lang;
+          if (!lang || !lang.language) return null;
+          return lang.proficiency
+            ? `${lang.language} (${lang.proficiency})`
+            : lang.language;
+        })
+        .filter(Boolean)
+    : [];
+
   return {
     name: data.full_name || data.name || "",
     tagline: data.job_title || data.tagline || "",
@@ -111,6 +123,7 @@ export const buildResumeTemplateData = (
     skills,
     certifications,
     interests,
+    languages,
   };
 };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useContext } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import {
   Camera,
@@ -24,6 +24,9 @@ import {
   ChevronRight,
   ChevronDown,
   Globe,
+  UserPlus,
+  Mail,
+  Trash2,
 } from "lucide-react";
 import { generatePDF } from "../services/PDFService";
 import { useLanguage } from "../context/LanguageContext";
@@ -32,6 +35,7 @@ import { toast } from "sonner";
 import { useParams } from "react-router-dom";
 import { getByResumeId } from "../services/resumeService";
 import { generateShareableLink, getCurrentShareableLink, deactivateShareableLink } from "../services/ShareableLinkService";
+import { inviteCollaborator, getCollaborators, removeCollaborator } from "../services/CollaborationService";
 import ShowExperience from "../components/ShowExperience";
 import NewExperience from "../components/NewExperience";
 import ShowEducation from "../components/ShowEducation";
@@ -42,13 +46,26 @@ import ShowHobby from "../components/ShowHobby";
 import NewHobby from "../components/NewHobby";
 import ShowCertificate from "../components/ShowCertificate";
 import NewCertificate from "../components/NewCertificate";
+import { AuthContext } from "../context/AuthContext";
+import axiosInstance from "../api/axiosInstance";
 import ShowLanguage from "../components/ShowLanguage";
 import NewLanguage from "../components/NewLanguage";
 import { buildResumeTemplateData } from "../utils/resumeTemplateMapper";
 import ResumeTemplatePreview from "../components/ResumeTemplatePreview";
+import { deriveTemplateLayout, TEMPLATE_LAYOUTS } from "../utils/templateStyles";
+
+const createPreviewDraftsState = () => ({
+  experiences: { edits: {}, draft: null },
+  educations: { edits: {}, draft: null },
+  skills: { edits: {}, draft: null },
+  hobbies: { edits: {}, draft: null },
+  certificates: { edits: {}, draft: null },
+  languages: { edits: {}, draft: null },
+});
 export default function EditResume() {
     // 1. Destructure the 'id' parameter from the URL
   const { id } = useParams();
+  const { user } = useContext(AuthContext);
 
   const [showNewExperience,setShowNewExperience]=useState(false);
   const [showNewEducation,setShowNewEducation]=useState(false);
@@ -63,6 +80,98 @@ export default function EditResume() {
   const [isLoadingLink, setIsLoadingLink] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState(7);
+  const [showCollaborationModal, setShowCollaborationModal] = useState(false);
+  const [collaborators, setCollaborators] = useState([]);
+  const [isLoadingCollaborators, setIsLoadingCollaborators] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [selectedSections, setSelectedSections] = useState([
+    'basic_info',
+    'experiences',
+    'educations',
+    'skills',
+    'hobbies',
+    'certificates',
+    'languages'
+  ]); // Default: all sections allowed
+  const [userPermissions, setUserPermissions] = useState(null); // null = owner (all permissions), array = allowed sections
+
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    location: "",
+    job_title: "",
+    resume_id: 1,
+    template_id: null,
+    template_layout: TEMPLATE_LAYOUTS.CLASSIC,
+    linkedin: "",
+    github: "",
+    professional_summary: "",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
+    experiences: [],
+    educations: [],
+    skills: [],
+    hobbies: [],
+    certificates: [],
+    languages: [],
+  });
+  const [previewDrafts, setPreviewDrafts] = useState(() => createPreviewDraftsState());
+
+  const resetPreviewDrafts = useCallback(() => {
+    setPreviewDrafts(createPreviewDraftsState());
+  }, []);
+
+  const updatePreviewSection = useCallback((section, draft, { isNew = false, id } = {}) => {
+    setPreviewDrafts((prev) => {
+      const currentSection = prev[section] || { edits: {}, draft: null };
+      let nextSection = currentSection;
+      if (isNew) {
+        nextSection = { ...currentSection, draft };
+      } else if (id !== undefined && id !== null) {
+        nextSection = {
+          ...currentSection,
+          edits: {
+            ...currentSection.edits,
+            [id]: draft,
+          },
+        };
+      } else {
+        return prev;
+      }
+      return {
+        ...prev,
+        [section]: nextSection,
+      };
+    });
+  }, []);
+
+  const clearPreviewSection = useCallback((section, { isNew = false, id } = {}) => {
+    setPreviewDrafts((prev) => {
+      const currentSection = prev[section] || { edits: {}, draft: null };
+      let nextSection = currentSection;
+      if (isNew) {
+        if (!currentSection.draft) {
+          return prev;
+        }
+        nextSection = { ...currentSection, draft: null };
+      } else if (id !== undefined && id !== null) {
+        if (!currentSection.edits[id]) {
+          return prev;
+        }
+        const nextEdits = { ...currentSection.edits };
+        delete nextEdits[id];
+        nextSection = { ...currentSection, edits: nextEdits };
+      } else {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [section]: nextSection,
+      };
+    });
+  }, []);
   
   // Prevent body scroll when full page preview is open
   useEffect(() => {
@@ -80,14 +189,51 @@ const fetchResumeData = useCallback(async () => {
  try {
         console.log("Resume ID from URL:", id);
         const response = await getByResumeId(id);
-        const basicInfo = response.data.data.basic_info || {};
+        const resumeRecord = response.data.data || {};
+        const basicInfo = resumeRecord.basic_info || {};
+        const templateLayout = deriveTemplateLayout(resumeRecord.template);
+        const templateId =
+          resumeRecord.template_id ||
+          resumeRecord.template?.id ||
+          null;
+
+        // Check if current user is owner or collaborator and get permissions
+        const resumeOwnerId = resumeRecord.user_id;
+        const currentUserId = user?.id;
+        
+        if (currentUserId && resumeOwnerId === currentUserId) {
+          // User is the owner - has all permissions
+          setUserPermissions(null);
+        } else {
+          // Check if user is a collaborator
+          try {
+            const collaboratorsResponse = await getCollaborators(id);
+            if (collaboratorsResponse.data.status) {
+              const currentUserCollaborator = collaboratorsResponse.data.data.find(
+                (collab) => collab.user?.id === currentUserId
+              );
+              if (currentUserCollaborator) {
+                // User is a collaborator - set their allowed sections
+                setUserPermissions(currentUserCollaborator.allowed_sections || null);
+              } else {
+                // User is not a collaborator - no permissions
+                setUserPermissions([]);
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching collaborators:", error);
+            // Default to no permissions if we can't check
+            setUserPermissions([]);
+          }
+        }
+
         const { full_name , job_title , phone, professional_summary , email , location, avatar, linkedin, github } = basicInfo;
-        const { experiences } = response.data.data;
-        const { educations } = response.data.data;
-        const { skills } = response.data.data;
-        const { hobbies } = response.data.data;
-        const { certificates } = response.data.data;
-        const { languages } = response.data.data;
+        const { experiences } = resumeRecord;
+        const { educations } = resumeRecord;
+        const { skills } = resumeRecord;
+        const { hobbies } = resumeRecord;
+        const { certificates } = resumeRecord;
+        const { languages } = resumeRecord;
          
         setFormData((prev) => ({
           ...prev,
@@ -106,12 +252,15 @@ const fetchResumeData = useCallback(async () => {
           hobbies: hobbies || [],
           certificates: certificates || [],
           languages: languages || [],
+          template_id: templateId,
+          template_layout: templateLayout || prev.template_layout,
         }));
+        resetPreviewDrafts();
 
       } catch (error) {
         console.error("Error fetching resume data:", error);
         }
-}, [id]);
+}, [id, resetPreviewDrafts, user?.id]);
   useEffect(() => {
     // Fetch resume data using the 'id' and populate formData
    fetchResumeData();
@@ -122,24 +271,6 @@ const fetchResumeData = useCallback(async () => {
   const locale = language === "fr" ? "fr-FR" : "en-US";
   const localeCode = language === "fr" ? "fr" : "en";
   const shareStrings = t?.share || {};
-  const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    phone: "",
-    location: "",
-    job_title: "",
-    resume_id: 1,
-    linkedin: "",
-    github: "",
-    professional_summary: "",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
-    experiences: [],
-    educations: [],
-    skills: [],
-    hobbies: [],
-    certificates: [],
-    languages: [],
-  });
 
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true);
@@ -177,13 +308,39 @@ const fetchResumeData = useCallback(async () => {
 
   const downloadRequirementMessage =
     "Complete your basic info and add at least one experience and one education before downloading.";
+  const verificationRequiredMessage =
+    "Please verify your email address before downloading your resume.";
+
+  const previewSourceData = useMemo(() => {
+    const mergeSection = (items = [], sectionKey) => {
+      const sectionDraft = previewDrafts[sectionKey] || { edits: {}, draft: null };
+      const merged = (items || []).map((item, idx) => {
+        const identifier = item?.id ?? `temp-${sectionKey}-${idx}`;
+        if (identifier && sectionDraft.edits[identifier]) {
+          return { ...item, ...sectionDraft.edits[identifier] };
+        }
+        return item;
+      });
+      return sectionDraft.draft ? [...merged, sectionDraft.draft] : merged;
+    };
+
+    return {
+      ...formData,
+      experiences: mergeSection(formData.experiences, "experiences"),
+      educations: mergeSection(formData.educations, "educations"),
+      skills: mergeSection(formData.skills, "skills"),
+      hobbies: mergeSection(formData.hobbies, "hobbies"),
+      certificates: mergeSection(formData.certificates, "certificates"),
+      languages: mergeSection(formData.languages, "languages"),
+    };
+  }, [formData, previewDrafts]);
 
   const resumePreviewData = useMemo(
     () =>
-      buildResumeTemplateData(formData, locale, {
+      buildResumeTemplateData(previewSourceData, locale, {
         present: t?.preview?.present,
       }),
-    [formData, locale, t?.preview?.present]
+    [previewSourceData, locale, t?.preview?.present]
   );
 
   const openSection = (section) => {
@@ -365,7 +522,108 @@ const fetchResumeData = useCallback(async () => {
     }
   };
 
+  // Collaboration functions
+  const loadCollaborators = async () => {
+    setIsLoadingCollaborators(true);
+    try {
+      const response = await getCollaborators(id);
+      if (response.data.status) {
+        setCollaborators(response.data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to load collaborators", error);
+      toast.error("Failed to load collaborators");
+    } finally {
+      setIsLoadingCollaborators(false);
+    }
+  };
+
+  const handleInviteCollaborator = async (e) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) {
+      toast.error("Please enter an email address");
+      return;
+    }
+
+    if (selectedSections.length === 0) {
+      toast.error("Please select at least one section the collaborator can edit");
+      return;
+    }
+
+    setIsInviting(true);
+    try {
+      const response = await inviteCollaborator(id, inviteEmail.trim(), selectedSections);
+      if (response.data.status) {
+        toast.success("Invitation sent successfully!");
+        setInviteEmail("");
+        setSelectedSections(['basic_info', 'experiences', 'educations', 'skills', 'hobbies', 'certificates', 'languages']); // Reset to all
+        loadCollaborators();
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to send invitation"
+      );
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  const toggleCollaborationSection = (section) => {
+    setSelectedSections(prev => 
+      prev.includes(section)
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    );
+  };
+
+  const collaborationSectionLabels = {
+    basic_info: 'Basic Info',
+    experiences: 'Experiences',
+    educations: 'Education',
+    skills: 'Skills',
+    hobbies: 'Hobbies',
+    certificates: 'Certificates',
+    languages: 'Languages'
+  };
+
+  // Check if user can edit a specific section
+  const canEditSection = (section) => {
+    // null means owner (all permissions)
+    if (userPermissions === null) {
+      return true;
+    }
+    // Empty array means no permissions
+    if (Array.isArray(userPermissions) && userPermissions.length === 0) {
+      return false;
+    }
+    // Check if section is in allowed list
+    return Array.isArray(userPermissions) && userPermissions.includes(section);
+  };
+
+  const handleRemoveCollaborator = async (collaboratorId) => {
+    if (!window.confirm("Are you sure you want to remove this collaborator?")) {
+      return;
+    }
+
+    try {
+      const response = await removeCollaborator(id, collaboratorId);
+      if (response.data.status) {
+        toast.success("Collaborator removed successfully");
+        loadCollaborators();
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to remove collaborator"
+      );
+    }
+  };
+
   const handleDownload = async () => {
+    if (!user?.email_verified_at) {
+      toast.error(verificationRequiredMessage);
+      return;
+    }
+
     if (!downloadRequirementsMet) {
       toast.error(downloadRequirementMessage);
       return;
@@ -407,8 +665,25 @@ const fetchResumeData = useCallback(async () => {
       );
     }
   };
+
+  const handleSendVerification = async () => {
+    setIsSendingVerification(true);
+    try {
+      await axiosInstance.post("/email/verification-notification");
+      toast.success(t?.auth?.verify?.resent || "Verification email sent!");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          t?.auth?.verify?.resendError ||
+          "Failed to send verification email."
+      );
+    } finally {
+      setIsSendingVerification(false);
+    }
+  };
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
 
   const validateBasicInfo = () => {
     const newErrors = {};
@@ -495,36 +770,42 @@ const fetchResumeData = useCallback(async () => {
   const handleExperienceSave = () => {
     setIsExperienceOpen(true);
     setShowNewExperience(false);
+    clearPreviewSection("experiences", { isNew: true });
     fetchResumeData();
   };
 
   const handleEducationSave = () => {
     setIsEducationOpen(true);
     setShowNewEducation(false);
+    clearPreviewSection("educations", { isNew: true });
     fetchResumeData();
   };
 
   const handleSkillSave = () => {
     setIsSkillsOpen(true);
     setShowNewSkill(false);
+    clearPreviewSection("skills", { isNew: true });
     fetchResumeData();
   };
 
   const handleHobbySave = () => {
     setIsHobbiesOpen(true);
     setShowNewHobby(false);
+    clearPreviewSection("hobbies", { isNew: true });
     fetchResumeData();
   };
 
   const handleCertificateSave = () => {
     setIsCertificatesOpen(true);
     setShowNewCertificate(false);
+    clearPreviewSection("certificates", { isNew: true });
     fetchResumeData();
   };
 
   const handleLanguageSave = () => {
     setIsLanguagesOpen(true);
     setShowNewLanguage(false);
+    clearPreviewSection("languages", { isNew: true });
     fetchResumeData();
   };
 
@@ -648,15 +929,15 @@ const fetchResumeData = useCallback(async () => {
     }`;
 
   const buttonBase =
-    "inline-flex items-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 text-xs sm:text-sm";
+    "inline-flex items-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
   const buttonVariants = {
-    primary: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl focus:ring-blue-500 focus:ring-offset-white`,
-    secondary: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 bg-white text-slate-800 border border-slate-200 hover:border-slate-300 hover:bg-white focus:ring-slate-400 focus:ring-offset-white`,
-    outline: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 border border-slate-300 text-slate-600 bg-white hover:bg-slate-50 focus:ring-slate-400 focus:ring-offset-white`,
-    muted: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-400 focus:ring-offset-white`,
-    purple: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 border border-purple-300 text-purple-700 bg-white hover:bg-purple-50 focus:ring-purple-300 focus:ring-offset-white`,
-    blueSolid: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 bg-blue-600 text-white shadow-lg hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-white`,
-    danger: `${buttonBase} px-3 py-2 sm:px-4 sm:py-2.5 border border-red-200 text-red-600 bg-white hover:border-red-300 focus:ring-red-400 focus:ring-offset-white`,
+    primary: `${buttonBase} px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl focus:ring-blue-500 focus:ring-offset-white`,
+    secondary: `${buttonBase} px-4 py-2.5 bg-white text-slate-800 border border-slate-200 hover:border-slate-300 hover:bg-white focus:ring-slate-400 focus:ring-offset-white`,
+    outline: `${buttonBase} px-4 py-2.5 border border-slate-300 text-slate-600 bg-white hover:bg-slate-50 focus:ring-slate-400 focus:ring-offset-white`,
+    muted: `${buttonBase} px-4 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-400 focus:ring-offset-white`,
+    purple: `${buttonBase} px-4 py-2.5 border border-purple-300 text-purple-700 bg-white hover:bg-purple-50 focus:ring-purple-300 focus:ring-offset-white`,
+    blueSolid: `${buttonBase} px-4 py-2.5 bg-blue-600 text-white shadow-lg hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-white`,
+    danger: `${buttonBase} px-4 py-2.5 border border-red-200 text-red-600 bg-white hover:border-red-300 focus:ring-red-400 focus:ring-offset-white`,
   };
   const disabledButtonClasses = "opacity-50 cursor-not-allowed pointer-events-none";
 
@@ -666,6 +947,31 @@ const fetchResumeData = useCallback(async () => {
     <AuthLayout>
       <div className="min-h-screen bg-slate-50 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          {!user?.email_verified_at && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-amber-50 border border-amber-200 text-amber-900 px-5 py-4 rounded-2xl shadow-sm">
+              <div>
+                <p className="text-sm font-semibold">
+                  {t?.auth?.verify?.title || "Verify your email"}
+                </p>
+                <p className="text-sm text-amber-800">
+                  {t?.auth?.verify?.subtitle ||
+                    "Please verify your email address before downloading your resume."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSendVerification}
+                disabled={isSendingVerification}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-white text-sm font-semibold shadow hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSendingVerification && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                {t?.auth?.verify?.resend || "Resend verification email"}
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left Panel - CV Form */}
           <div className="p-3 bg-white/90 backdrop-blur-sm border border-slate-100 shadow-xl rounded-3xl overflow-hidden self-start">
@@ -736,7 +1042,10 @@ const fetchResumeData = useCallback(async () => {
                             name="full_name"
                             value={formData.full_name}
                             onChange={handleChange}
-                            className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5"
+                            disabled={!canEditSection('basic_info')}
+                            className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5 ${
+                              !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
                             placeholder={t.dashboard.sections.personalInfo.fullNamePlaceholder}
                           />
                         </div>
@@ -760,7 +1069,10 @@ const fetchResumeData = useCallback(async () => {
                             name="job_title"
                             value={formData.job_title}
                             onChange={handleChange}
-                            className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5"
+                            disabled={!canEditSection('basic_info')}
+                            className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5 ${
+                              !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
                             placeholder={t.dashboard.sections.personalInfo.jobTitlePlaceholder}
                           />
                         </div>
@@ -779,7 +1091,10 @@ const fetchResumeData = useCallback(async () => {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5"
+                            disabled={!canEditSection('basic_info')}
+                            className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5 ${
+                              !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
                             placeholder={t.dashboard.sections.personalInfo.emailPlaceholder}
                           />
                         </div>
@@ -798,7 +1113,10 @@ const fetchResumeData = useCallback(async () => {
                             name="phone"
                             value={formData.phone}
                             onChange={handleChange}
-                            className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5"
+                            disabled={!canEditSection('basic_info')}
+                            className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5 ${
+                              !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
                             placeholder={t.dashboard.sections.personalInfo.phonePlaceholder}
                           />
                         </div>
@@ -817,7 +1135,10 @@ const fetchResumeData = useCallback(async () => {
                             name="location"
                             value={formData.location}
                             onChange={handleChange}
-                            className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5"
+                            disabled={!canEditSection('basic_info')}
+                            className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5 ${
+                              !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
                             placeholder={t.dashboard.sections.personalInfo.locationPlaceholder}
                           />
                         </div>
@@ -835,7 +1156,10 @@ const fetchResumeData = useCallback(async () => {
                           rows={4}
                           value={formData.professional_summary}
                           onChange={handleChange}
-                          className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm p-4"
+                          disabled={!canEditSection('basic_info')}
+                          className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm p-4 ${
+                            !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                          }`}
                           placeholder={t.dashboard.sections.personalInfo.summaryPlaceholder}
                         />
                       </div>
@@ -843,9 +1167,9 @@ const fetchResumeData = useCallback(async () => {
                     <div className="flex justify-end pt-4">
                       <button
                         type="submit"
-                        disabled={hasValidationErrors() || isLoading}
+                        disabled={hasValidationErrors() || isLoading || !canEditSection('basic_info')}
                         className={`${buttonVariants.primary} ${
-                          hasValidationErrors() || isLoading ? disabledButtonClasses : ""
+                          hasValidationErrors() || isLoading || !canEditSection('basic_info') ? disabledButtonClasses : ""
                         }`}
                       >
                         {isLoading ? (
@@ -866,6 +1190,7 @@ const fetchResumeData = useCallback(async () => {
               </div>
 
               {/* Experience Section */}
+              {canEditSection('experiences') && (
               <div className={getAccordionClasses("experience", isExperienceOpen)}>
                 <button
                   type="button"
@@ -909,26 +1234,39 @@ const fetchResumeData = useCallback(async () => {
                     {showNewExperience && (
                       <NewExperience
                         index={formData.experiences.length}
-                        hide={() => setShowNewExperience(false)}
+                        hide={() => {
+                          setShowNewExperience(false);
+                          clearPreviewSection("experiences", { isNew: true });
+                        }}
                         resumeId={id}
                         onSave={handleExperienceSave}
+                        onPreviewChange={(draft) => updatePreviewSection("experiences", draft, { isNew: true })}
+                        onPreviewClear={() => clearPreviewSection("experiences", { isNew: true })}
                       />
                     )}
 
-                    {formData.experiences.map((exp, index) => (
-                      <ShowExperience
-                        key={exp.id || index}
-                        exp={exp}
-                        index={index}
-                        hide={() => setShowNewExperience(false)}
-                        resumeId={id}
-                        onSave={handleExperienceSave}
-                        onDelete={handleExperienceSave}
-                      />
-                    ))}
+                    {formData.experiences.map((exp, index) => {
+                      const experiencePreviewId = exp.id ?? `experience-${index}`;
+                      return (
+                        <ShowExperience
+                          key={experiencePreviewId}
+                          exp={exp}
+                          index={index}
+                          hide={() => setShowNewExperience(false)}
+                          resumeId={id}
+                          onSave={handleExperienceSave}
+                          onDelete={handleExperienceSave}
+                          onPreviewChange={(draft) =>
+                            updatePreviewSection("experiences", draft, { id: experiencePreviewId })
+                          }
+                          onPreviewClear={() => clearPreviewSection("experiences", { id: experiencePreviewId })}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Education Section */}
               <div className={getAccordionClasses("education", isEducationOpen)}>
@@ -974,30 +1312,42 @@ const fetchResumeData = useCallback(async () => {
                     {showNewEducation && (
                       <NewEducation
                         index={formData.educations ? formData.educations.length : 0}
-                        hide={() => setShowNewEducation(false)}
+                        hide={() => {
+                          setShowNewEducation(false);
+                          clearPreviewSection("educations", { isNew: true });
+                        }}
                         resumeId={id}
                         onSave={handleEducationSave}
+                        onPreviewChange={(draft) => updatePreviewSection("educations", draft, { isNew: true })}
+                        onPreviewClear={() => clearPreviewSection("educations", { isNew: true })}
                       />
                     )}
 
-                    {formData.educations.map((exp, index) => (
-                      <ShowEducation
-                        key={exp.id || index}
-                        exp={exp}
-                        index={index}
-                        hide={() => setShowNewEducation(false)}
-                        resumeId={id}
-                        onSave={handleEducationSave}
-                        onDelete={handleEducationSave}
-                      />
-                    ))}
+                    {formData.educations.map((exp, index) => {
+                      const educationPreviewId = exp.id ?? `education-${index}`;
+                      return (
+                        <ShowEducation
+                          key={educationPreviewId}
+                          exp={exp}
+                          index={index}
+                          hide={() => setShowNewEducation(false)}
+                          resumeId={id}
+                          onSave={handleEducationSave}
+                          onDelete={handleEducationSave}
+                          onPreviewChange={(draft) =>
+                            updatePreviewSection("educations", draft, { id: educationPreviewId })
+                          }
+                          onPreviewClear={() => clearPreviewSection("educations", { id: educationPreviewId })}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               </div>
-
-            
+              
 
               {/* Skills Section */}
+              {canEditSection('skills') && (
               <div className={getAccordionClasses("skills", isSkillsOpen)}>
                 <button
                   type="button"
@@ -1041,29 +1391,44 @@ const fetchResumeData = useCallback(async () => {
                     {showNewSkill && (
                       <NewSkill
                         index={formData.skills ? formData.skills.length : 0}
-                        hide={() => setShowNewSkill(false)}
+                        hide={() => {
+                          setShowNewSkill(false);
+                          clearPreviewSection("skills", { isNew: true });
+                        }}
                         resumeId={id}
                         onSave={handleSkillSave}
+                        onPreviewChange={(draft) => updatePreviewSection("skills", draft, { isNew: true })}
+                        onPreviewClear={() => clearPreviewSection("skills", { isNew: true })}
                       />
                     )}
 
                     {formData.skills &&
-                      formData.skills.map((skill, index) => (
-                        <ShowSkill
-                          key={skill.id || index}
-                          skill={skill}
-                          index={index}
-                          hide={() => setShowNewSkill(false)}
-                          resumeId={id}
-                          onSave={handleSkillSave}
-                          onDelete={handleSkillSave}
-                        />
-                      ))}
+                      formData.skills.map((skill, index) => {
+                        const skillPreviewId = skill.id ?? `skill-${index}`;
+                        return (
+                          <ShowSkill
+                            key={skillPreviewId}
+                            skill={skill}
+                            index={index}
+                            hide={() => setShowNewSkill(false)}
+                            resumeId={id}
+                            onSave={handleSkillSave}
+                            onDelete={handleSkillSave}
+                            onPreviewChange={(draft) =>
+                              updatePreviewSection("skills", draft, { id: skillPreviewId })
+                            }
+                            onPreviewClear={() => clearPreviewSection("skills", { id: skillPreviewId })}
+                          />
+                        );
+                      })}
+                      
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Hobbies Section */}
+              {canEditSection('hobbies') && (
               <div className={getAccordionClasses("hobbies", isHobbiesOpen)}>
                 <button
                   type="button"
@@ -1109,29 +1474,43 @@ const fetchResumeData = useCallback(async () => {
                     {showNewHobby && (
                       <NewHobby
                         index={formData.hobbies ? formData.hobbies.length : 0}
-                        hide={() => setShowNewHobby(false)}
+                        hide={() => {
+                          setShowNewHobby(false);
+                          clearPreviewSection("hobbies", { isNew: true });
+                        }}
                         resumeId={id}
                         onSave={handleHobbySave}
+                        onPreviewChange={(draft) => updatePreviewSection("hobbies", draft, { isNew: true })}
+                        onPreviewClear={() => clearPreviewSection("hobbies", { isNew: true })}
                       />
                     )}
 
                     {formData.hobbies &&
-                      formData.hobbies.map((hobby, index) => (
-                        <ShowHobby
-                          key={hobby.id || index}
-                          hobby={hobby}
-                          index={index}
-                          hide={() => setShowNewHobby(false)}
-                          resumeId={id}
-                          onSave={handleHobbySave}
-                          onDelete={handleHobbySave}
-                        />
-                      ))}
+                      formData.hobbies.map((hobby, index) => {
+                        const hobbyPreviewId = hobby.id ?? `hobby-${index}`;
+                        return (
+                          <ShowHobby
+                            key={hobbyPreviewId}
+                            hobby={hobby}
+                            index={index}
+                            hide={() => setShowNewHobby(false)}
+                            resumeId={id}
+                            onSave={handleHobbySave}
+                            onDelete={handleHobbySave}
+                            onPreviewChange={(draft) =>
+                              updatePreviewSection("hobbies", draft, { id: hobbyPreviewId })
+                            }
+                            onPreviewClear={() => clearPreviewSection("hobbies", { id: hobbyPreviewId })}
+                          />
+                        );
+                      })}
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Certificates Section */}
+              {canEditSection('certificates') && (
               <div className={getAccordionClasses("certificates", isCertificatesOpen)}>
                 <button
                   type="button"
@@ -1175,29 +1554,45 @@ const fetchResumeData = useCallback(async () => {
                     {showNewCertificate && (
                       <NewCertificate
                         index={formData.certificates ? formData.certificates.length : 0}
-                        hide={() => setShowNewCertificate(false)}
+                        hide={() => {
+                          setShowNewCertificate(false);
+                          clearPreviewSection("certificates", { isNew: true });
+                        }}
                         resumeId={id}
                         onSave={handleCertificateSave}
+                        onPreviewChange={(draft) => updatePreviewSection("certificates", draft, { isNew: true })}
+                        onPreviewClear={() => clearPreviewSection("certificates", { isNew: true })}
                       />
                     )}
 
                     {formData.certificates &&
-                      formData.certificates.map((certificate, index) => (
-                        <ShowCertificate
-                          key={certificate.id || index}
-                          certificate={certificate}
-                          index={index}
-                          hide={() => setShowNewCertificate(false)}
-                          resumeId={id}
-                          onSave={handleCertificateSave}
-                          onDelete={handleCertificateSave}
-                        />
-                      ))}
+                      formData.certificates.map((certificate, index) => {
+                        const certificatePreviewId = certificate.id ?? `certificate-${index}`;
+                        return (
+                          <ShowCertificate
+                            key={certificatePreviewId}
+                            certificate={certificate}
+                            index={index}
+                            hide={() => setShowNewCertificate(false)}
+                            resumeId={id}
+                            onSave={handleCertificateSave}
+                            onDelete={handleCertificateSave}
+                            onPreviewChange={(draft) =>
+                              updatePreviewSection("certificates", draft, { id: certificatePreviewId })
+                            }
+                            onPreviewClear={() =>
+                              clearPreviewSection("certificates", { id: certificatePreviewId })
+                            }
+                          />
+                        );
+                      })}
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Languages Section */}
+              {canEditSection('languages') && (
               <div className={getAccordionClasses("languages", isLanguagesOpen)}>
                 <button
                   type="button"
@@ -1241,29 +1636,40 @@ const fetchResumeData = useCallback(async () => {
                     {showNewLanguage && (
                       <NewLanguage
                         index={formData.languages ? formData.languages.length : 0}
-                        hide={() => setShowNewLanguage(false)}
+                        hide={() => {
+                          setShowNewLanguage(false);
+                          clearPreviewSection("languages", { isNew: true });
+                        }}
                         resumeId={id}
                         onSave={handleLanguageSave}
+                        onPreviewChange={(draft) => updatePreviewSection("languages", draft, { isNew: true })}
+                        onPreviewClear={() => clearPreviewSection("languages", { isNew: true })}
                       />
                     )}
 
                     {formData.languages &&
-                      formData.languages.map((language, index) => (
-                        <ShowLanguage
-                          key={language.id || index}
-                          lang={language}
-                          index={index}
-                          hide={() => setShowNewLanguage(false)}
-                          resumeId={id}
-                          onSave={handleLanguageSave}
-                          onDelete={handleLanguageSave}
-                        />
-                      ))}
+                      formData.languages.map((language, index) => {
+                        const languagePreviewId = language.id ?? `language-${index}`;
+                        return (
+                          <ShowLanguage
+                            key={languagePreviewId}
+                            lang={language}
+                            index={index}
+                            hide={() => setShowNewLanguage(false)}
+                            resumeId={id}
+                            onSave={handleLanguageSave}
+                            onDelete={handleLanguageSave}
+                            onPreviewChange={(draft) =>
+                              updatePreviewSection("languages", draft, { id: languagePreviewId })
+                            }
+                            onPreviewClear={() => clearPreviewSection("languages", { id: languagePreviewId })}
+                          />
+                        );
+                      })}
                   </div>
                 </div>
               </div>
-
-              
+              )}
             </form>
           </div>
 
@@ -1273,10 +1679,10 @@ const fetchResumeData = useCallback(async () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 
-                <div className="flex items-center space-x-1 sm:space-x-2 flex-wrap gap-1 sm:gap-0">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   <button
                     onClick={() => setIsFullPagePreview(true)}
-                    className={`${buttonVariants.outline} text-xs sm:text-sm`}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5`}
                     title="Full page preview"
                   >
                     <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -1287,11 +1693,22 @@ const fetchResumeData = useCallback(async () => {
                       setShowShareModal(true);
                       loadShareableLink();
                     }}
-                    className={`${buttonVariants.purple} text-xs sm:text-sm`}
+                    className={`${buttonVariants.purple} text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5`}
                     title={shareStrings.buttonTitle || "Share CV"}
                   >
                     <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">{shareStrings.button || "Share"}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowCollaborationModal(true);
+                      loadCollaborators();
+                    }}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5 border-blue-300 text-blue-700 hover:bg-blue-50`}
+                    title="Share for editing"
+                  >
+                    <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Collaborate</span>
                   </button>
                   <button
                     onClick={handleDownload}
@@ -1299,279 +1716,19 @@ const fetchResumeData = useCallback(async () => {
                     title={
                       downloadRequirementsMet ? undefined : downloadRequirementMessage
                     }
-                    className={`${buttonVariants.blueSolid} text-xs sm:text-sm ${
+                    className={`${buttonVariants.blueSolid} ${
                       !downloadRequirementsMet ? disabledButtonClasses : ""
-                    }`}
+                    } text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5`}
                   >
                     <Download className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">{t.nav.download}</span>
                   </button>
                 </div>
               </div>
-            <ResumeTemplatePreview resume={resumePreviewData} />
-
-            {false && (
-            <div className="bg-white rounded-lg p-8 print:bg-white" data-cv-preview="true">
-                {/* Header Section */}
-                <div className="mb-8 pb-6 border-b-2 border-gray-200">
-                  <div className="flex items-start justify-between gap-6">
-                    <div className="flex-1">
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {formData.full_name || t.preview.yourName}
-                  </h1>
-                      <p className="text-lg text-gray-600 mb-4">
-                    {formData.job_title || t.preview.professionalTitle}
-                  </p>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                        {formData.email && (
-                          <span className="flex items-center">
-                            <span className="mr-1">📧</span>
-                            {formData.email}
-                          </span>
-                        )}
-                        {formData.phone && (
-                          <span className="flex items-center">
-                            <span className="mr-1">📱</span>
-                            {formData.phone}
-                          </span>
-                        )}
-                    {formData.location && (
-                          <span className="flex items-center">
-                            <span className="mr-1">📍</span>
-                            {formData.location}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {formData.avatar && (
-                      <img
-                        src={formData.avatar}
-                        alt="Profile"
-                        className="h-28 w-28 rounded-full object-cover border-2 border-gray-200 shadow-lg flex-shrink-0"
-                        style={{ border: '2px solid #e5e7eb' }}
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Professional Summary Section */}
-                {formData.professional_summary && (
-                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-3">
-                      {t.preview.professionalSummary}
-                    </h2>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                      {formData.professional_summary}
-                    </p>
-                  </div>
-                )}
-
-                
-
-                {/* Work Experience Section */}
-                {formData.experiences.length > 0 && (
-                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                      {t.preview.workExperience}
-                    </h2>
-                    <div className="space-y-6">
-                      {formData.experiences.map((exp, index) => (
-                        <div key={index} className="space-y-4">
-                          <div className="flex justify-between items-start flex-wrap gap-2">
-                            <div>
-                              <h3 className="font-semibold text-gray-900 text-lg">
-                              {exp.position}
-                            </h3>
-                              <p className="text-gray-600 font-medium">{exp.company}</p>
-                          </div>
-                            <p className="text-gray-500 text-sm whitespace-nowrap">
-                            {exp.startDate &&
-                              new Date(exp.startDate).toLocaleDateString(
-                                language === "fr" ? "fr-FR" : "en-US",
-                                  { month: "short", year: "numeric" }
-                              )}
-                            {exp.startDate && exp.endDate && " - "}
-                              {exp.endDate
-                                ? new Date(exp.endDate).toLocaleDateString(
-                                language === "fr" ? "fr-FR" : "en-US",
-                                    { month: "short", year: "numeric" }
-                                  )
-                                : exp.startDate && t.preview.present}
-                          </p>
-                          </div>
-                          {exp.description && (
-                            <div className="text-gray-700 text-sm leading-relaxed pl-4 border-l-2 border-gray-200">
-                              {exp.description.split("\n").map((item, i) => (
-                                item.trim() && (
-                                  <div key={i} className="mb-1">
-                                    • {item.trim()}
-                                </div>
-                                )
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Education Section */}
-                {formData.educations.length > 0 && (
-                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                      {t.preview.education}
-                    </h2>
-                    <div className="space-y-5">
-                      {formData.educations.map((edu, index) => (
-                        <div key={index} className="space-y-1">
-                          <div className="flex justify-between items-start flex-wrap gap-2">
-                            <div>
-                              <h3 className="font-semibold text-gray-900 text-lg">
-                                {edu.degree}
-                            </h3>
-                              <p className="text-gray-600">{edu.institution}</p>
-                          </div>
-                            <p className="text-gray-500 text-sm whitespace-nowrap">
-                            {edu.start_date &&
-                              new Date(edu.start_date).toLocaleDateString(
-                                language === "fr" ? "fr-FR" : "en-US",
-                                  { month: "short", year: "numeric" }
-                              )}
-                            {edu.start_date && edu.end_date && " - "}
-                              {edu.end_date
-                                ? new Date(edu.end_date).toLocaleDateString(
-                                language === "fr" ? "fr-FR" : "en-US",
-                                    { month: "short", year: "numeric" }
-                                  )
-                                : edu.start_date && t.preview.present}
-                          </p>
-                          </div>
-                          {edu.description && (
-                            <p className="text-gray-700 text-sm leading-relaxed mt-2">
-                              {edu.description}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Skills Section */}
-                {formData.skills.length > 0 && (
-                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                      {t.preview.skills}
-                    </h2>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.skills.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-gray-100 text-gray-800 rounded-md text-sm font-medium"
-                          style={{ backgroundColor: '#f3f4f6', color: '#1f2937' }}
-                        >
-                                {skill.name}
-                          {skill.proficiency && (
-                            <span className="text-gray-500 ml-1" style={{ color: '#6b7280' }}>
-                              ({skill.proficiency})
-                            </span>
-                          )}
-                              </span>
-                            ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Hobbies Section */}
-                {formData.hobbies.length > 0 && (
-                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                      {t.preview.interests}
-                    </h2>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.hobbies.map((hobby, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-gray-100 text-gray-800 rounded-md text-sm font-medium"
-                          style={{ backgroundColor: '#f3f4f6', color: '#1f2937' }}
-                        >
-                            {hobby.name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Certificates Section */}
-                {formData.certificates.length > 0 && (
-                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                      {t.preview.certifications}
-                    </h2>
-                    <div className="space-y-4">
-                      {formData.certificates.map((cert, index) => (
-                        <div key={index} className="space-y-1">
-                          <div className="flex justify-between items-start flex-wrap gap-2">
-                            <div>
-                              <h3 className="font-semibold text-gray-900 text-lg">
-                              {cert.name}
-                            </h3>
-                              {cert.issuer && (
-                                <p className="text-gray-600 text-sm">{cert.issuer}</p>
-                              )}
-                          </div>
-                            {cert.date_obtained && (
-                              <p className="text-gray-500 text-sm whitespace-nowrap">
-                                {new Date(cert.date_obtained).toLocaleDateString(
-                                language === "fr" ? "fr-FR" : "en-US",
-                                  { month: "short", year: "numeric" }
-                                )}
-                            </p>
-                          )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Languages Section */}
-                {formData.languages && formData.languages.length > 0 && (
-                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                      {t.preview.languages}
-                    </h2>
-                    <div className="space-y-3">
-                      {formData.languages.map((lang, index) => {
-                        const getProficiencyColor = (proficiency) => {
-                          switch (proficiency) {
-                            case 'Native':
-                              return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-                            case 'Fluent':
-                              return 'bg-blue-100 text-blue-700 border-blue-200';
-                            case 'Intermediate':
-                              return 'bg-amber-100 text-amber-700 border-amber-200';
-                            case 'Basic':
-                              return 'bg-gray-100 text-gray-700 border-gray-200';
-                            default:
-                              return 'bg-gray-100 text-gray-700 border-gray-200';
-                          }
-                        };
-                        return (
-                          <div key={index} className="flex justify-between items-center py-2">
-                            <span className="font-semibold text-gray-900 text-base">{lang.language}</span>
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getProficiencyColor(lang.proficiency)}`}>
-                              {lang.proficiency}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            <ResumeTemplatePreview
+              resume={resumePreviewData}
+              templateKey={formData.template_layout}
+            />
             </div>
             </div>
           </div>
@@ -1593,11 +1750,11 @@ const fetchResumeData = useCallback(async () => {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  {t.nav.preview} - {t.preview.fullPageView}
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+                <h2 className="text-lg sm:text-2xl font-semibold text-gray-900">
+                  <span className="hidden sm:inline">{t.nav.preview} - </span>{t.preview.fullPageView}
                 </h2>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   <button
                     onClick={handleDownload}
                     disabled={!downloadRequirementsMet}
@@ -1606,17 +1763,17 @@ const fetchResumeData = useCallback(async () => {
                     }
                     className={`${buttonVariants.blueSolid} ${
                       !downloadRequirementsMet ? disabledButtonClasses : ""
-                    }`}
+                    } text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5`}
                   >
-                    <Download className="h-4 w-4" />
-                    {t.nav.download}
+                    <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{t.nav.download}</span>
                   </button>
                   <button
                     onClick={() => setIsFullPagePreview(false)}
-                    className={`${buttonBase} p-2 text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 focus:ring-slate-300 focus:ring-offset-white`}
+                    className={`${buttonBase} p-1.5 sm:p-2 text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 focus:ring-slate-300 focus:ring-offset-white`}
                     title="Close"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                 </div>
               </div>
@@ -1627,7 +1784,10 @@ const fetchResumeData = useCallback(async () => {
                   className="bg-white rounded-lg mx-auto"
                   style={{ width: '210mm', minHeight: '297mm' }}
                 >
-                  <ResumeTemplatePreview resume={resumePreviewData} />
+                  <ResumeTemplatePreview
+                    resume={resumePreviewData}
+                    templateKey={formData.template_layout}
+                  />
                 </div>
               </div>
             </div>
@@ -1786,6 +1946,181 @@ const fetchResumeData = useCallback(async () => {
                     )}
                   </>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Collaboration Modal */}
+      {showCollaborationModal && (
+        <div 
+          className="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-75"
+          onClick={() => setShowCollaborationModal(false)}
+        >
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div 
+              className="relative bg-white rounded-lg shadow-xl w-full max-w-md my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <UserPlus className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Share for Editing
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setShowCollaborationModal(false)}
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+                  title="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6">
+                <p className="text-gray-600 mb-4 text-sm">
+                  Invite someone to collaborate on this resume. Select which sections they can edit.
+                </p>
+
+                {/* Verification Warning */}
+                {!user?.email_verified_at && (
+                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-sm text-amber-800">
+                      <ShieldCheck className="h-4 w-4 inline mr-1" />
+                      Please verify your email address before inviting collaborators to your resume.
+                    </p>
+                  </div>
+                )}
+
+                {/* Invite Form */}
+                <form onSubmit={handleInviteCollaborator} className="mb-6">
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="Enter email address"
+                      className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        !user?.email_verified_at ? disabledButtonClasses : ""
+                      }`}
+                      required
+                      disabled={!user?.email_verified_at}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sections They Can Edit
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      {Object.entries(collaborationSectionLabels).map(([key, label]) => (
+                        <label
+                          key={key}
+                          className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedSections.includes(key)}
+                            onChange={() => toggleCollaborationSection(key)}
+                            disabled={!user?.email_verified_at}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <span className="text-sm text-gray-700">{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {selectedSections.length === 0 && (
+                      <p className="text-xs text-red-600 mt-1">Please select at least one section</p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isInviting || !user?.email_verified_at || selectedSections.length === 0}
+                    className={`${buttonVariants.primary} w-full px-4 py-2 ${
+                      isInviting || !user?.email_verified_at || selectedSections.length === 0 ? disabledButtonClasses : ""
+                    }`}
+                    title={!user?.email_verified_at ? "Please verify your email address to invite collaborators" : ""}
+                  >
+                    {isInviting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="ml-2">Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="h-4 w-4" />
+                        <span className="ml-2">Send Invitation</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Collaborators List */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">
+                    Collaborators ({collaborators.length})
+                  </h3>
+                  {isLoadingCollaborators ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    </div>
+                  ) : collaborators.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-4">
+                      No collaborators yet. Invite someone to get started!
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {collaborators.map((collaborator) => (
+                        <div
+                          key={collaborator.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <Mail className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900">
+                                {collaborator.user?.name || collaborator.invited_email}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {collaborator.accepted_at 
+                                  ? `Joined ${new Date(collaborator.accepted_at).toLocaleDateString()}`
+                                  : "Pending invitation"
+                                }
+                              </p>
+                              {collaborator.allowed_sections && collaborator.allowed_sections.length > 0 && (
+                                <p className="text-xs text-blue-600 mt-1">
+                                  Can edit: {collaborator.allowed_sections.map(s => collaborationSectionLabels[s] || s).join(', ')}
+                                </p>
+                              )}
+                              {(!collaborator.allowed_sections || collaborator.allowed_sections.length === 0) && collaborator.accepted_at && (
+                                <p className="text-xs text-gray-400 mt-1">All sections</p>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleRemoveCollaborator(collaborator.id)}
+                            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                            title="Remove collaborator"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

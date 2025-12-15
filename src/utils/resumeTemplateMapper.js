@@ -21,6 +21,12 @@ export const buildResumeTemplateData = (
   locale = "en-US",
   labels = {}
 ) => {
+  const templateLayout =
+    data.template_layout && typeof data.template_layout === "string"
+      ? data.template_layout
+      : "classic";
+  const templateId = data.template_id || null;
+
   const presentLabel =
     labels.present || (locale.startsWith("fr") ? "En cours" : "Present");
   const contact = {
@@ -116,6 +122,8 @@ export const buildResumeTemplateData = (
   return {
     name: data.full_name || data.name || "",
     tagline: data.job_title || data.tagline || "",
+    template_layout: templateLayout,
+    template_id: templateId,
     contact,
     summary: data.professional_summary || data.summary || "",
     experience,

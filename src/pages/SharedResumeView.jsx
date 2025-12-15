@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useLanguage } from "../context/LanguageContext";
 import { buildResumeTemplateData } from "../utils/resumeTemplateMapper";
 import ResumeTemplatePreview from "../components/ResumeTemplatePreview";
+import { deriveTemplateLayout } from "../utils/templateStyles";
 
 export default function SharedResumeView() {
   const { token } = useParams();
@@ -86,9 +87,14 @@ export default function SharedResumeView() {
       skills: [],
       hobbies: [],
       certificates: [],
+      template_layout: "classic",
+      template_id: null,
     };
     
     const basicInfo = resume.basic_info || {};
+    const templateLayout = deriveTemplateLayout(resume.template);
+    const templateId = resume.template_id || resume.template?.id || null;
+
     return {
       full_name: basicInfo.full_name || "",
       email: basicInfo.email || "",
@@ -104,6 +110,8 @@ export default function SharedResumeView() {
       skills: resume.skills || [],
       hobbies: resume.hobbies || [],
       certificates: resume.certificates || [],
+      template_layout: templateLayout,
+      template_id: templateId,
     };
   };
 
@@ -167,7 +175,10 @@ export default function SharedResumeView() {
 
         {/* CV Preview */}
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <ResumeTemplatePreview resume={previewData} />
+          <ResumeTemplatePreview
+            resume={previewData}
+            templateKey={formData.template_layout}
+          />
         </div>
       </div>
     </div>

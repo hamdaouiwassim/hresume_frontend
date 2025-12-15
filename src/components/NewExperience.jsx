@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Experience } from "../Models/Experience";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -15,7 +15,7 @@ export default function NewExperience({exp = {
         startDate : null,
         endDate : null,
         position : ""
-    } ,index = null  , hide , resumeId , edit=false , onSave}) {
+    } ,index = null  , hide , resumeId , edit=false , onSave, onPreviewChange, onPreviewClear}) {
 const { t } = useLanguage();
 const [errors,setErrors]=useState({});
 const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +54,7 @@ const handleStoreExperience = async () => {
     let data = {...experience , resume_id : resumeId }
     try{
     const response = await storeExperience(data);
-    hide()
+    closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
     }catch(error) {
@@ -78,7 +78,7 @@ const handleUpdateExperience = async () => {
 let data = {...experience }
     try{
     const response = await updateExperience(data,exp.id);
-    hide()
+    closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
     }catch(error) {
@@ -93,6 +93,31 @@ let data = {...experience }
 }
     const [experience,setExperience] = useState(exp);
 
+    const previewChangeRef = useRef(onPreviewChange);
+    useEffect(() => {
+      previewChangeRef.current = onPreviewChange;
+    }, [onPreviewChange]);
+
+    useEffect(() => {
+      previewChangeRef.current?.(experience);
+    }, [experience]);
+
+    const previewClearRef = useRef(onPreviewClear);
+    useEffect(() => {
+      previewClearRef.current = onPreviewClear;
+    }, [onPreviewClear]);
+
+    useEffect(() => {
+      return () => {
+        previewClearRef.current?.();
+      };
+    }, []);
+
+    const closeForm = () => {
+      previewClearRef.current?.();
+      hide && hide();
+    };
+
     return (
             <div
                       key={index}
@@ -104,7 +129,7 @@ let data = {...experience }
                         </h4>
                         <button
                           type="button"
-                          onClick={hide}
+                          onClick={closeForm}
                           className={`${buttonVariants.danger} p-2`}
                           title="Cancel"
                         >

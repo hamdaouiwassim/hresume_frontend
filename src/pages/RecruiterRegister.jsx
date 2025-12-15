@@ -60,7 +60,7 @@ export default function RecruiterRegister() {
     return <Navigate to="/recruiter/resumes" replace />;
   }
   if (user) {
-    return <Navigate to="/verify-email" replace />;
+    return <Navigate to="/resumes" replace />;
   }
 
   const handleChange = (e) => {
@@ -150,10 +150,7 @@ export default function RecruiterRegister() {
       toast.success(
         "Please verify your email. We'll notify you once an admin activates your recruiter access."
       );
-      navigate("/verify-email", {
-        replace: true,
-        state: { email: registeredUser.email, from: "recruiter" },
-      });
+      navigate("/resumes", { replace: true });
     } catch (error) {
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);

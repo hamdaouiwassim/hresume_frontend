@@ -1,8 +1,8 @@
 import { useContext, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import GuestLayout from "../Layouts/GuestLayout";
-import { UserCheck, Lock, Mail, ArrowLeft, Loader2 } from 'lucide-react';
-import { register } from '../services/authService';
+import { UserCheck, Lock, Mail, ArrowLeft, Loader2, Chrome } from 'lucide-react';
+import { register, getGoogleAuthUrl } from '../services/authService';
 import { toast } from 'sonner';
 import { AuthContext } from '../context/AuthContext';
 
@@ -16,6 +16,7 @@ export default function Register() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const navigate = useNavigate();
   const handleChange = (e) => {
@@ -27,8 +28,7 @@ export default function Register() {
   };
 const { user, setUser } = useContext(AuthContext);
 
-  if (user?.email_verified_at) return <Navigate to="/resumes" replace />;
-  if (user) return <Navigate to="/verify-email" replace />;
+  if (user) return <Navigate to="/resumes" replace />;
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -43,10 +43,7 @@ const { user, setUser } = useContext(AuthContext);
 
       toast.success("Account created! Please verify your email to continue.");
 
-      navigate('/verify-email', {
-        state: { email: newUser.email, from: 'register' },
-        replace: true,
-      });
+      navigate('/resumes', { replace: true });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.errors) {
         setErrors(error.response.data.errors);
@@ -54,6 +51,24 @@ const { user, setUser } = useContext(AuthContext);
       toast.error(error.response?.data?.message || "❌ Can't create your account");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setIsGoogleLoading(true);
+    try {
+      const response = await getGoogleAuthUrl();
+      const redirectUrl = response.data?.url;
+      if (!redirectUrl) {
+        throw new Error("Missing redirect URL");
+      }
+      window.location.href = redirectUrl;
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Google sign-up is temporarily unavailable."
+      );
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -182,6 +197,40 @@ const { user, setUser } = useContext(AuthContext);
               </button>
             </div>
           </form>
+
+          {/* Divider */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-[11px] uppercase tracking-[0.3em]">
+                <span className="px-3 bg-white text-gray-400">Instant onboarding</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Google Sign Up Button */}
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={handleGoogleSignUp}
+              disabled={isGoogleLoading}
+              className="w-full flex items-center gap-3 rounded-2xl border border-gray-200 bg-white py-3.5 px-4 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 disabled:opacity-60"
+            >
+              <span className="h-10 w-10 rounded-xl bg-gradient-to-br from-white via-red-50 to-rose-100 border border-rose-100 flex items-center justify-center">
+                {isGoogleLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-rose-500" />
+                ) : (
+                  <Chrome className="h-5 w-5 text-rose-500" />
+                )}
+              </span>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-slate-900">Sign up with Google</p>
+                <p className="text-xs text-slate-500">Create your recruiter-ready account in one tap</p>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </GuestLayout>

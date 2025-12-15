@@ -11,10 +11,6 @@ const RecruiterRoute = ({ children }) => {
     return <Navigate to="/login" />;
   }
 
-  if (!user.email_verified_at) {
-    return <Navigate to="/verify-email" replace />;
-  }
-
   if (!user.is_recruiter || user.recruiter_status !== "approved") {
     return <Navigate to="/403" replace />;
   }

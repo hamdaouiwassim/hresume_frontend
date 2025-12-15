@@ -1,7 +1,8 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FileText, User, Settings, LogOut, ChevronDown, Menu, X, Shield, Briefcase, Heart } from 'lucide-react';
+import { FileText, User, Settings, LogOut, ChevronDown, Menu, X, Shield, Briefcase, Heart, Users } from 'lucide-react';
 import LanguageToggle from '../components/LanguageToggle';
+import CollaborationNotifications from '../components/CollaborationNotifications';
 import { logout } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -46,9 +47,11 @@ export default function AuthLayout({ children }) {
                         <div className="flex">
                             <div className="flex-shrink-0 flex items-center">
                                 <Link to="/" className="flex items-center space-x-2 group">
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 group-hover:scale-110 transition-transform duration-300">
-                                        <FileText className="h-6 w-6 text-white" />
-                                    </div>
+                                    <img 
+                                        src="/logo.png" 
+                                        alt="HResume Logo" 
+                                        className="h-10 w-auto group-hover:scale-110 transition-transform duration-300"
+                                    />
                                     <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
                                         HResume
                                     </span>
@@ -59,12 +62,23 @@ export default function AuthLayout({ children }) {
                                 <Link 
                                     to="/resumes"
                                     className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                                        location.pathname === '/resumes' || location.pathname.startsWith('/resume/')
+                                        location.pathname === '/resumes' || (location.pathname.startsWith('/resume/') && !location.pathname.startsWith('/resume/edit/'))
                                             ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/50'
                                             : 'text-gray-600 hover:text-blue-600 hover:bg-gray-100'
                                     }`}
                                 >
                                     {navStrings.myResumes || 'My Resumes'}
+                                </Link>
+                                <Link 
+                                    to="/shared-with-me"
+                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                        location.pathname === '/shared-with-me'
+                                            ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/50'
+                                            : 'text-gray-600 hover:text-purple-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <Users className="h-4 w-4 mr-1.5" />
+                                    Shared with Me
                                 </Link>
                                 {/* <Link 
                                     to="/templates"
@@ -82,6 +96,7 @@ export default function AuthLayout({ children }) {
                         {/* User dropdown menu */}
                         <div className="hidden md:ml-4 md:flex md:items-center md:space-x-3">
                             <LanguageToggle />
+                            <CollaborationNotifications />
                             <div className="relative">
                                 <button
                                     onClick={toggleDropdown}
@@ -172,6 +187,9 @@ export default function AuthLayout({ children }) {
                         {/* Mobile menu button */}
                         <div className="flex items-center md:hidden space-x-2">
                             <LanguageToggle />
+                            <div className="md:hidden">
+                                <CollaborationNotifications />
+                            </div>
                             <button
                                 onClick={toggleMobileMenu}
                                 className="inline-flex items-center justify-center p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-200"
@@ -195,12 +213,24 @@ export default function AuthLayout({ children }) {
                                 to="/resumes"
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
-                                location.pathname === '/resumes' || location.pathname.startsWith('/resume/')
+                                location.pathname === '/resumes' || (location.pathname.startsWith('/resume/') && !location.pathname.startsWith('/resume/edit/'))
                                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                                     : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
                             }`}
                                 >
                                 {navStrings.myResumes || 'My Resumes'}
+                            </Link>
+                            <Link
+                                to="/shared-with-me"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
+                                location.pathname === '/shared-with-me'
+                                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                                    : 'text-gray-600 hover:bg-gray-100 hover:text-purple-600'
+                            }`}
+                                >
+                                <Users className="h-4 w-4 inline mr-2" />
+                                Shared with Me
                             </Link>
                             <Link
                                 to="/templates"

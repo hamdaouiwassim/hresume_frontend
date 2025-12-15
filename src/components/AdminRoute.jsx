@@ -11,10 +11,6 @@ const AdminRoute = ({ children }) => {
     return <Navigate to="/login" />;
   }
 
-  if (!user.email_verified_at) {
-    return <Navigate to="/verify-email" replace />;
-  }
-
   if (!user.is_admin) {
     return <Navigate to="/resumes" />;
   }

@@ -49,20 +49,11 @@ export default function SocialCallback() {
         localStorage.setItem("user", JSON.stringify(profile));
         setUser({ token, ...profile });
 
-        const requiresVerification =
-          query.get("requires_email_verification") === "1" ||
-          !profile.email_verified_at;
-
-        if (requiresVerification) {
+        if (!profile.email_verified_at) {
           toast.info("Please verify your email to continue.");
-          navigate("/verify-email", {
-            replace: true,
-            state: { email: profile.email, from: "google" },
-          });
-          return;
+        } else {
+          toast.success("Signed in with Google");
         }
-
-        toast.success("Signed in with Google");
         navigate(getHomePath(profile), { replace: true });
       } catch (error) {
         console.error("Social login error", error);

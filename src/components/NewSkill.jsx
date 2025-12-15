@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Save,
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 export default function NewSkill({skill = {
     name: "",
     proficiency: ""
-}, index = null, hide, resumeId, edit = false, onSave}) {
+}, index = null, hide, resumeId, edit = false, onSave, onPreviewChange, onPreviewClear}) {
     const { t } = useLanguage();
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ export default function NewSkill({skill = {
         let data = {...skillData, resume_id: resumeId};
         try {
             const response = await storeSkill(data);
-            hide();
+            closeForm();
             toast.success(response.data.message || "");
             if (onSave) onSave();
         } catch (error) {
@@ -70,7 +70,7 @@ export default function NewSkill({skill = {
         let data = {...skillData};
         try {
             const response = await updateSkill(data, skill.id);
-            hide();
+            closeForm();
             toast.success(response.data.message || "");
             if (onSave) onSave();
         } catch (error) {
@@ -86,6 +86,31 @@ export default function NewSkill({skill = {
 
     const [skillData, setSkillData] = useState(skill);
 
+    const previewChangeRef = useRef(onPreviewChange);
+    useEffect(() => {
+        previewChangeRef.current = onPreviewChange;
+    }, [onPreviewChange]);
+
+    useEffect(() => {
+        previewChangeRef.current?.(skillData);
+    }, [skillData]);
+
+    const previewClearRef = useRef(onPreviewClear);
+    useEffect(() => {
+        previewClearRef.current = onPreviewClear;
+    }, [onPreviewClear]);
+
+    useEffect(() => {
+        return () => {
+            previewClearRef.current?.();
+        };
+    }, []);
+
+    const closeForm = () => {
+        previewClearRef.current?.();
+        hide && hide();
+    };
+
     return (
         <div
             key={index}
@@ -97,7 +122,7 @@ export default function NewSkill({skill = {
                 </h4>
                 <button
                     type="button"
-                    onClick={hide}
+                    onClick={closeForm}
                     className={`${buttonVariants.danger} p-2`}
                     title="Cancel"
                 >

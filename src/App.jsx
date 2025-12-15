@@ -15,10 +15,12 @@ const Login = lazy(() => import('./pages/login'));
 const Register = lazy(() => import('./pages/register'));
 const RecruiterRegister = lazy(() => import('./pages/RecruiterRegister'));
 const Resumes = lazy(() => import('./pages/resumes'));
+const SharedWithMe = lazy(() => import('./pages/SharedWithMe'));
 const Templates = lazy(() => import('./pages/templates'));
 const CreateResume = lazy(() => import('./pages/createResume'));
 const EditResume = lazy(() => import('./pages/EditResume'));
 const SharedResumeView = lazy(() => import('./pages/SharedResumeView'));
+const AcceptCollaboration = lazy(() => import('./pages/AcceptCollaboration'));
 const Profile = lazy(() => import('./pages/Profile'));
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminUsersList = lazy(() => import('./pages/admin/UsersList'));
@@ -31,7 +33,6 @@ const RecruiterProfile = lazy(() => import('./pages/recruiter/Profile'));
 const Forbidden = lazy(() => import('./pages/errors/Forbidden'));
 const TrackRequest = lazy(() => import('./pages/TrackRequest'));
 const SocialCallback = lazy(() => import('./pages/SocialCallback'));
-const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
@@ -41,6 +42,9 @@ const Review = lazy(() => import('./pages/Review'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AdminBlog = lazy(() => import('./pages/admin/Blog'));
+const AdminUserDetails = lazy(() => import('./pages/admin/UserDetails'));
+const AdminUserCVs = lazy(() => import('./pages/admin/UserCVs'));
+const AdminGeneratedCV = lazy(() => import('./pages/admin/GeneratedCV'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -63,8 +67,8 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/register/recruiter" element={<RecruiterRegister />} />
             <Route path="/share/:token" element={<SharedResumeView />} />
+            <Route path="/collaborate/accept/:token" element={<AcceptCollaboration />} />
             <Route path="/auth/social-callback" element={<SocialCallback />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/track-request" element={<TrackRequest />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/faq" element={<FAQ />} />
@@ -77,6 +81,7 @@ function App() {
 
             <Route path="/resume/edit/:id" element={<PrivateRoute><EditResume />  </PrivateRoute>} />
                <Route path="/resumes" element={<PrivateRoute><Resumes /></PrivateRoute>} />
+               <Route path="/shared-with-me" element={<PrivateRoute><SharedWithMe /></PrivateRoute>} />
             <Route path="/templates" element={<PrivateRoute><Templates /></PrivateRoute>} />
           {/* New path for creating a resume */}
           <Route path="/resume/create" element={<PrivateRoute><CreateResume /></PrivateRoute>} />
@@ -88,6 +93,9 @@ function App() {
           {/* Admin routes */}
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/users" element={<AdminRoute><AdminUsersList /></AdminRoute>} />
+          <Route path="/admin/users/:id" element={<AdminRoute><AdminUserDetails /></AdminRoute>} />
+          <Route path="/admin/users/:id/cvs" element={<AdminRoute><AdminUserCVs /></AdminRoute>} />
+          <Route path="/admin/cvs" element={<AdminRoute><AdminGeneratedCV /></AdminRoute>} />
           <Route path="/admin/templates" element={<AdminRoute><AdminTemplatesManagement /></AdminRoute>} />
           <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
           <Route path="/admin/profile" element={<AdminRoute><AdminProfile /></AdminRoute>} />

@@ -34,10 +34,6 @@ export default function Login() {
     return "/resumes";
   };
 
-  if (user?.email_verified_at === null) {
-    return <Navigate to="/verify-email" replace />;
-  }
-
   if (user) return <Navigate to={getHomePath(user)} />;
   const handleSubmit = async (e) => {
    
@@ -58,11 +54,6 @@ export default function Login() {
 
       if (res.data.requires_email_verification) {
         toast.info("Please verify your email to continue.");
-        navigate("/verify-email", {
-          replace: true,
-          state: { email: loggedInUser.email, from: "login" },
-        });
-        return;
       }
 
       toast.success("Login successful!");
@@ -215,12 +206,14 @@ export default function Login() {
             </div>
           </form>
 
-          <div className="relative">
+          <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-200" />
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-slate-500">or continue with</span>
+            <div className="relative flex justify-center text-[11px] uppercase tracking-[0.3em]">
+              <span className="px-3 bg-white text-slate-400">
+                Seamless access
+              </span>
             </div>
           </div>
 
@@ -228,14 +221,23 @@ export default function Login() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
-            className="w-full inline-flex items-center justify-center gap-3 rounded-lg border border-slate-200 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition disabled:opacity-60"
+            className="mt-4 w-full flex items-center gap-3 rounded-2xl border border-slate-200 bg-white py-3.5 px-4 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 disabled:opacity-60"
           >
-            {isGoogleLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
-            ) : (
-              <Chrome className="h-5 w-5 text-blue-600" />
-            )}
-            Continue with Google
+            <span className="h-10 w-10 rounded-xl bg-gradient-to-br from-white via-red-50 to-rose-100 border border-rose-100 flex items-center justify-center">
+              {isGoogleLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-rose-500" />
+              ) : (
+                <Chrome className="h-5 w-5 text-rose-500" />
+              )}
+            </span>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-slate-900">
+                Continue with Google
+              </p>
+              <p className="text-xs text-slate-500">
+                Use your professional Gmail in seconds
+              </p>
+            </div>
           </button>
         </div>
       </div>

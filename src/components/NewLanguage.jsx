@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Save,
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 export default function NewLanguage({lang = {
         language : "",
         proficiency : ""
-    } ,index = null  , hide , resumeId , edit=false , onSave}) {
+    } ,index = null  , hide , resumeId , edit=false , onSave, onPreviewChange, onPreviewClear}) {
 const { t } = useLanguage();
 const [errors,setErrors]=useState({});
 const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +50,7 @@ const handleStoreLanguage = async () => {
     let data = {...language , resume_id : resumeId }
     try{
     const response = await storeLanguage(data);
-    hide()
+    closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
     }catch(error) {
@@ -74,7 +74,7 @@ const handleUpdateLanguage = async () => {
     let data = {...language }
     try{
     const response = await updateLanguage(data,lang.id);
-    hide()
+    closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
     }catch(error) {
@@ -89,6 +89,31 @@ const handleUpdateLanguage = async () => {
 }
     const [language,setLanguage] = useState(lang);
 
+    const previewChangeRef = useRef(onPreviewChange);
+    useEffect(() => {
+      previewChangeRef.current = onPreviewChange;
+    }, [onPreviewChange]);
+
+    useEffect(() => {
+      previewChangeRef.current?.(language);
+    }, [language]);
+
+    const previewClearRef = useRef(onPreviewClear);
+    useEffect(() => {
+      previewClearRef.current = onPreviewClear;
+    }, [onPreviewClear]);
+
+    useEffect(() => {
+      return () => {
+        previewClearRef.current?.();
+      };
+    }, []);
+
+    const closeForm = () => {
+      previewClearRef.current?.();
+      hide && hide();
+    };
+
     return (
             <div
                       key={index}
@@ -100,7 +125,7 @@ const handleUpdateLanguage = async () => {
                         </h4>
                         <button
                           type="button"
-                          onClick={hide}
+                          onClick={closeForm}
                           className={`${buttonVariants.danger} p-2`}
                           title="Cancel"
                         >

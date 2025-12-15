@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Save,
@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function NewHobby({hobby = {
     name: ""
-}, index = null, hide, resumeId, edit = false, onSave}) {
+}, index = null, hide, resumeId, edit = false, onSave, onPreviewChange, onPreviewClear}) {
     const { t } = useLanguage();
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +45,7 @@ export default function NewHobby({hobby = {
         let data = {...hobbyData, resume_id: resumeId};
         try {
             const response = await storeHobby(data);
-            hide();
+            closeForm();
             toast.success(response.data.message || "");
             if (onSave) onSave();
         } catch (error) {
@@ -69,7 +69,7 @@ export default function NewHobby({hobby = {
         let data = {...hobbyData};
         try {
             const response = await updateHobby(data, hobby.id);
-            hide();
+            closeForm();
             toast.success(response.data.message || "");
             if (onSave) onSave();
         } catch (error) {
@@ -85,6 +85,31 @@ export default function NewHobby({hobby = {
 
     const [hobbyData, setHobbyData] = useState(hobby);
 
+    const previewChangeRef = useRef(onPreviewChange);
+    useEffect(() => {
+        previewChangeRef.current = onPreviewChange;
+    }, [onPreviewChange]);
+
+    useEffect(() => {
+        previewChangeRef.current?.(hobbyData);
+    }, [hobbyData]);
+
+    const previewClearRef = useRef(onPreviewClear);
+    useEffect(() => {
+        previewClearRef.current = onPreviewClear;
+    }, [onPreviewClear]);
+
+    useEffect(() => {
+        return () => {
+            previewClearRef.current?.();
+        };
+    }, []);
+
+    const closeForm = () => {
+        previewClearRef.current?.();
+        hide && hide();
+    };
+
     return (
         <div
             key={index}
@@ -96,7 +121,7 @@ export default function NewHobby({hobby = {
                 </h4>
                 <button
                     type="button"
-                    onClick={hide}
+                    onClick={closeForm}
                     className={`${buttonVariants.danger} p-2`}
                     title="Cancel"
                 >

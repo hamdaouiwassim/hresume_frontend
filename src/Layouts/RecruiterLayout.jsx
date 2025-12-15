@@ -54,9 +54,11 @@ export default function RecruiterLayout({ children }) {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <Link to="/recruiter/resumes" className="flex items-center space-x-2 group">
-                <div className="p-2 bg-gradient-to-br from-sky-500 to-indigo-600 text-white rounded-xl shadow-lg shadow-sky-500/40 group-hover:scale-110 transition-transform">
-                  <Briefcase className="h-5 w-5" />
-                </div>
+                <img 
+                  src="/logo.png" 
+                  alt="HResume Logo" 
+                  className="h-10 w-auto group-hover:scale-110 transition-transform duration-300"
+                />
                 <div>
                   <p className="text-xs uppercase tracking-widest text-slate-500">
                     Recruiter Hub

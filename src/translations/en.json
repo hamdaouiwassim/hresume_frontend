@@ -344,9 +344,9 @@
     "dashboard": {
         "sections": {
             "personalInfo": {
-                "title": "Informations Personnelles",
-                "fullName": "Nom Complet",
-                "fullNamePlaceholder": "Hamdaoui Wassim",
+                "title": "Personal Information",
+                "fullName": "Full Name",
+                "fullNamePlaceholder": "John Doe",
                 "fullNameHint": "How you want to be addressed",
                 "jobTitle": "Professional Title",
                 "jobTitlePlaceholder": "Senior Software Engineer",

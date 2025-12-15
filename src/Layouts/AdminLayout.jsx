@@ -43,9 +43,11 @@ export default function AdminLayout({ children }) {
                         <div className="flex">
                             <div className="flex-shrink-0 flex items-center">
                                 <Link to="/admin" className="flex items-center space-x-2 group">
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 group-hover:scale-110 transition-transform duration-300">
-                                        <Shield className="h-6 w-6 text-white" />
-                                    </div>
+                                    <img 
+                                        src="/logo.png" 
+                                        alt="HResume Logo" 
+                                        className="h-10 w-auto group-hover:scale-110 transition-transform duration-300"
+                                    />
                                     <span className="text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-800 bg-clip-text text-transparent">
                                         Admin Panel
                                     </span>
@@ -96,6 +98,17 @@ export default function AdminLayout({ children }) {
                                 >
                                     <FileText className="h-4 w-4 mr-2" />
                                     Blog
+                                </Link>
+                                <Link
+                                    to="/admin/cvs"
+                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                        isActive('/admin/cvs')
+                                            ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/50'
+                                            : 'text-gray-600 hover:text-purple-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Generated CVs
                                 </Link>
                             </div>
                         </div>
@@ -225,6 +238,17 @@ export default function AdminLayout({ children }) {
                             }`}
                         >
                             Blog
+                        </Link>
+                        <Link
+                            to="/admin/cvs"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
+                                isActive('/admin/cvs')
+                                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                                    : 'text-gray-600 hover:bg-gray-100 hover:text-purple-600'
+                            }`}
+                        >
+                            Generated CVs
                         </Link>
                         <Link
                             to="/admin/profile"

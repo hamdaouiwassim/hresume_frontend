@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Save,
@@ -14,7 +14,7 @@ export default function NewEducation({edu = {
         start_date : null,
         end_date : null,
         description : ""
-    } ,index = null  , hide , resumeId , edit=false , onSave}) {
+    } ,index = null  , hide , resumeId , edit=false , onSave, onPreviewChange, onPreviewClear}) {
 const { t } = useLanguage();
 const [errors,setErrors]=useState({});
 const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +53,7 @@ const handleStoreEducation = async () => {
     let data = {...education , resume_id : resumeId }
     try{
     const response = await storeEducation(data);
-    hide()
+    closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
     }catch(error) {
@@ -77,7 +77,7 @@ const handleUpdateEducation = async () => {
     let data = {...education }
     try{
     const response = await updateEducation(data,edu.id);
-    hide()
+    closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
     }catch(error) {
@@ -92,6 +92,31 @@ const handleUpdateEducation = async () => {
 }
     const [education,setEducation] = useState(edu);
 
+    const previewChangeRef = useRef(onPreviewChange);
+    useEffect(() => {
+      previewChangeRef.current = onPreviewChange;
+    }, [onPreviewChange]);
+
+    useEffect(() => {
+      previewChangeRef.current?.(education);
+    }, [education]);
+
+    const previewClearRef = useRef(onPreviewClear);
+    useEffect(() => {
+      previewClearRef.current = onPreviewClear;
+    }, [onPreviewClear]);
+
+    useEffect(() => {
+      return () => {
+        previewClearRef.current?.();
+      };
+    }, []);
+
+    const closeForm = () => {
+      previewClearRef.current?.();
+      hide && hide();
+    };
+
     return (
             <div
                       key={index}
@@ -103,7 +128,7 @@ const handleUpdateEducation = async () => {
                         </h4>
                         <button
                           type="button"
-                          onClick={hide}
+                          onClick={closeForm}
                           className={`${buttonVariants.danger} p-2`}
                           title="Cancel"
                         >

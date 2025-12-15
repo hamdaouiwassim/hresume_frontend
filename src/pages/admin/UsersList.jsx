@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { Users, Search, Trash2, Loader2, Shield, Calendar, Mail, FileText, Briefcase, Building2, CheckCircle, XCircle } from 'lucide-react';
+import { Users, Search, Trash2, Loader2, Shield, Calendar, Mail, FileText, Briefcase, Building2, CheckCircle, XCircle, Eye } from 'lucide-react';
 import { getAdminUsers, deleteAdminUser, updateAdminUser } from '../../services/adminService';
 import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -384,6 +384,13 @@ export default function UsersList() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex items-center justify-end space-x-2">
+                                                    <button
+                                                        onClick={() => navigate(`/admin/users/${user.id}`)}
+                                                        className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                                                        title="View user details"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </button>
                                                     <button
                                                         onClick={() => toggleAdmin(user)}
                                                         className={`p-2 rounded-lg transition-colors ${

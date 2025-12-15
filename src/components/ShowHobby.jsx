@@ -6,7 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 import ConfirmDialog from "./ConfirmDialog";
 import { Edit2, Trash2, Loader2 } from "lucide-react";
 
-export default function ShowHobby({ hobby, index, hide, resumeId, onSave, onDelete }) {
+export default function ShowHobby({ hobby, index, hide, resumeId, onSave, onDelete, onPreviewChange, onPreviewClear }) {
     const { t } = useLanguage();
     const [edit, setEdit] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -45,6 +45,8 @@ export default function ShowHobby({ hobby, index, hide, resumeId, onSave, onDele
                     hide={handleHide} 
                     resumeId={resumeId}
                     onSave={onSave}
+                    onPreviewChange={onPreviewChange}
+                    onPreviewClear={onPreviewClear}
                 />
             ) : (
                 <>

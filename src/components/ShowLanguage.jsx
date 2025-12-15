@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import ConfirmDialog from "./ConfirmDialog";
 import { Edit2, Trash2, Loader2 } from "lucide-react";
 
-export default function ShowLanguage({ lang, index, hide, resumeId, onSave, onDelete }) {
+export default function ShowLanguage({ lang, index, hide, resumeId, onSave, onDelete, onPreviewChange, onPreviewClear }) {
     const [edit, setEdit] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -51,7 +51,16 @@ export default function ShowLanguage({ lang, index, hide, resumeId, onSave, onDe
     return (
         <>
             {edit ? (
-                <NewLanguage lang={lang} index={index} edit={true} hide={handleHide} resumeId={resumeId} onSave={onSave} />
+                <NewLanguage
+                    lang={lang}
+                    index={index}
+                    edit={true}
+                    hide={handleHide}
+                    resumeId={resumeId}
+                    onSave={onSave}
+                    onPreviewChange={onPreviewChange}
+                    onPreviewClear={onPreviewClear}
+                />
             ) : (
                 <>
                     <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200 mb-4">

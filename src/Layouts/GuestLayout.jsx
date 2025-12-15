@@ -1,13 +1,63 @@
 
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, FileText } from 'lucide-react';
+import { Menu, X, FileText, Mail, MapPin, Phone, ArrowRight, Linkedin, Twitter, Github, Loader2, Check } from 'lucide-react';
 import LanguageToggle from '../components/LanguageToggle';
 import { AuthContext } from '../context/AuthContext';
+import { getStats } from '../services/statsService';
+import { subscribe } from '../services/subscriberService';
+import { toast } from 'sonner';
 
 export default function GuestLayout({ children }) {
     const [isOpen, setIsOpen] = useState(false);
     const { user , setUser } = useContext(AuthContext);
+    const [resumeCount, setResumeCount] = useState(null);
+    const [subscriptionEmail, setSubscriptionEmail] = useState('');
+    const [isSubscribing, setIsSubscribing] = useState(false);
+    const [isSubscribed, setIsSubscribed] = useState(false);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await getStats();
+                if (response.data?.status) {
+                    setResumeCount(response.data.data?.total_resumes ?? null);
+                }
+            } catch (error) {
+                console.error('Failed to load stats', error);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault();
+        
+        if (!subscriptionEmail.trim()) {
+            toast.error('Please enter a valid email address');
+            return;
+        }
+
+        setIsSubscribing(true);
+        try {
+            const response = await subscribe(subscriptionEmail);
+            if (response.data.status) {
+                toast.success(response.data.message || 'Successfully subscribed to our newsletter!');
+                setIsSubscribed(true);
+                setSubscriptionEmail('');
+                // Reset success state after 3 seconds
+                setTimeout(() => setIsSubscribed(false), 3000);
+            }
+        } catch (error) {
+            toast.error(
+                error.response?.data?.message || 
+                'Failed to subscribe. Please try again later.'
+            );
+        } finally {
+            setIsSubscribing(false);
+        }
+    };
 
     return (
         <div className="min-h-screen w-full">
@@ -16,9 +66,11 @@ export default function GuestLayout({ children }) {
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <Link to="/" className="flex-shrink-0 flex items-center space-x-2 group">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 group-hover:scale-110 transition-transform duration-300">
-                                    <FileText className="h-6 w-6 text-white" />
-                                </div>
+                                <img 
+                                    src="/logo.png" 
+                                    alt="HResume Logo" 
+                                    className="h-10 w-auto group-hover:scale-110 transition-transform duration-300"
+                                />
                                 <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
                                     HResume
                                 </span>
@@ -101,104 +153,145 @@ export default function GuestLayout({ children }) {
             </main>
 
             {/* Footer */}
-            <footer className="bg-black">
-                <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <footer className="bg-[#05060a] text-gray-300">
+                <div className="border-y border-white/5 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                            <div>
+                                <p className="text-sm uppercase tracking-[0.35em] text-gray-400">Weekly insights</p>
+                                <h3 className="text-2xl font-semibold text-white mt-2">Stay ahead with job market tactics.</h3>
+                            </div>
+                            <form onSubmit={handleSubscribe} className="md:col-span-2 flex flex-col sm:flex-row gap-3">
+                                <div className="relative flex-1">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <input
+                                        type="email"
+                                        value={subscriptionEmail}
+                                        onChange={(e) => setSubscriptionEmail(e.target.value)}
+                                        placeholder="Enter your work email"
+                                        className="w-full bg-white/10 border border-white/20 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                        required
+                                        disabled={isSubscribing || isSubscribed}
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={isSubscribing || isSubscribed}
+                                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-[#05060a] font-semibold px-6 py-3 text-sm shadow-lg shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                                >
+                                    {isSubscribing ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            Subscribing...
+                                        </>
+                                    ) : isSubscribed ? (
+                                        <>
+                                            <Check className="h-4 w-4" />
+                                            Subscribed!
+                                        </>
+                                    ) : (
+                                        <>
+                                            Subscribe
+                                            <ArrowRight className="h-4 w-4" />
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="max-w-7xl mx-auto py-14 px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
                         {/* Brand Section */}
-                        <div className="col-span-1 md:col-span-2">
+                        <div className="lg:col-span-2 space-y-5">
                             <div className="flex items-center space-x-2">
-                                <FileText className="h-8 w-8 text-blue-400" />
-                                <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">
+                                <img 
+                                    src="/logo-light.png" 
+                                    alt="HResume Logo" 
+                                    className="h-10 w-auto"
+                                />
+                                <span className="text-2xl font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
                                     HResume
                                 </span>
                             </div>
-                            <p className="mt-4 text-sm text-gray-400 max-w-md">
-                                Create professional resumes in minutes with our intuitive builder. 
-                                Stand out from the crowd with beautifully designed templates.
+                            <p className="text-sm text-gray-400 leading-relaxed">
+                                Intelligent resume workflows for teams and talents. Build trust with ATS-friendly exports,
+                                branded templates, and live collaboration that helps you sign offers faster.
                             </p>
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                                <div>
+                                    <p className="text-white font-semibold text-lg">
+                                        {resumeCount !== null ? resumeCount.toLocaleString() : '—'}
+                                    </p>
+                                    <p>Resumes shipped</p>
+                                </div>
+                                <div>
+                                    <p className="text-white font-semibold text-lg">0</p>
+                                    <p>Recruiter partners</p>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Quick Links */}
-                        <div>
-                            <h3 className="text-sm font-semibold text-white tracking-wider uppercase">
-                                Quick Links
-                            </h3>
-                            <ul className="mt-4 space-y-4">
-                                <li>
-                                    <Link to="/templates/public" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                                        Resume Templates
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/blog" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                                        Blog
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/examples" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                                        Resume Examples
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/pricing" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                                        Pricing
-                                    </Link>
-                                </li>
-                            </ul>
+                        {/* Navigation */}
+                        <div className="grid grid-cols-2 gap-8 lg:col-span-2">
+                            <div>
+                                <h3 className="text-sm font-semibold text-white uppercase tracking-[0.2em]">Product</h3>
+                                <ul className="mt-4 space-y-4 text-sm text-gray-400">
+                                    <li><Link to="/templates/public" className="hover:text-white transition">Resume Templates</Link></li>
+                                    <li><Link to="/templates" className="hover:text-white transition">Template Builder</Link></li>
+                                    <li><Link to="/pricing" className="hover:text-white transition">Pricing</Link></li>
+                                    <li><Link to="/blog" className="hover:text-white transition">Blog</Link></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-semibold text-white uppercase tracking-[0.2em]">Company</h3>
+                                <ul className="mt-4 space-y-4 text-sm text-gray-400">
+                                    <li><Link to="/contact" className="hover:text-white transition">Contact</Link></li>
+                                    <li><Link to="/faq" className="hover:text-white transition">FAQ</Link></li>
+                                    <li><Link to="/privacy" className="hover:text-white transition">Privacy</Link></li>
+                                    <li><Link to="/review" className="hover:text-white transition">Reviews</Link></li>
+                                </ul>
+                            </div>
                         </div>
 
-                        {/* Support */}
-                        <div>
-                            <h3 className="text-sm font-semibold text-white tracking-wider uppercase">
-                                Support
-                            </h3>
-                            <ul className="mt-4 space-y-4">
-                                <li>
-                                    <Link to="/contact" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                                        Contact Us
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/faq" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                                        FAQ
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link to="/privacy" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                                        Privacy Policy
-                                    </Link>
-                                </li>
-                            </ul>
+                        {/* Contact */}
+                        <div className="space-y-5">
+                            <h3 className="text-sm font-semibold text-white uppercase tracking-[0.2em]">Talk to humans</h3>
+                            <div className="space-y-4 text-sm text-gray-400">
+                                <a href="mailto:contact@hresume.pro" className="flex items-center gap-3 hover:text-white transition">
+                                    <Mail className="h-4 w-4 text-blue-400" />
+                                    contact@hresume.pro
+                                </a>
+                                <a href="tel:+21692045389" className="flex items-center gap-3 hover:text-white transition">
+                                    <Phone className="h-4 w-4 text-blue-400" />
+                                    +216 92 045 389
+                                </a>
+                                <div className="flex items-center gap-3">
+                                    <MapPin className="h-4 w-4 text-blue-400" />
+                                    Remote-first · Available worldwide
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <a href="https://linkedin.com" className="p-2 rounded-full bg-white/5 text-white hover:bg-white/10 transition" aria-label="LinkedIn">
+                                    <Linkedin className="h-4 w-4" />
+                                </a>
+                                <a href="https://twitter.com" className="p-2 rounded-full bg-white/5 text-white hover:bg-white/10 transition" aria-label="Twitter">
+                                    <Twitter className="h-4 w-4" />
+                                </a>
+                                <a href="https://github.com" className="p-2 rounded-full bg-white/5 text-white hover:bg-white/10 transition" aria-label="GitHub">
+                                    <Github className="h-4 w-4" />
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Bottom Section */}
-                    <div className="mt-8 pt-8 border-t border-gray-800">
-                        <div className="flex flex-col md:flex-row justify-between items-center">
-                            <p className="text-sm text-gray-500">
-                                © {new Date().getFullYear()} HResume. All rights reserved.
-                            </p>
-                            {/* Social Links */}
-                            <div className="flex space-x-6 mt-4 md:mt-0">
-                                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-                                    <span className="sr-only">Twitter</span>
-                                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                                    </svg>
-                                </a>
-                                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-                                    <span className="sr-only">LinkedIn</span>
-                                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                                    </svg>
-                                </a>
-                                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-                                    <span className="sr-only">GitHub</span>
-                                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                                    </svg>
-                                </a>
-                            </div>
+                    <div className="mt-12 border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-4">
+                        <p>© {new Date().getFullYear()} HResume. Built for ambitious careers.</p>
+                        <div className="flex items-center gap-6">
+                            <Link to="/terms" className="hover:text-white transition">Terms</Link>
+                            <Link to="/privacy" className="hover:text-white transition">Privacy</Link>
+                            <span className="text-gray-600">SOC2-ready infrastructure</span>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AuthLayout from "../Layouts/AuthLayout";
 import { Eye, ArrowRight, X, Loader2, Search, Sparkles } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -7,7 +7,7 @@ import { getTemplates } from '../services/resumeService';
 import { toast } from 'sonner';
 
 export default function Templates() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [filteredTemplates, setFilteredTemplates] = useState([]);
@@ -67,10 +67,6 @@ export default function Templates() {
   const handlePreview = (template) => {
     setSelectedTemplate(template);
     setShowPreview(true);
-  };
-
-  const handleUseTemplate = (templateId) => {
-    navigate(`/resume/new?template=${templateId}`);
   };
 
   const getCategoryColor = (category) => {
@@ -165,22 +161,22 @@ export default function Templates() {
                   key={template.id}
                   className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2 border border-gray-100 group"
                 >
-                  <div className="relative h-64 overflow-hidden">
+                  <div className="relative h-64 bg-slate-50 flex items-start justify-center p-5">
                     {template.preview_image_url ? (
                       <img
                         src={template.preview_image_url}
                         alt={template.name}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        className="max-h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow"
                         onError={(e) => {
-                          e.target.src = `https://via.placeholder.com/800x1000/667eea/ffffff?text=${encodeURIComponent(template.name)}`;
+                          e.currentTarget.src = `https://via.placeholder.com/800x1000/667eea/ffffff?text=${encodeURIComponent(template.name)}`;
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                        <span className="text-white text-2xl font-bold">{template.name}</span>
+                      <div className="w-full h-full rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                        {template.name}
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                       <button
                         onClick={() => handlePreview(template)}
                         className="px-6 py-3 bg-white text-blue-600 rounded-xl flex items-center font-semibold transform translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -189,9 +185,12 @@ export default function Templates() {
                         {t.templates.preview}
                       </button>
                     </div>
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-4 right-4 flex gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(template.category)}`}>
                         {template.category}
+                      </span>
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                        Free
                       </span>
                     </div>
                   </div>

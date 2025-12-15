@@ -20,8 +20,9 @@ export default function TemplatesManagement() {
         name: '',
         description: '',
         category: 'Corporate',
-        preview_image_url: ''
+        previewImageFile: null,
     });
+    const [imagePreview, setImagePreview] = useState('');
     const [errors, setErrors] = useState({});
 
     const categories = ['All', 'Corporate', 'Creative', 'Simple'];
@@ -29,6 +30,14 @@ export default function TemplatesManagement() {
     useEffect(() => {
         fetchTemplates();
     }, [searchQuery, selectedCategory]);
+
+    useEffect(() => {
+        return () => {
+            if (imagePreview && imagePreview.startsWith('blob:')) {
+                URL.revokeObjectURL(imagePreview);
+            }
+        };
+    }, [imagePreview]);
 
     const fetchTemplates = async () => {
         try {
@@ -78,8 +87,9 @@ export default function TemplatesManagement() {
             name: template.name || '',
             description: template.description || '',
             category: template.category || 'Corporate',
-            preview_image_url: template.preview_image_url || ''
+            previewImageFile: null,
         });
+        setImagePreview(template.preview_image_url || '');
         setEditDialog({ isOpen: true, template });
         setErrors({});
     };
@@ -89,8 +99,9 @@ export default function TemplatesManagement() {
             name: '',
             description: '',
             category: 'Corporate',
-            preview_image_url: ''
+            previewImageFile: null,
         });
+        setImagePreview('');
         setNewTemplateDialog(true);
         setErrors({});
     };
@@ -102,6 +113,7 @@ export default function TemplatesManagement() {
         const newErrors = {};
         if (!formData.name.trim()) newErrors.name = 'Name is required';
         if (!formData.category) newErrors.category = 'Category is required';
+        if (!formData.previewImageFile && !editDialog.isOpen) newErrors.preview_image = 'Preview image is required';
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -109,12 +121,20 @@ export default function TemplatesManagement() {
         }
 
         try {
+            const payload = new FormData();
+            payload.append('name', formData.name);
+            payload.append('description', formData.description);
+            payload.append('category', formData.category);
+            if (formData.previewImageFile) {
+                payload.append('preview_image', formData.previewImageFile);
+            }
+
             if (editDialog.isOpen && editDialog.template) {
-                await updateAdminTemplate(editDialog.template.id, formData);
+                await updateAdminTemplate(editDialog.template.id, payload);
                 toast.success('Template updated successfully');
                 setEditDialog({ isOpen: false, template: null });
             } else {
-                await createAdminTemplate(formData);
+                await createAdminTemplate(payload);
                 toast.success('Template created successfully');
                 setNewTemplateDialog(false);
             }
@@ -122,8 +142,12 @@ export default function TemplatesManagement() {
                 name: '',
                 description: '',
                 category: 'Corporate',
-                preview_image_url: ''
+                previewImageFile: null,
             });
+            if (imagePreview && imagePreview.startsWith('blob:')) {
+                URL.revokeObjectURL(imagePreview);
+            }
+            setImagePreview('');
             setErrors({});
             fetchTemplates();
         } catch (error) {
@@ -216,18 +240,18 @@ export default function TemplatesManagement() {
                                 key={template.id}
                                 className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-2"
                             >
-                                <div className="relative h-48 overflow-hidden">
+                                <div className="relative h-48 bg-gray-50 flex items-start justify-center p-4 overflow-hidden">
                                     {template.preview_image_url ? (
                                         <img
                                             src={template.preview_image_url}
                                             alt={template.name}
-                                            className="w-full h-full object-cover"
+                                            className="max-h-full w-auto object-contain drop-shadow-md"
                                             onError={(e) => {
                                                 e.target.src = `https://via.placeholder.com/800x1000/667eea/ffffff?text=${encodeURIComponent(template.name)}`;
                                             }}
                                         />
                                     ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-xl">
                                             <span className="text-white text-xl font-bold">{template.name}</span>
                                         </div>
                                     )}
@@ -346,14 +370,50 @@ export default function TemplatesManagement() {
                                     {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Preview Image URL</label>
-                                    <input
-                                        type="url"
-                                        value={formData.preview_image_url}
-                                        onChange={(e) => setFormData({ ...formData, preview_image_url: e.target.value })}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                        placeholder="https://example.com/image.jpg"
-                                    />
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Preview Image {editDialog.isOpen ? '(optional)' : '*'}
+                                    </label>
+                                    <div className="space-y-3">
+                                        <div className="relative w-full rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 overflow-hidden flex items-start justify-center p-4">
+                                            {imagePreview ? (
+                                                <img
+                                                    src={imagePreview}
+                                                    alt="Template preview"
+                                                    className="max-h-56 w-auto object-contain drop-shadow-md"
+                                                />
+                                            ) : (
+                                                <div className="h-56 flex items-center justify-center text-gray-400 text-sm">
+                                                    No image selected
+                                                </div>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0] || null;
+                                                if (imagePreview && imagePreview.startsWith('blob:')) {
+                                                    URL.revokeObjectURL(imagePreview);
+                                                }
+                                                setFormData((prev) => ({ ...prev, previewImageFile: file }));
+                                                setImagePreview(
+                                                    file
+                                                        ? URL.createObjectURL(file)
+                                                        : editDialog.template?.preview_image_url || ''
+                                                );
+                                                if (errors.preview_image) {
+                                                    setErrors({ ...errors, preview_image: null });
+                                                }
+                                            }}
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        />
+                                        {errors.preview_image && (
+                                            <p className="text-sm text-red-600">{errors.preview_image}</p>
+                                        )}
+                                        <p className="text-xs text-gray-500">
+                                            Accepted formats: JPG, PNG. Max size 2MB.
+                                        </p>
+                                    </div>
                                 </div>
                                 <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
                                     <button

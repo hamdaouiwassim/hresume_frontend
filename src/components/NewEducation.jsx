@@ -13,7 +13,8 @@ export default function NewEducation({edu = {
         degree : "",
         start_date : null,
         end_date : null,
-        description : ""
+        description : "",
+        is_present : false
     } ,index = null  , hide , resumeId , edit=false , onSave, onPreviewChange, onPreviewClear}) {
 const { t } = useLanguage();
 const [errors,setErrors]=useState({});
@@ -227,15 +228,35 @@ const handleUpdateEducation = async () => {
                             <input
                               type="date"
                               value={education.end_date}
+                              disabled={education.is_present}
                               onChange={(e) =>
                                 setEducation(
                                   {...education, end_date :e.target.value}
                                   
                                 )
                               }
-                              className="w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3"
+                              className={`w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3 ${
+                                education.is_present ? 'opacity-50 cursor-not-allowed bg-slate-50' : ''
+                              }`}
                             />
                           </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2 mt-4">
+                          <input
+                            type="checkbox"
+                            id={`education-is-present-${index}`}
+                            checked={education.is_present || false}
+                            onChange={(e) =>
+                              setEducation(
+                                {...education, is_present: e.target.checked, end_date: e.target.checked ? null : education.end_date}
+                              )
+                            }
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                          />
+                          <label htmlFor={`education-is-present-${index}`} className="text-sm font-semibold text-slate-700 cursor-pointer">
+                            { t.dashboard.sections.educations.education.isPresent || 'Currently studying here' }
+                          </label>
                         </div>
 
                         <div>

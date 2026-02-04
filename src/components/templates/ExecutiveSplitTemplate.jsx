@@ -7,6 +7,185 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
   const certifications = resume.certifications || [];
   const languages = resume.languages || [];
   const hobbies = resume.hobbies || [];
+  const projects = resume.projects || [];
+
+  // Default section order if not specified
+  const sectionOrder = resume.section_order || ['personal', 'socialMedia', 'experience', 'education', 'skills', 'hobbies', 'certificates', 'languages', 'projects'];
+
+  console.log('🎨 ExecutiveSplitTemplate received section_order:', sectionOrder);
+
+  // Define all sections with their data and render functions
+  const availableSections = [
+    {
+      key: 'education',
+      hasData: education.length > 0,
+      isSidebar: true,
+      render: () => (
+        <section className="exec-section">
+          <h3>{labels.education || "Education"}</h3>
+          <ul className="exec-list">
+            {education.map((edu, idx) => (
+              <li key={`edu-${idx}`}>
+                <strong>{edu.degree}</strong>
+                {edu.school && ` | ${edu.school}`}
+                {edu.location && ` | ${edu.location}`}
+                {edu.graduated && ` (${labels.graduated || "Graduated"} ${edu.graduated})`}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    },
+    {
+      key: 'skills',
+      hasData: skills.length > 0,
+      isSidebar: true,
+      render: () => (
+        <section className="exec-section">
+          <h3>{labels.skills || "Skills"}</h3>
+          <ul className="exec-list">
+            {skills.map((skill, idx) => (
+              <li key={`skill-${idx}`}>{skill}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    },
+    {
+      key: 'certificates',
+      hasData: certifications.length > 0,
+      isSidebar: true,
+      render: () => (
+        <section className="exec-section">
+          <h3>{labels.certifications || "Certifications"}</h3>
+          <ul className="exec-list">
+            {certifications.map((cert, idx) => (
+              <li key={`cert-${idx}`}>{cert}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    },
+    {
+      key: 'languages',
+      hasData: languages.length > 0,
+      isSidebar: true,
+      render: () => (
+        <section className="exec-section">
+          <h3>{labels.languages || "Languages"}</h3>
+          <ul className="exec-list">
+            {languages.map((lang, idx) => (
+              <li key={`lang-${idx}`}>{lang}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    },
+    {
+      key: 'hobbies',
+      hasData: hobbies.length > 0,
+      isSidebar: true,
+      render: () => (
+        <section className="exec-section">
+          <h3>{labels.hobbies || "Hobbies"}</h3>
+          <ul className="exec-list">
+            {hobbies.map((hobby, idx) => (
+              <li key={`hobby-${idx}`}>{hobby}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    },
+    {
+      key: 'experience',
+      hasData: experience.length > 0,
+      isSidebar: false,
+      render: () => (
+        <div className="exec-section">
+          <h3 className="section-title">
+            {labels.workExperience || "Professional Experience"}
+          </h3>
+          {experience.map((role, idx) => (
+            <div key={`exp-${idx}`}>
+              <div className="exec-role">
+                <span className="exec-role-title">{role.title}</span>
+              </div>
+              {formatTimeline(role.start, role.end) && (
+                <p className="exec-timeline">
+                  {formatTimeline(role.start, role.end)}
+                </p>
+              )}
+              {(role.company || role.location) && (
+                <p className="exec-company">
+                  {[role.company, role.location].filter(Boolean).join(" | ")}
+                </p>
+              )}
+              {role.summary && <p className="exec-summary">{role.summary}</p>}
+              {role.bullets && role.bullets.length > 0 && (
+                <ul className="exec-bullets">
+                  {role.bullets.map((bullet, bulletIdx) => (
+                    <li key={`exp-${idx}-bullet-${bulletIdx}`}>{bullet}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+    },
+    {
+      key: 'projects',
+      hasData: projects.length > 0,
+      isSidebar: false,
+      render: () => (
+        <div className="exec-section">
+          <h3 className="section-title">
+            {labels.projects || "Projects"}
+          </h3>
+          {projects.map((project, idx) => (
+            <div key={`project-${idx}`}>
+              <div className="exec-role">
+                <span className="exec-role-title">{project.name}</span>
+              </div>
+              {formatTimeline(project.start, project.end) && (
+                <p className="exec-timeline">
+                  {formatTimeline(project.start, project.end)}
+                </p>
+              )}
+              {project.technologies && (
+                <p className="exec-company">{project.technologies}</p>
+              )}
+              {project.url && (
+                <p className="exec-company" style={{ fontSize: '11px', color: '#6B7280' }}>
+                  {project.url}
+                </p>
+              )}
+              {project.description && <p className="exec-summary">{project.description}</p>}
+              {project.bullets && project.bullets.length > 0 && (
+                <ul className="exec-bullets">
+                  {project.bullets.map((bullet, bulletIdx) => (
+                    <li key={`project-${idx}-bullet-${bulletIdx}`}>{bullet}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+    },
+  ];
+
+  // Get sections that have data, ordered by sectionOrder
+  const orderedSidebarSections = sectionOrder
+    .map(sectionKey => availableSections.find(section => section.key === sectionKey))
+    .filter(section => section && section.hasData && section.isSidebar);
+
+  const orderedMainSections = sectionOrder
+    .map(sectionKey => availableSections.find(section => section.key === sectionKey))
+    .filter(section => section && section.hasData && !section.isSidebar);
+
+  console.log('📋 ExecutiveSplitTemplate orderedSidebarSections:', orderedSidebarSections.map(s => s.key));
+  console.log('📋 ExecutiveSplitTemplate orderedMainSections:', orderedMainSections.map(s => s.key));
 
   const formatTimelineLabel = (value) => {
     if (!value) return "";
@@ -35,6 +214,7 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
     { label: "Phone", value: contact.phone },
     { label: "Location", value: contact.location },
     { label: "LinkedIn", value: contact.linkedin },
+    { label: "GitHub", value: contact.github },
     { label: "Website", value: contact.website },
   ].filter((item) => item.value);
 
@@ -206,76 +386,10 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
             </section>
           )}
 
-          {education.length > 0 && (
-            <section className="exec-section">
-              <h3>{labels.education || "Education"}</h3>
-              <ul className="exec-list">
-                {education.map((edu, idx) => (
-                  <li key={`edu-${idx}`}>
-                    <strong>{edu.degree}</strong>
-                    {edu.school && ` | ${edu.school}`}
-                    {edu.location && ` | ${edu.location}`}
-                    {edu.graduated && ` (${labels.graduated || "Graduated"} ${edu.graduated})`}
-                  </li>
+          {/* Render sidebar sections dynamically based on section_order */}
+          {orderedSidebarSections.map((section) => (
+            <div key={section.key}>{section.render()}</div>
                 ))}
-              </ul>
-            </section>
-          )}
-
-          {skills.length > 0 && (
-            <section className="exec-section">
-              <h3>{labels.skills || "Skills"}</h3>
-              <ul className="exec-list">
-                {skills.map((skill, idx) => (
-                  <li key={`skill-${idx}`}>{skill}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {certifications.length > 0 && (
-            <section className="exec-section">
-              <h3>{labels.certifications || "Certifications"}</h3>
-              <ul className="exec-list">
-                {certifications.map((cert, idx) => (
-                  <li key={`cert-${idx}`}>{cert}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {languages.length > 0 && (
-            <section className="exec-section">
-              <h3>{labels.languages || "Languages"}</h3>
-              <ul className="exec-list">
-                {languages.map((lang, idx) => (
-                  <li key={`lang-${idx}`}>{lang}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {hobbies.length > 0 && (
-            <section className="exec-section">
-              <h3>{labels.hobbies || "Hobbies"}</h3>
-              <ul className="exec-list">
-                {hobbies.map((hobby, idx) => (
-                  <li key={`hobby-${idx}`}>{hobby}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {interests.length > 0 && (
-            <section className="exec-section">
-              <h3>{labels.interests || "Interests"}</h3>
-              <ul className="exec-list">
-                {interests.map((interest, idx) => (
-                  <li key={`int-${idx}`}>{interest}</li>
-                ))}
-              </ul>
-            </section>
-          )}
         </aside>
 
         <section className="exec-main">
@@ -288,38 +402,10 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
             </div>
           )}
 
-          {experience.length > 0 && (
-            <div className="exec-section">
-              <h3 className="section-title">
-                {labels.workExperience || "Professional Experience"}
-              </h3>
-              {experience.map((role, idx) => (
-                <div key={`exp-${idx}`}>
-                  <div className="exec-role">
-                    <span className="exec-role-title">{role.title}</span>
-                  </div>
-                  {formatTimeline(role.start, role.end) && (
-                    <p className="exec-timeline">
-                      {formatTimeline(role.start, role.end)}
-                    </p>
-                  )}
-                  {(role.company || role.location) && (
-                    <p className="exec-company">
-                      {[role.company, role.location].filter(Boolean).join(" | ")}
-                    </p>
-                  )}
-                  {role.summary && <p className="exec-summary">{role.summary}</p>}
-                  {role.bullets && role.bullets.length > 0 && (
-                    <ul className="exec-bullets">
-                      {role.bullets.map((bullet, bulletIdx) => (
-                        <li key={`exp-${idx}-bullet-${bulletIdx}`}>{bullet}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+          {/* Render main content sections dynamically based on section_order */}
+          {orderedMainSections.map((section) => (
+            <div key={section.key}>{section.render()}</div>
               ))}
-            </div>
-          )}
         </section>
       </div>
     </div>

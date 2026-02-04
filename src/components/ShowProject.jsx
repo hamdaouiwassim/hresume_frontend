@@ -1,11 +1,11 @@
 import { useState } from "react";
-import NewEducation from "./NewEducation";
-import { deleteEducation } from "../services/EducationService";
+import NewProject from "./NewProject";
+import { deleteProject } from "../services/ProjectService";
 import { toast } from "sonner";
 import ConfirmDialog from "./ConfirmDialog";
-import { Edit2, Trash2, Loader2 } from "lucide-react";
+import { Edit2, Trash2, Loader2, ExternalLink } from "lucide-react";
 
-export default function ShowEducation({ exp, index, hide, resumeId, onSave, onDelete, onPreviewChange, onPreviewClear }) {
+export default function ShowProject({ project, index, hide, resumeId, onSave, onDelete, onPreviewChange, onPreviewClear }) {
     const [edit, setEdit] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -16,14 +16,14 @@ export default function ShowEducation({ exp, index, hide, resumeId, onSave, onDe
       delete: `${buttonBase} px-3 py-2 border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:ring-red-400 focus:ring-offset-white`,
     };
 
-    const deleteEducationHandler = async () => {
+    const deleteProjectHandler = async () => {
         setIsDeleting(true);
         try {
-            const response = await deleteEducation(exp.id);
-            toast.success(response.data.message || "Education deleted successfully");
+            const response = await deleteProject(project.id);
+            toast.success(response.data.message || "Project deleted successfully");
             if (onDelete) onDelete();
         } catch (error) {
-            toast.error("Error deleting education. Please try again.");
+            toast.error("Error deleting project. Please try again.");
             setIsDeleting(false);
         }
     };
@@ -36,8 +36,8 @@ export default function ShowEducation({ exp, index, hide, resumeId, onSave, onDe
     return (
         <>
             {edit ? (
-                <NewEducation
-                    edu={exp}
+                <NewProject
+                    project={project}
                     index={index}
                     edit={true}
                     hide={handleHide}
@@ -52,20 +52,33 @@ export default function ShowEducation({ exp, index, hide, resumeId, onSave, onDe
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <h5 className="text-base font-semibold text-slate-900 mb-1">
-                                    {exp.institution}
+                                    {project.name}
                                 </h5>
-                                <p className="text-sm text-slate-600 mb-2">
-                                    {exp.degree}
-                                </p>
-                                {exp.start_date && (
-                                    <p className="text-xs text-slate-500">
-                                        {new Date(exp.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {exp.is_present ? 'Present' : (exp.end_date ? new Date(exp.end_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '')}
+                                {project.technologies && (
+                                    <p className="text-sm text-slate-500 mb-2">
+                                        {project.technologies}
                                     </p>
                                 )}
-                                {exp.description && (
-                                    <p className="text-sm text-slate-600 mt-2 line-clamp-2">
-                                        {exp.description}
+                                {project.startDate && project.endDate && (
+                                    <p className="text-xs text-slate-500 mb-2">
+                                        {new Date(project.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {new Date(project.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                                     </p>
+                                )}
+                                {project.description && (
+                                    <p className="text-sm text-slate-600 mt-2 line-clamp-2">
+                                        {project.description}
+                                    </p>
+                                )}
+                                {project.url && (
+                                    <a 
+                                        href={project.url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mt-2"
+                                    >
+                                        <ExternalLink className="h-3 w-3" />
+                                        View Project
+                                    </a>
                                 )}
                             </div>
                             <div className="flex gap-2 flex-shrink-0">
@@ -73,7 +86,7 @@ export default function ShowEducation({ exp, index, hide, resumeId, onSave, onDe
                                     className={buttonVariants.edit}
                                     onClick={() => setEdit(true)}
                                     disabled={isDeleting}
-                                    title="Edit education"
+                                    title="Edit project"
                                 >
                                     {isDeleting ? (
                                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -85,7 +98,7 @@ export default function ShowEducation({ exp, index, hide, resumeId, onSave, onDe
                                     className={buttonVariants.delete}
                                     onClick={() => setShowDeleteDialog(true)}
                                     disabled={isDeleting}
-                                    title="Delete education"
+                                    title="Delete project"
                                 >
                                     {isDeleting ? (
                                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -99,10 +112,10 @@ export default function ShowEducation({ exp, index, hide, resumeId, onSave, onDe
                     <ConfirmDialog
                         isOpen={showDeleteDialog}
                         onClose={() => setShowDeleteDialog(false)}
-                        onConfirm={deleteEducationHandler}
-                        title="Delete Education"
-                        message="Are you sure you want to delete this education? This action cannot be undone."
-                        itemName={`${exp.institution} - ${exp.degree}`}
+                        onConfirm={deleteProjectHandler}
+                        title="Delete Project"
+                        message="Are you sure you want to delete this project? This action cannot be undone."
+                        itemName={project.name}
                         confirmText="Yes"
                         cancelText="No"
                     />
@@ -111,3 +124,4 @@ export default function ShowEducation({ exp, index, hide, resumeId, onSave, onDe
         </>
     );
 }
+

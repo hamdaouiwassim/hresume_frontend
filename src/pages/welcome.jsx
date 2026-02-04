@@ -7,6 +7,7 @@ import { FileText, Layout, Rocket, CheckCircle, Award, ArrowRight, PlayCircle, S
 import { useLanguage } from '../context/LanguageContext';
 import ReviewsCarousel from '../components/ReviewsCarousel';
 import { getStats } from '../services/statsService';
+import { getTemplates } from '../services/templateService';
 import './welcome.css';
 export default function Welcome() {
   const { t } = useLanguage();
@@ -17,9 +18,12 @@ export default function Welcome() {
   const featuresSubtitle = t?.welcome?.features?.subtitle;
   const [stats, setStats] = useState({ total_candidates: 0, total_resumes: 0 });
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [templates, setTemplates] = useState([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchTemplates();
   }, []);
 
   const fetchStats = async () => {
@@ -32,6 +36,19 @@ export default function Welcome() {
       console.error('Error fetching stats:', error);
     } finally {
       setIsLoadingStats(false);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const response = await getTemplates();
+      if (response.data.status === 'success' && response.data.data) {
+        setTemplates(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+    } finally {
+      setIsLoadingTemplates(false);
     }
   };
 
@@ -212,6 +229,112 @@ export default function Welcome() {
                 )}
               </div>
             ) : null}
+          </div>
+        </div>
+
+        {/* Template Examples Section */}
+        <div className="relative bg-gradient-to-br from-slate-50 to-blue-50 py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {t?.welcome?.templates?.title || "Professional Templates"}
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                {t?.welcome?.templates?.subtitle || "Choose from our collection of professionally designed resume templates"}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+              {isLoadingTemplates ? (
+                // Loading skeleton
+                Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden animate-pulse">
+                    <div className="bg-gray-200 h-48"></div>
+                    <div className="p-6">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                templates.map((template, index) => (
+                  <div key={template.id || index} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden group">
+                    <div className="relative">
+                      {template.preview_image_url ? (
+                        <img
+                          src={template.preview_image_url}
+                          alt={`${template.name} Template`}
+                          className="w-full h-48 object-cover"
+                          onError={(e) => {
+                            // Fallback to CSS preview if image fails to load
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      {/* Fallback CSS preview */}
+                      <div className={`${template.preview_image_url ? 'hidden' : ''} bg-gradient-to-br from-blue-50 to-white h-48 p-4 border-b`}>
+                        <div className="bg-white rounded-lg p-3 shadow-sm mb-3 border-l-4 border-blue-500">
+                          <div className="h-3 bg-gray-800 rounded w-3/4 mb-2"></div>
+                          <div className="h-2 bg-gray-400 rounded w-1/2"></div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex space-x-2">
+                            <div className="h-2 bg-blue-200 rounded w-16"></div>
+                            <div className="h-2 bg-gray-300 rounded flex-1"></div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <div className="h-2 bg-blue-200 rounded w-20"></div>
+                            <div className="h-2 bg-gray-300 rounded flex-1"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="absolute bottom-4 left-4 text-white drop-shadow-lg">
+                        <h3 className="text-xl font-bold">{template.name}</h3>
+                        <p className="text-sm opacity-90">
+                          {template.category || 'Professional'}
+                        </p>
+                      </div>
+                      <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
+                        <button className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                          Preview Template
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <h4 className="text-lg font-bold mb-2 text-gray-900">{template.name} Template</h4>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {template.description || `Professional ${template.name.toLowerCase()} template for all industries.`}
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-1">
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                          {template.category || 'Professional'}
+                        </span>
+                        {template.category === 'Corporate' && (
+                          <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                            Business
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="text-center mt-12">
+              <p className="text-gray-600 mb-6">
+                {t?.welcome?.templates?.more || "And many more templates available"}
+              </p>
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                {t?.welcome?.templates?.cta || "Choose Your Template"}
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </div>
           </div>
         </div>
 

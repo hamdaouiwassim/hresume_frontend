@@ -140,6 +140,12 @@
             "noCard": "No credit card",
             "instant": "Instant download"
         },
+        "templates": {
+            "title": "Professional Templates",
+            "subtitle": "Choose from our collection of professionally designed resume templates",
+            "more": "And many more templates available",
+            "cta": "Choose Your Template"
+        },
         "stats": {
             "candidates": "Candidates",
             "resumes": "Resumes Created"
@@ -245,6 +251,7 @@
         "interests": "Interests",
         "certifications": "Certifications",
         "languages": "Languages",
+        "projects": "Projects",
         "present": "Present",
         "graduated": "Graduated",
         "fullPageView": "Full Page View",
@@ -381,6 +388,7 @@
                     "startDateHint": "When you joined",
                     "endDate": "End Date",
                     "endDateHint": "Leave empty if current",
+                    "isPresent": "This is my current position",
                     "description": "Key Achievements",
                     "descriptionHint": "Use bullet points for better readability",
                     "descriptionPlaceholder": "• Developed and launched feature X that increased user engagement by Y%\n• Led a team of X developers to deliver project Y ahead of schedule\n• Reduced system response time by X% through optimization",
@@ -466,6 +474,29 @@
                     "intermediate": "Intermediate",
                     "basic": "Basic"
                 }
+            },
+            "projects": {
+                "title": "Projects",
+                "addProject": "Add Project",
+                "project": {
+                    "title": "Project",
+                    "name": "Project Name",
+                    "nameHint": "Name of your project",
+                    "namePlaceholder": "e.g., E-commerce Website, Mobile App",
+                    "description": "Project Description",
+                    "descriptionHint": "Describe what the project does and your role",
+                    "descriptionPlaceholder": "• Built a full-stack e-commerce platform with React and Node.js\n• Implemented payment gateway integration\n• Achieved 40% increase in user engagement",
+                    "technologies": "Technologies Used",
+                    "technologiesHint": "Technologies, frameworks, or tools used",
+                    "technologiesPlaceholder": "e.g., React, Node.js, MongoDB, AWS",
+                    "url": "Project URL",
+                    "urlHint": "Link to live project or repository",
+                    "urlPlaceholder": "https://example.com or https://github.com/username/project",
+                    "startDate": "Start Date",
+                    "startDateHint": "When you started the project",
+                    "endDate": "End Date",
+                    "endDateHint": "When the project was completed (leave empty if ongoing)"
+                }
             }
         }
     },
@@ -476,6 +507,7 @@
         "templateLabel": "Resume Template",
         "subtitle": "Fill in the details to build your professional resume",
         "personalInfo": "Personal Information",
+        "socialMedia": "Social Media",
         "experience": "Experience",
         "education": "Education",
         "skills": "Skills",

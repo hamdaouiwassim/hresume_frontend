@@ -27,13 +27,15 @@ import {
   UserPlus,
   Mail,
   Trash2,
+  FolderGit,
+  GripVertical,
 } from "lucide-react";
 import { generatePDF } from "../services/PDFService";
 import { useLanguage } from "../context/LanguageContext";
 import { storeBasicInfo } from "../services/basicInfoService";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
-import { getByResumeId } from "../services/resumeService";
+import { getByResumeId, update as updateResume, getTemplates } from "../services/resumeService";
 import { generateShareableLink, getCurrentShareableLink, deactivateShareableLink } from "../services/ShareableLinkService";
 import { inviteCollaborator, getCollaborators, removeCollaborator } from "../services/CollaborationService";
 import ShowExperience from "../components/ShowExperience";
@@ -50,9 +52,12 @@ import { AuthContext } from "../context/AuthContext";
 import axiosInstance from "../api/axiosInstance";
 import ShowLanguage from "../components/ShowLanguage";
 import NewLanguage from "../components/NewLanguage";
+import ShowProject from "../components/ShowProject";
+import NewProject from "../components/NewProject";
 import { buildResumeTemplateData } from "../utils/resumeTemplateMapper";
 import ResumeTemplatePreview from "../components/ResumeTemplatePreview";
 import { deriveTemplateLayout, TEMPLATE_LAYOUTS } from "../utils/templateStyles";
+import SectionOrderManager from "../components/SectionOrderManager";
 
 const createPreviewDraftsState = () => ({
   experiences: { edits: {}, draft: null },
@@ -61,7 +66,12 @@ const createPreviewDraftsState = () => ({
   hobbies: { edits: {}, draft: null },
   certificates: { edits: {}, draft: null },
   languages: { edits: {}, draft: null },
+  projects: { edits: {}, draft: null },
 });
+
+// Toolbar button: icon only by default, label revealed on hover (sm and up). Uses max-width so transition animates.
+const toolbarLabelClass =
+  "hidden sm:inline-block overflow-hidden whitespace-nowrap max-w-0 ml-0 transition-[max-width,margin] duration-200 ease-out group-hover:max-w-[8rem] group-hover:ml-1.5";
 export default function EditResume() {
     // 1. Destructure the 'id' parameter from the URL
   const { id } = useParams();
@@ -73,6 +83,7 @@ export default function EditResume() {
   const [showNewHobby,setShowNewHobby]=useState(false);
   const [showNewCertificate,setShowNewCertificate]=useState(false);
   const [showNewLanguage,setShowNewLanguage]=useState(false);
+  const [showNewProject,setShowNewProject]=useState(false);
   const [isFullPagePreview, setIsFullPagePreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareableLink, setShareableLink] = useState(null);
@@ -85,6 +96,10 @@ export default function EditResume() {
   const [isLoadingCollaborators, setIsLoadingCollaborators] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templates, setTemplates] = useState([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
+  const [isChangingTemplate, setIsChangingTemplate] = useState(false);
   const [selectedSections, setSelectedSections] = useState([
     'basic_info',
     'experiences',
@@ -92,9 +107,52 @@ export default function EditResume() {
     'skills',
     'hobbies',
     'certificates',
-    'languages'
+    'languages',
+    'projects'
   ]); // Default: all sections allowed
   const [userPermissions, setUserPermissions] = useState(null); // null = owner (all permissions), array = allowed sections
+  
+  // Fixed sections that cannot be reordered
+  const fixedSections = ['personal', 'socialMedia'];
+
+  // Default section order (matching section keys used in the form)
+  const defaultSectionOrder = ['personal', 'socialMedia', 'experience', 'education', 'skills', 'hobbies', 'certificates', 'languages', 'projects'];
+
+  // Helper function to ensure fixed sections are always at the beginning
+  const ensureFixedSectionsFirst = (orderArray) => {
+    // Start with fixed sections
+    const result = [...fixedSections];
+
+    // Add remaining sections in the order they appear in the input array
+    orderArray.forEach(section => {
+      if (!fixedSections.includes(section)) {
+        result.push(section);
+      }
+    });
+
+    // Ensure all default sections are included
+    defaultSectionOrder.forEach(section => {
+      if (!result.includes(section)) {
+        result.push(section);
+      }
+    });
+
+    return result;
+  };
+
+  // Wrapper function for section order changes to ensure fixed sections stay first
+  const handleSectionOrderChange = (newOrder) => {
+    setSectionOrder(ensureFixedSectionsFirst(newOrder));
+  };
+  const [sectionOrder, setSectionOrder] = useState(ensureFixedSectionsFirst(defaultSectionOrder));
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const [draggedSectionIndex, setDraggedSectionIndex] = useState(null);
+  const [dragOverSectionIndex, setDragOverSectionIndex] = useState(null);
+
+  // Debug logging for section order
+    console.log('🔄 Section Order State:', sectionOrder);
+    console.log('🔒 Fixed Sections:', fixedSections);
+    console.log('🎯 Is Reorder Mode:', isReorderMode);
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -107,6 +165,7 @@ export default function EditResume() {
     template_layout: TEMPLATE_LAYOUTS.CLASSIC,
     linkedin: "",
     github: "",
+    website: "",
     professional_summary: "",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
     experiences: [],
@@ -115,6 +174,7 @@ export default function EditResume() {
     hobbies: [],
     certificates: [],
     languages: [],
+    projects: [],
   });
   const [previewDrafts, setPreviewDrafts] = useState(() => createPreviewDraftsState());
 
@@ -227,13 +287,23 @@ const fetchResumeData = useCallback(async () => {
           }
         }
 
-        const { full_name , job_title , phone, professional_summary , email , location, avatar, linkedin, github } = basicInfo;
+        const { full_name , job_title , phone, professional_summary , email , location, avatar, linkedin, github, website } = basicInfo;
         const { experiences } = resumeRecord;
         const { educations } = resumeRecord;
         const { skills } = resumeRecord;
         const { hobbies } = resumeRecord;
         const { certificates } = resumeRecord;
         const { languages } = resumeRecord;
+        const { projects } = resumeRecord;
+        const sectionOrderFromDB = resumeRecord.section_order;
+         
+        // Set section order if it exists, otherwise use default
+        // Always ensure fixed sections are at the beginning
+        if (sectionOrderFromDB && Array.isArray(sectionOrderFromDB) && sectionOrderFromDB.length > 0) {
+          setSectionOrder(ensureFixedSectionsFirst(sectionOrderFromDB));
+        } else {
+          setSectionOrder(defaultSectionOrder);
+        }
          
         setFormData((prev) => ({
           ...prev,
@@ -245,6 +315,7 @@ const fetchResumeData = useCallback(async () => {
           location,
           linkedin: linkedin || "",
           github: github || "",
+          website: website || "",
           avatar: avatar || prev.avatar,
           experiences: experiences || [],
           educations: educations || [],
@@ -252,6 +323,7 @@ const fetchResumeData = useCallback(async () => {
           hobbies: hobbies || [],
           certificates: certificates || [],
           languages: languages || [],
+          projects: projects || [],
           template_id: templateId,
           template_layout: templateLayout || prev.template_layout,
         }));
@@ -265,7 +337,31 @@ const fetchResumeData = useCallback(async () => {
     // Fetch resume data using the 'id' and populate formData
    fetchResumeData();
     // Example: fetchResumeData(id);
-  }, [fetchResumeData,showNewExperience,showNewEducation,showNewSkill,showNewHobby,showNewCertificate,showNewLanguage]);
+  }, [fetchResumeData,showNewExperience,showNewEducation,showNewSkill,showNewHobby,showNewCertificate,showNewLanguage,showNewProject]);
+
+  // Fetch templates for template selector
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      setIsLoadingTemplates(true);
+      try {
+        console.log('Fetching templates...');
+        const response = await getTemplates();
+        console.log('Templates response:', response.data);
+        if (response.data.status === 'success' && response.data.data) {
+          setTemplates(response.data.data);
+          console.log('Templates loaded:', response.data.data.length);
+        } else {
+          console.warn('Templates response format unexpected:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        toast.error('Failed to load templates');
+      } finally {
+        setIsLoadingTemplates(false);
+      }
+    };
+    fetchTemplates();
+  }, []);
 
   const { t, language } = useLanguage();
   const locale = language === "fr" ? "fr-FR" : "en-US";
@@ -274,11 +370,13 @@ const fetchResumeData = useCallback(async () => {
 
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(true);
+  const [isSocialMediaOpen, setIsSocialMediaOpen] = useState(false);
   const [isEducationOpen, setIsEducationOpen] = useState(false);
   const [isSkillsOpen, setIsSkillsOpen] = useState(false);
   const [isHobbiesOpen, setIsHobbiesOpen] = useState(false);
   const [isCertificatesOpen, setIsCertificatesOpen] = useState(false);
   const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
+  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
 
   const hasBasicInfo = useMemo(() => {
     return [
@@ -332,21 +430,31 @@ const fetchResumeData = useCallback(async () => {
       hobbies: mergeSection(formData.hobbies, "hobbies"),
       certificates: mergeSection(formData.certificates, "certificates"),
       languages: mergeSection(formData.languages, "languages"),
+      projects: mergeSection(formData.projects, "projects"),
     };
   }, [formData, previewDrafts]);
 
   const resumePreviewData = useMemo(
-    () =>
-      buildResumeTemplateData(previewSourceData, locale, {
+    () => {
+      const data = buildResumeTemplateData(
+        { ...previewSourceData, section_order: sectionOrder },
+        locale,
+        {
         present: t?.preview?.present,
-      }),
-    [previewSourceData, locale, t?.preview?.present]
+        }
+      );
+      console.log('📋 Resume Preview Data section_order:', data.section_order);
+      return data;
+    },
+    [previewSourceData, locale, t?.preview?.present, sectionOrder]
   );
 
   const openSection = (section) => {
     // Only open the section if it's not already open, and close all others
     if (section === "personal") {
       setIsPersonalInfoOpen(true);
+    } else if (section === "socialMedia") {
+      setIsSocialMediaOpen(true);
     } else if (section === "experience") {
       setIsExperienceOpen(true);
     } else if (section === "education") {
@@ -359,11 +467,16 @@ const fetchResumeData = useCallback(async () => {
       setIsCertificatesOpen(true);
     } else if (section === "languages") {
       setIsLanguagesOpen(true);
+    } else if (section === "projects") {
+      setIsProjectsOpen(true);
     }
     
     // Close all other sections
     if (section !== "personal") {
       setIsPersonalInfoOpen(false);
+    }
+    if (section !== "socialMedia") {
+      setIsSocialMediaOpen(false);
     }
     if (section !== "experience") {
       setIsExperienceOpen(false);
@@ -383,6 +496,9 @@ const fetchResumeData = useCallback(async () => {
     if (section !== "languages") {
       setIsLanguagesOpen(false);
     }
+    if (section !== "projects") {
+      setIsProjectsOpen(false);
+    }
   };
 
   const toggleSection = (section) => {
@@ -391,6 +507,9 @@ const fetchResumeData = useCallback(async () => {
     if (section === "personal") {
       isCurrentlyOpen = isPersonalInfoOpen;
       setIsPersonalInfoOpen(prev => !prev);
+    } else if (section === "socialMedia") {
+      isCurrentlyOpen = isSocialMediaOpen;
+      setIsSocialMediaOpen(prev => !prev);
     } else if (section === "experience") {
       isCurrentlyOpen = isExperienceOpen;
       setIsExperienceOpen(prev => !prev);
@@ -409,12 +528,18 @@ const fetchResumeData = useCallback(async () => {
     } else if (section === "languages") {
       isCurrentlyOpen = isLanguagesOpen;
       setIsLanguagesOpen(prev => !prev);
+    } else if (section === "projects") {
+      isCurrentlyOpen = isProjectsOpen;
+      setIsProjectsOpen(prev => !prev);
     }
     
     // Close all other sections only if we're opening a new one (not closing the current one)
     if (!isCurrentlyOpen) {
       if (section !== "personal") {
         setIsPersonalInfoOpen(false);
+      }
+      if (section !== "socialMedia") {
+        setIsSocialMediaOpen(false);
       }
       if (section !== "experience") {
         setIsExperienceOpen(false);
@@ -433,6 +558,9 @@ const fetchResumeData = useCallback(async () => {
       }
       if (section !== "languages") {
         setIsLanguagesOpen(false);
+      }
+      if (section !== "projects") {
+        setIsProjectsOpen(false);
       }
     }
   };
@@ -577,6 +705,7 @@ const fetchResumeData = useCallback(async () => {
   };
 
   const collaborationSectionLabels = {
+    projects: "Projects",
     basic_info: 'Basic Info',
     experiences: 'Experiences',
     educations: 'Education',
@@ -635,7 +764,10 @@ const fetchResumeData = useCallback(async () => {
       const filename = `${
         formData.full_name ? formData.full_name.replace(/\s+/g, "_") : "cv"
       }.pdf`;
-      const resumePayload = buildResumeTemplateData(formData, locale, {
+      const resumePayload = buildResumeTemplateData({
+        ...formData,
+        section_order: sectionOrder
+      }, locale, {
         present: t?.preview?.present,
       });
 
@@ -644,6 +776,10 @@ const fetchResumeData = useCallback(async () => {
         filename,
         locale: localeCode,
       });
+
+      console.log('PDF response received:', response);
+      console.log('PDF response status:', response.status);
+      console.log('PDF response headers:', response.headers);
 
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
@@ -660,7 +796,7 @@ const fetchResumeData = useCallback(async () => {
       console.error("PDF generation error:", error);
       toast.error(
         error.response?.data?.message ||
-          "There was an error generating the PDF. Please try again.",
+          "Failed to generate PDF. Please try again.",
         { id: "pdf-generation" }
       );
     }
@@ -725,6 +861,9 @@ const fetchResumeData = useCallback(async () => {
         location: formData.location,
         job_title: formData.job_title,
         professional_summary: formData.professional_summary,
+        linkedin: formData.linkedin,
+        github: formData.github,
+        website: formData.website,
       });   
       toast.success(response.data.message || "Basic info saved successfully!");
     } catch (error) {
@@ -809,6 +948,57 @@ const fetchResumeData = useCallback(async () => {
     fetchResumeData();
   };
 
+  const handleProjectSave = () => {
+    setIsProjectsOpen(true);
+    setShowNewProject(false);
+    clearPreviewSection("projects", { isNew: true });
+    fetchResumeData();
+  };
+
+  // Template change handler
+  const handleTemplateChange = async (newTemplateId) => {
+    if (!newTemplateId || newTemplateId === formData.template_id) {
+      return;
+    }
+
+    setIsChangingTemplate(true);
+    try {
+      // Find the selected template
+      const selectedTemplate = templates.find(t => t.id === newTemplateId);
+      if (!selectedTemplate) {
+        toast.error('Template not found');
+        return;
+      }
+
+      // Derive the template layout
+      const newTemplateLayout = deriveTemplateLayout(selectedTemplate);
+
+      // Update the resume in the backend
+      const response = await updateResume(id, {
+        template_id: newTemplateId
+      });
+
+      if (response.data.status) {
+        // Update local state
+        setFormData((prev) => ({
+          ...prev,
+          template_id: newTemplateId,
+          template_layout: newTemplateLayout,
+        }));
+
+        toast.success('Template changed successfully!');
+        setShowTemplateModal(false);
+      } else {
+        toast.error('Failed to change template');
+      }
+    } catch (error) {
+      console.error('Error changing template:', error);
+      toast.error(error.response?.data?.message || 'Failed to change template');
+    } finally {
+      setIsChangingTemplate(false);
+    }
+  };
+
   // Experience handlers
   const addExperience = () => {
     setShowNewExperience(true);
@@ -844,6 +1034,108 @@ const fetchResumeData = useCallback(async () => {
     openSection("languages");
   };
 
+  const addProject = () => {
+    setShowNewProject(true);
+    openSection("projects");
+  };
+
+  // Drag and drop handlers for sections
+    const handleSectionDragStart = (e, sectionKey) => {
+      if (!isReorderMode) return;
+
+      // Prevent dragging of fixed sections
+      if (fixedSections.includes(sectionKey)) {
+        e.preventDefault();
+        return;
+      }
+
+      const index = sectionOrder.indexOf(sectionKey);
+      setDraggedSectionIndex(index);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", sectionKey);
+      e.currentTarget.style.opacity = "0.5";
+      console.log('🚀 Drag Start:', { sectionKey, index, sectionOrder, isFixed: false });
+    };
+
+  const handleSectionDragEnd = (e) => {
+    if (!isReorderMode) return;
+    e.currentTarget.style.opacity = "1";
+    setDraggedSectionIndex(null);
+    setDragOverSectionIndex(null);
+    console.log('🏁 Drag End');
+  };
+
+    const handleSectionDragOver = (e, sectionKey) => {
+      if (!isReorderMode) return;
+
+      // Don't allow dropping on fixed sections
+      if (fixedSections.includes(sectionKey)) {
+        setDragOverSectionIndex(null);
+        return;
+      }
+
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      const index = sectionOrder.indexOf(sectionKey);
+      setDragOverSectionIndex(index);
+    };
+
+  const handleSectionDragLeave = () => {
+    if (!isReorderMode) return;
+    setDragOverSectionIndex(null);
+  };
+
+  const handleSectionDrop = (e, dropSectionKey) => {
+    if (!isReorderMode) return;
+    e.preventDefault();
+
+    const draggedSectionKey = e.dataTransfer.getData("text/plain");
+    console.log('📦 Drop Event:', { draggedSectionKey, dropSectionKey });
+
+    if (!draggedSectionKey || draggedSectionKey === dropSectionKey || fixedSections.includes(draggedSectionKey)) {
+      setDragOverSectionIndex(null);
+      return;
+    }
+
+    // Don't allow dropping on fixed sections
+    if (fixedSections.includes(dropSectionKey)) {
+      setDragOverSectionIndex(null);
+      return;
+    }
+
+    const draggedIndex = sectionOrder.indexOf(draggedSectionKey);
+    const dropIndex = sectionOrder.indexOf(dropSectionKey);
+
+    console.log('📊 Indices:', { draggedIndex, dropIndex, sectionOrder });
+
+    if (draggedIndex === -1 || dropIndex === -1) return;
+
+    // Separate fixed and movable sections
+    const fixedPart = sectionOrder.slice(0, fixedSections.length);
+    const movablePart = sectionOrder.slice(fixedSections.length);
+
+    // Find the dragged item in the movable part
+    const movableIndex = movablePart.indexOf(draggedSectionKey);
+    if (movableIndex === -1) return; // Shouldn't happen, but safety check
+
+    // Remove from movable part
+    const [draggedItem] = movablePart.splice(movableIndex, 1);
+
+    // Calculate the drop position within the movable part
+    const adjustedDropIndex = dropIndex - fixedSections.length;
+
+    // Insert at new position in movable part
+    movablePart.splice(adjustedDropIndex, 0, draggedItem);
+
+    // Combine back and ensure fixed sections are first
+    const newOrder = [...fixedPart, ...movablePart];
+
+    setSectionOrder(ensureFixedSectionsFirst(newOrder));
+    setDragOverSectionIndex(null);
+    setDraggedSectionIndex(null);
+    console.log('✨ New Order:', newOrder);
+  };
+
   
 
  
@@ -857,6 +1149,12 @@ const fetchResumeData = useCallback(async () => {
         "border-blue-500 bg-gradient-to-br from-blue-50 via-white to-white shadow-lg shadow-blue-100",
       iconOpen: "bg-blue-600 text-white shadow-blue-200",
       chevron: "text-blue-600",
+    },
+    socialMedia: {
+      openContainer:
+        "border-teal-500 bg-gradient-to-br from-teal-50 via-white to-white shadow-lg shadow-teal-100",
+      iconOpen: "bg-teal-600 text-white shadow-teal-200",
+      chevron: "text-teal-600",
     },
     experience: {
       openContainer:
@@ -894,16 +1192,66 @@ const fetchResumeData = useCallback(async () => {
       iconOpen: "bg-cyan-500 text-white shadow-cyan-200",
       chevron: "text-cyan-600",
     },
+    projects: {
+      openContainer:
+        "border-violet-500 bg-gradient-to-br from-violet-50 via-white to-white shadow-lg shadow-violet-100",
+      iconOpen: "bg-violet-500 text-white shadow-violet-200",
+      chevron: "text-violet-600",
+    },
   };
 
   const sectionLabels = {
     personal: t.preview?.sectionLabelPersonal || "01 Personal Info",
-    experience: t.preview?.sectionLabelExperience || "02 Experience",
-    languages: t.preview?.sectionLabelLanguages || "07 Languages",
-    education: t.preview?.sectionLabelEducation || "03 Education",
-    skills: t.preview?.sectionLabelSkills || "04 Skills",
-    hobbies: t.preview?.sectionLabelHobbies || "05 Hobbies",
-    certificates: t.preview?.sectionLabelCertificates || "06 Certificates",
+    socialMedia: t.preview?.sectionLabelSocialMedia || "02 Social Media",
+    experience: t.preview?.sectionLabelExperience || "03 Experience",
+    languages: t.preview?.sectionLabelLanguages || "08 Languages",
+    education: t.preview?.sectionLabelEducation || "04 Education",
+    skills: t.preview?.sectionLabelSkills || "05 Skills",
+    hobbies: t.preview?.sectionLabelHobbies || "06 Hobbies",
+    certificates: t.preview?.sectionLabelCertificates || "07 Certificates",
+    projects: t.preview?.sectionLabelProjects || "09 Projects",
+  };
+
+    // Helper function to render a section wrapper with drag handlers
+    const renderSectionWrapper = (sectionKey, children) => {
+      const sectionIndex = sectionOrder.indexOf(sectionKey);
+      const isFixed = fixedSections.includes(sectionKey);
+      return (
+        <div
+          key={sectionKey}
+          draggable={isReorderMode && !isFixed}
+          onDragStart={(e) => handleSectionDragStart(e, sectionKey)}
+          onDragEnd={handleSectionDragEnd}
+          onDragOver={(e) => handleSectionDragOver(e, sectionKey)}
+          onDragLeave={handleSectionDragLeave}
+          onDrop={(e) => handleSectionDrop(e, sectionKey)}
+          className={`${getAccordionClasses(sectionKey,
+            sectionKey === "personal" ? isPersonalInfoOpen :
+            sectionKey === "socialMedia" ? isSocialMediaOpen :
+            sectionKey === "experience" ? isExperienceOpen :
+            sectionKey === "education" ? isEducationOpen :
+            sectionKey === "skills" ? isSkillsOpen :
+            sectionKey === "hobbies" ? isHobbiesOpen :
+            sectionKey === "certificates" ? isCertificatesOpen :
+            sectionKey === "languages" ? isLanguagesOpen :
+            sectionKey === "projects" ? isProjectsOpen : false
+          )} ${
+            isReorderMode && !isFixed ? "cursor-move" : ""
+          } ${
+            isReorderMode && isFixed ? "cursor-not-allowed opacity-75" : ""
+          } ${
+            draggedSectionIndex !== null && sectionIndex === draggedSectionIndex
+              ? "opacity-50"
+              : ""
+          } ${
+            dragOverSectionIndex !== null && sectionIndex === dragOverSectionIndex
+              ? "ring-2 ring-blue-400 ring-offset-2"
+              : ""
+          }`}
+        >
+        {children}
+      </div>
+    );
   };
 
   const getAccordionClasses = (key, isOpen) =>
@@ -975,15 +1323,52 @@ const fetchResumeData = useCallback(async () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left Panel - CV Form */}
           <div className="p-3 bg-white/90 backdrop-blur-sm border border-slate-100 shadow-xl rounded-3xl overflow-hidden self-start">
+            <div className="mb-4 flex justify-end">
+              <SectionOrderManager
+                sections={defaultSectionOrder}
+                sectionOrder={sectionOrder}
+                onOrderChange={handleSectionOrderChange}
+                resumeId={id}
+                sectionLabels={sectionLabels}
+                isReorderMode={isReorderMode}
+                onToggleReorderMode={setIsReorderMode}
+              />
+            </div>
+            {isReorderMode && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Reorder Mode:</strong> Drag sections directly to reorder them. The preview updates in real-time.
+                </p>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="divide-y divide-gray-200">
-              <div className={getAccordionClasses("personal", isPersonalInfoOpen)}>
+              {sectionOrder.map((sectionKey) => {
+                // Skip sections that shouldn't be rendered
+                if (sectionKey === "socialMedia" && !canEditSection('basic_info')) return null;
+                if (sectionKey === "experience" && !canEditSection('experiences')) return null;
+                if (sectionKey === "skills" && !canEditSection('skills')) return null;
+                if (sectionKey === "hobbies" && !canEditSection('hobbies')) return null;
+                if (sectionKey === "certificates" && !canEditSection('certificates')) return null;
+                if (sectionKey === "languages" && !canEditSection('languages')) return null;
+                if (sectionKey === "projects" && !canEditSection('projects')) return null;
+
+                // Personal Info Section
+                if (sectionKey === "personal") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
                 <button
                   type="button"
-                  onClick={() => toggleSection("personal")}
+                        onClick={() => !isReorderMode && toggleSection("personal")}
                   className={getAccordionButtonClasses(isPersonalInfoOpen)}
                   aria-expanded={isPersonalInfoOpen}
+                        disabled={isReorderMode}
                 >
                   <div className="flex items-center gap-3">
+                          {isReorderMode && !fixedSections.includes("personal") && (
+                            <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                              <GripVertical className="h-5 w-5" />
+                            </div>
+                          )}
                     <div className={getAccordionIconClasses("personal", isPersonalInfoOpen)}>
                       <UserCircle className="h-5 w-5" />
                     </div>
@@ -1186,19 +1571,158 @@ const fetchResumeData = useCallback(async () => {
                       </button>
                     </div>
                   </div>
+                      </div>
+                    </>
+                  );
+                }
+
+                // Social Media Section
+                if (sectionKey === "socialMedia") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
+                      <button
+                  type="button"
+                  onClick={() => !isReorderMode && toggleSection("socialMedia")}
+                  className={getAccordionButtonClasses(isSocialMediaOpen)}
+                  aria-expanded={isSocialMediaOpen}
+                  disabled={isReorderMode}
+                >
+                  <div className="flex items-center gap-3">
+                    {isReorderMode && !fixedSections.includes("socialMedia") && (
+                      <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div className={getAccordionIconClasses("socialMedia", isSocialMediaOpen)}>
+                      <Share2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                        {sectionLabels.socialMedia}
+                      </p>
+                      <h2 className="text-lg font-semibold">
+                        {t.dashboard.sections.socialMedia?.title || "Social Media"}
+                      </h2>
+                    </div>
+                  </div>
+                  <ChevronDown className={getChevronClasses("socialMedia", isSocialMediaOpen)} />
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-500 ${
+                    isSocialMediaOpen ? "max-h-[2000px]" : "max-h-0"
+                  }`}
+                >
+                  <div
+                    className={`px-6 pb-6 transition-all duration-300 ${
+                      isSocialMediaOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+                    }`}
+                  >
+                    <div className="grid grid-cols-1 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t.dashboard.sections.socialMedia?.linkedin || "LinkedIn"} {" "}
+                          <span className="text-gray-400 text-xs">(Optional)</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="url"
+                            name="linkedin"
+                            value={formData.linkedin}
+                            onChange={handleChange}
+                            disabled={!canEditSection('basic_info')}
+                            className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5 ${
+                              !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
+                            placeholder={t.dashboard.sections.socialMedia?.linkedinPlaceholder || "https://linkedin.com/in/yourprofile"}
+                          />
                 </div>
               </div>
 
-              {/* Experience Section */}
-              {canEditSection('experiences') && (
-              <div className={getAccordionClasses("experience", isExperienceOpen)}>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t.dashboard.sections.socialMedia?.github || "GitHub"} {" "}
+                          <span className="text-gray-400 text-xs">(Optional)</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="url"
+                            name="github"
+                            value={formData.github}
+                            onChange={handleChange}
+                            disabled={!canEditSection('basic_info')}
+                            className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5 ${
+                              !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
+                            placeholder={t.dashboard.sections.socialMedia?.githubPlaceholder || "https://github.com/yourusername"}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t.dashboard.sections.socialMedia?.website || "Website"} {" "}
+                          <span className="text-gray-400 text-xs">(Optional)</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="url"
+                            name="website"
+                            value={formData.website}
+                            onChange={handleChange}
+                            disabled={!canEditSection('basic_info')}
+                            className={`mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm pl-4 py-2.5 ${
+                              !canEditSection('basic_info') ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
+                            placeholder={t.dashboard.sections.socialMedia?.websitePlaceholder || "https://yourwebsite.com"}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-end pt-4">
                 <button
                   type="button"
-                  onClick={() => toggleSection("experience")}
+                        onClick={handleSubmit}
+                        disabled={isLoading || !canEditSection('basic_info')}
+                        className={`${buttonVariants.primary} ${
+                          isLoading || !canEditSection('basic_info') ? disabledButtonClasses : ""
+                        }`}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>{t.common.loading}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4" />
+                            <span>{t.common.save}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                    </>
+                  );
+                }
+
+                // Experience Section
+                if (sectionKey === "experience") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
+                      <button
+                  type="button"
+                  onClick={() => !isReorderMode && toggleSection("experience")}
                   className={getAccordionButtonClasses(isExperienceOpen)}
                   aria-expanded={isExperienceOpen}
+                  disabled={isReorderMode}
                 >
                   <div className="flex items-center gap-3">
+                    {isReorderMode && (
+                      <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-5 w-5" />
+                      </div>
+                    )}
                     <div className={getAccordionIconClasses("experience", isExperienceOpen)}>
                       <Briefcase className="h-5 w-5" />
                     </div>
@@ -1265,18 +1789,27 @@ const fetchResumeData = useCallback(async () => {
                     })}
                   </div>
                 </div>
-              </div>
-              )}
+                    </>
+                  );
+                }
 
-              {/* Education Section */}
-              <div className={getAccordionClasses("education", isEducationOpen)}>
+                // Education Section
+                if (sectionKey === "education") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
                 <button
                   type="button"
-                  onClick={() => toggleSection("education")}
+                  onClick={() => !isReorderMode && toggleSection("education")}
                   className={getAccordionButtonClasses(isEducationOpen)}
                   aria-expanded={isEducationOpen}
+                  disabled={isReorderMode}
                 >
                   <div className="flex items-center gap-3">
+                    {isReorderMode && (
+                      <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-5 w-5" />
+                      </div>
+                    )}
                     <div className={getAccordionIconClasses("education", isEducationOpen)}>
                       <GraduationCap className="h-5 w-5" />
                     </div>
@@ -1343,19 +1876,27 @@ const fetchResumeData = useCallback(async () => {
                     })}
                   </div>
                 </div>
-              </div>
-              
+                    </>
+                  );
+                }
 
-              {/* Skills Section */}
-              {canEditSection('skills') && (
-              <div className={getAccordionClasses("skills", isSkillsOpen)}>
+                // Skills Section
+                if (sectionKey === "skills") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
                 <button
                   type="button"
-                  onClick={() => toggleSection("skills")}
+                  onClick={() => !isReorderMode && toggleSection("skills")}
                   className={getAccordionButtonClasses(isSkillsOpen)}
                   aria-expanded={isSkillsOpen}
+                  disabled={isReorderMode}
                 >
                   <div className="flex items-center gap-3">
+                    {isReorderMode && (
+                      <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-5 w-5" />
+                      </div>
+                    )}
                     <div className={getAccordionIconClasses("skills", isSkillsOpen)}>
                       <Lightbulb className="h-5 w-5" />
                     </div>
@@ -1424,19 +1965,27 @@ const fetchResumeData = useCallback(async () => {
                       
                   </div>
                 </div>
-              </div>
-              )}
+                    </>
+                  );
+                }
 
-              {/* Hobbies Section */}
-              {canEditSection('hobbies') && (
-              <div className={getAccordionClasses("hobbies", isHobbiesOpen)}>
+                // Hobbies Section
+                if (sectionKey === "hobbies") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
                 <button
                   type="button"
-                  onClick={() => toggleSection("hobbies")}
+                  onClick={() => !isReorderMode && toggleSection("hobbies")}
                   className={getAccordionButtonClasses(isHobbiesOpen)}
                   aria-expanded={isHobbiesOpen}
+                  disabled={isReorderMode}
                 >
                   <div className="flex items-center gap-3">
+                    {isReorderMode && (
+                      <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-5 w-5" />
+                      </div>
+                    )}
                     <div className={getAccordionIconClasses("hobbies", isHobbiesOpen)}>
                       <Heart className="h-5 w-5" />
                     </div>
@@ -1506,19 +2055,27 @@ const fetchResumeData = useCallback(async () => {
                       })}
                   </div>
                 </div>
-              </div>
-              )}
+                    </>
+                  );
+                }
 
-              {/* Certificates Section */}
-              {canEditSection('certificates') && (
-              <div className={getAccordionClasses("certificates", isCertificatesOpen)}>
+                // Certificates Section
+                if (sectionKey === "certificates") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
                 <button
                   type="button"
-                  onClick={() => toggleSection("certificates")}
+                  onClick={() => !isReorderMode && toggleSection("certificates")}
                   className={getAccordionButtonClasses(isCertificatesOpen)}
                   aria-expanded={isCertificatesOpen}
+                  disabled={isReorderMode}
                 >
                   <div className="flex items-center gap-3">
+                    {isReorderMode && (
+                      <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-5 w-5" />
+                      </div>
+                    )}
                     <div className={getAccordionIconClasses("certificates", isCertificatesOpen)}>
                       <Trophy className="h-5 w-5" />
                     </div>
@@ -1588,19 +2145,27 @@ const fetchResumeData = useCallback(async () => {
                       })}
                   </div>
                 </div>
-              </div>
-              )}
+                    </>
+                  );
+                }
 
-              {/* Languages Section */}
-              {canEditSection('languages') && (
-              <div className={getAccordionClasses("languages", isLanguagesOpen)}>
+                // Languages Section
+                if (sectionKey === "languages") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
                 <button
                   type="button"
-                  onClick={() => toggleSection("languages")}
+                  onClick={() => !isReorderMode && toggleSection("languages")}
                   className={getAccordionButtonClasses(isLanguagesOpen)}
                   aria-expanded={isLanguagesOpen}
+                  disabled={isReorderMode}
                 >
                   <div className="flex items-center gap-3">
+                    {isReorderMode && (
+                      <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-5 w-5" />
+                      </div>
+                    )}
                     <div className={getAccordionIconClasses("languages", isLanguagesOpen)}>
                       <Globe className="h-5 w-5" />
                     </div>
@@ -1668,8 +2233,100 @@ const fetchResumeData = useCallback(async () => {
                       })}
                   </div>
                 </div>
+                    </>
+                  );
+                }
+
+                // Projects Section
+                if (sectionKey === "projects") {
+                  return renderSectionWrapper(sectionKey,
+                    <>
+                      <button
+                  type="button"
+                  onClick={() => !isReorderMode && toggleSection("projects")}
+                  className={getAccordionButtonClasses(isProjectsOpen)}
+                  aria-expanded={isProjectsOpen}
+                  disabled={isReorderMode}
+                >
+                  <div className="flex items-center gap-3">
+                    {isReorderMode && (
+                      <div className="text-gray-400 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-5 w-5" />
               </div>
               )}
+                    <div className={getAccordionIconClasses("projects", isProjectsOpen)}>
+                      <FolderGit className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                        {sectionLabels.projects}
+                      </p>
+                      <h2 className="text-lg font-semibold">
+                        {t.dashboard.sections.projects.title || "Projects"}
+                      </h2>
+                    </div>
+                  </div>
+                  <ChevronDown className={getChevronClasses("projects", isProjectsOpen)} />
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-500 ${
+                    isProjectsOpen ? "max-h-[3000px]" : "max-h-0"
+                  }`}
+                >
+                  <div
+                    className={`px-6 pb-6 transition-all duration-300 ${
+                      isProjectsOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={addProject}
+                      className={`mt-2 mb-4 ${buttonBase} border border-violet-200 bg-violet-50/80 text-violet-700 px-4 py-2 text-sm hover:bg-violet-100 focus:ring-violet-300 focus:ring-offset-white`}
+                    >
+                      {t.dashboard.sections.projects.addProject || "Add Project"}
+                    </button>
+
+                    {showNewProject && (
+                      <NewProject
+                        index={formData.projects ? formData.projects.length : 0}
+                        hide={() => {
+                          setShowNewProject(false);
+                          clearPreviewSection("projects", { isNew: true });
+                        }}
+                        resumeId={id}
+                        onSave={handleProjectSave}
+                        onPreviewChange={(draft) => updatePreviewSection("projects", draft, { isNew: true })}
+                        onPreviewClear={() => clearPreviewSection("projects", { isNew: true })}
+                      />
+                    )}
+
+                    {formData.projects &&
+                      formData.projects.map((project, index) => {
+                        const projectPreviewId = project.id ?? `project-${index}`;
+                        return (
+                          <ShowProject
+                            key={projectPreviewId}
+                            project={project}
+                            index={index}
+                            hide={() => setShowNewProject(false)}
+                            resumeId={id}
+                            onSave={handleProjectSave}
+                            onDelete={handleProjectSave}
+                            onPreviewChange={(draft) =>
+                              updatePreviewSection("projects", draft, { id: projectPreviewId })
+                            }
+                            onPreviewClear={() => clearPreviewSection("projects", { id: projectPreviewId })}
+                          />
+                        );
+                      })}
+                  </div>
+                </div>
+                    </>
+                  );
+                }
+
+                return null;
+              })}
             </form>
           </div>
 
@@ -1681,34 +2338,42 @@ const fetchResumeData = useCallback(async () => {
                 
                 <div className="flex items-center space-x-1 sm:space-x-2">
                   <button
+                    onClick={() => setShowTemplateModal(true)}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 border-green-300 text-green-700 hover:bg-green-50 group flex items-center overflow-hidden transition-all duration-200`}
+                    title="Change template"
+                  >
+                    <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className={toolbarLabelClass}>Template</span>
+                  </button>
+                  <button
                     onClick={() => setIsFullPagePreview(true)}
-                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5`}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 group flex items-center overflow-hidden transition-all duration-200`}
                     title="Full page preview"
                   >
-                    <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">{t.nav.fullPage}</span>
+                    <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className={toolbarLabelClass}>{t.nav.fullPage}</span>
                   </button>
                   <button
                     onClick={() => {
                       setShowShareModal(true);
                       loadShareableLink();
                     }}
-                    className={`${buttonVariants.purple} text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5`}
+                    className={`${buttonVariants.purple} text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 group flex items-center overflow-hidden transition-all duration-200`}
                     title={shareStrings.buttonTitle || "Share CV"}
                   >
-                    <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">{shareStrings.button || "Share"}</span>
+                    <Share2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className={toolbarLabelClass}>{shareStrings.button || "Share"}</span>
                   </button>
                   <button
                     onClick={() => {
                       setShowCollaborationModal(true);
                       loadCollaborators();
                     }}
-                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5 border-blue-300 text-blue-700 hover:bg-blue-50`}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 border-blue-300 text-blue-700 hover:bg-blue-50 group flex items-center overflow-hidden transition-all duration-200`}
                     title="Share for editing"
                   >
-                    <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Collaborate</span>
+                    <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className={toolbarLabelClass}>Collaborate</span>
                   </button>
                   <button
                     onClick={handleDownload}
@@ -1718,10 +2383,10 @@ const fetchResumeData = useCallback(async () => {
                     }
                     className={`${buttonVariants.blueSolid} ${
                       !downloadRequirementsMet ? disabledButtonClasses : ""
-                    } text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2.5`}
+                    } text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 group flex items-center overflow-hidden transition-all duration-200`}
                   >
-                    <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">{t.nav.download}</span>
+                    <Download className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className={toolbarLabelClass}>{t.nav.download}</span>
                   </button>
                 </div>
               </div>
@@ -1943,6 +2608,116 @@ const fetchResumeData = useCallback(async () => {
                       >
                         {shareStrings.newLink || "Generate New Link"}
                       </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Template Change Modal */}
+      {showTemplateModal && (
+        <div 
+          className="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-75"
+          onClick={() => setShowTemplateModal(false)}
+        >
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div 
+              className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Sparkles className="h-5 w-5 text-green-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Change Template
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setShowTemplateModal(false)}
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+                  title="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6">
+                {isLoadingTemplates ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-green-600" />
+                    <span className="ml-3 text-gray-600">Loading templates...</span>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-gray-600 mb-6 text-sm">
+                      Select a new template for your resume. Your content will remain the same, only the layout will change.
+                    </p>
+                    {templates.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Sparkles className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600">No templates available</p>
+                        <p className="text-sm text-gray-500 mt-2">Please try refreshing the page</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                        {templates.map((template) => {
+                        const isSelected = template.id === formData.template_id;
+                        return (
+                          <button
+                            key={template.id}
+                            onClick={() => handleTemplateChange(template.id)}
+                            disabled={isChangingTemplate || isSelected}
+                            className={`relative text-left border-2 rounded-xl p-4 transition-all hover:shadow-lg ${
+                              isSelected
+                                ? 'border-green-500 bg-green-50 ring-2 ring-green-200'
+                                : 'border-gray-200 bg-white hover:border-green-300'
+                            } ${isChangingTemplate ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          >
+                            {isSelected && (
+                              <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
+                                <Check className="h-4 w-4" />
+                              </div>
+                            )}
+                            {template.preview_image_url ? (
+                              <img
+                                src={template.preview_image_url}
+                                alt={template.name}
+                                className="w-full h-32 object-cover rounded-lg mb-3"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'block';
+                                }}
+                              />
+                            ) : null}
+                            <div className={`${template.preview_image_url ? 'hidden' : ''} w-full h-32 bg-gradient-to-br from-green-50 to-white rounded-lg mb-3 flex items-center justify-center`}>
+                              <Sparkles className="h-8 w-8 text-green-400" />
+                            </div>
+                            <h3 className="font-semibold text-gray-900 mb-1">{template.name}</h3>
+                            <p className="text-xs text-gray-600 line-clamp-2">
+                              {template.description || 'Professional template'}
+                            </p>
+                            {template.category && (
+                              <span className="inline-block mt-2 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">
+                                {template.category}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                      </div>
+                    )}
+                    {isChangingTemplate && (
+                      <div className="mt-4 flex items-center justify-center">
+                        <Loader2 className="h-5 w-5 animate-spin text-green-600 mr-2" />
+                        <span className="text-gray-600">Changing template...</span>
+                      </div>
                     )}
                   </>
                 )}

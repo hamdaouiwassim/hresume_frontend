@@ -1,25 +1,25 @@
 import { useState, useEffect, useRef } from "react";
-import { Experience } from "../Models/Experience";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Save,
   Loader2,
   X
 } from "lucide-react";
-import { storeExperience, updateExperience } from "../services/ExperienceService";
+import { storeProject, updateProject } from "../services/ProjectService";
 import { toast } from "sonner";
 
-export default function NewExperience({exp = {
-        company : "",
+export default function NewProject({project = {
+        name : "",
         description : "",
+        technologies : "",
+        url : "",
         startDate : null,
-        endDate : null,
-        position : "",
-        is_present : false
+        endDate : null
     } ,index = null  , hide , resumeId , edit=false , onSave, onPreviewChange, onPreviewClear}) {
 const { t } = useLanguage();
 const [errors,setErrors]=useState({});
 const [isLoading, setIsLoading] = useState(false);
+const [projectState,setProject] = useState(project);
 
 const buttonBase = "inline-flex items-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
 const buttonVariants = {
@@ -28,33 +28,30 @@ const buttonVariants = {
 };
 const disabledButtonClasses = "opacity-50 cursor-not-allowed pointer-events-none";
 
-const validateExperience = () => {
+const validateProject = (projectData) => {
     const newErrors = {};
-    if (!experience.company || experience.company.trim() === '') {
-        newErrors.company = ['Company is required'];
-    }
-    if (!experience.position || experience.position.trim() === '') {
-        newErrors.position = ['Position is required'];
+    if (!projectData.name || projectData.name.trim() === '') {
+        newErrors.name = ['Project name is required'];
     }
     return newErrors;
 };
 
 const hasValidationErrors = () => {
-    const validationErrors = validateExperience();
+    const validationErrors = validateProject(projectState);
     return Object.keys(validationErrors).length > 0 || Object.keys(errors).length > 0;
 };
 
-const handleStoreExperience = async () => {
-    const validationErrors = validateExperience();
+const handleStoreProject = async () => {
+    const validationErrors = validateProject(projectState);
     if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
         return;
     }
    
     setIsLoading(true);
-    let data = {...experience , resume_id : resumeId }
+    let data = {...projectState , resume_id : resumeId }
     try{
-    const response = await storeExperience(data);
+    const response = await storeProject(data);
     closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
@@ -63,22 +60,22 @@ const handleStoreExperience = async () => {
         console.log(error.response.data.errors);
         setErrors(error.response.data.errors);
       }
-      toast.error("Error saving experience. Please try again.");
+      toast.error("Error saving project. Please try again.");
     } finally {
       setIsLoading(false);
     }
 
   }
-const handleUpdateExperience = async () => {
-    const validationErrors = validateExperience();
+const handleUpdateProject = async () => {
+    const validationErrors = validateProject(projectState);
     if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
         return;
     }
     setIsLoading(true);
-let data = {...experience }
+let data = {...projectState }
     try{
-    const response = await updateExperience(data,exp.id);
+    const response = await updateProject(data,projectState.id);
     closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
@@ -87,12 +84,11 @@ let data = {...experience }
         console.log(error.response.data.errors);
         setErrors(error.response.data.errors);
       }
-      toast.error("Error updating experience. Please try again.");
+      toast.error("Error updating project. Please try again.");
     } finally {
       setIsLoading(false);
     }
 }
-    const [experience,setExperience] = useState(exp);
 
     const previewChangeRef = useRef(onPreviewChange);
     useEffect(() => {
@@ -100,8 +96,8 @@ let data = {...experience }
     }, [onPreviewChange]);
 
     useEffect(() => {
-      previewChangeRef.current?.(experience);
-    }, [experience]);
+      previewChangeRef.current?.(projectState);
+    }, [projectState]);
 
     const previewClearRef = useRef(onPreviewClear);
     useEffect(() => {
@@ -122,11 +118,11 @@ let data = {...experience }
     return (
             <div
                       key={index}
-                      className="bg-gradient-to-br from-amber-50/50 to-orange-50/30 border border-amber-200/60 rounded-2xl p-6 space-y-5 shadow-sm"
+                      className="bg-gradient-to-br from-purple-50/50 to-pink-50/30 border border-purple-200/60 rounded-2xl p-6 space-y-5 shadow-sm"
                     >
                       <div className="flex justify-between items-center">
                         <h4 className="text-base font-semibold text-slate-800">
-                          {edit ? "Edit Experience" : `Experience ${index !== null ? `#${index + 1}` : ''}`}
+                          {edit ? "Edit Project" : `Project ${index !== null ? `#${index + 1}` : ''}`}
                         </h4>
                         <button
                           type="button"
@@ -141,60 +137,90 @@ let data = {...experience }
                       <div className="grid grid-cols-1 gap-5">
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            { t.dashboard.sections.experiences.experience.company }{" "}
+                            { t.dashboard.sections.projects.project.name }{" "}
                             <span className="text-slate-400 font-normal text-xs">
-                              ({ t.dashboard.sections.experiences.experience.companyHint })
+                              ({ t.dashboard.sections.projects.project.nameHint })
                             </span>
                           </label>
                           <div className="relative">
                             <input
                               type="text"
-                              value={experience.company}
+                              value={projectState.name}
                               onChange={(e) => {
-                                setExperience({...experience, company: e.target.value});
-                                if (errors.company) {
+                                setProject({...projectState, name: e.target.value});
+                                if (errors.name) {
                                     const newErrors = {...errors};
-                                    delete newErrors.company;
+                                    delete newErrors.name;
                                     setErrors(newErrors);
                                 }
                               }}
                               className={`w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3 ${
-                                errors.company ? 'border-red-500 ring-red-200' : ''
+                                errors.name ? 'border-red-500 ring-red-200' : ''
                               }`}
-                              placeholder={ t.dashboard.sections.experiences.experience.companyPlaceholder }
+                              placeholder={ t.dashboard.sections.projects.project.namePlaceholder }
                             />
-                            {errors.company && (
-                                <p className="mt-1.5 text-sm text-red-600">{Array.isArray(errors.company) ? errors.company[0] : errors.company}</p>
+                            {errors.name && (
+                                <p className="mt-1.5 text-sm text-red-600">{Array.isArray(errors.name) ? errors.name[0] : errors.name}</p>
                             )}
                           </div>
                         </div>
 
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            { t.dashboard.sections.experiences.experience.position }{" "}
+                            { t.dashboard.sections.projects.project.url }{" "}
                             <span className="text-slate-400 font-normal text-xs">
-                              ({ t.dashboard.sections.experiences.experience.positionHint })
+                              ({ t.dashboard.sections.projects.project.urlHint })
+                            </span>
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="url"
+                              value={projectState.url || ""}
+                              onChange={(e) => {
+                                setProject({...projectState, url: e.target.value});
+                                if (errors.url) {
+                                    const newErrors = {...errors};
+                                    delete newErrors.url;
+                                    setErrors(newErrors);
+                                }
+                              }}
+                              className={`w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3 ${
+                                errors.url ? 'border-red-500 ring-red-200' : ''
+                              }`}
+                              placeholder={ t.dashboard.sections.projects.project.urlPlaceholder }
+                            />
+                            {errors.url && (
+                                <p className="mt-1.5 text-sm text-red-600">{Array.isArray(errors.url) ? errors.url[0] : errors.url}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            { t.dashboard.sections.projects.project.technologies }{" "}
+                            <span className="text-slate-400 font-normal text-xs">
+                              ({ t.dashboard.sections.projects.project.technologiesHint })
                             </span>
                           </label>
                           <div className="relative">
                             <input
                               type="text"
-                              value={experience.position}
+                              value={projectState.technologies || ""}
                               onChange={(e) => {
-                                setExperience({...experience, position: e.target.value});
-                                if (errors.position) {
+                                setProject({...projectState, technologies: e.target.value});
+                                if (errors.technologies) {
                                     const newErrors = {...errors};
-                                    delete newErrors.position;
+                                    delete newErrors.technologies;
                                     setErrors(newErrors);
                                 }
                               }}
                               className={`w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3 ${
-                                errors.position ? 'border-red-500 ring-red-200' : ''
+                                errors.technologies ? 'border-red-500 ring-red-200' : ''
                               }`}
-                              placeholder={ t.dashboard.sections.experiences.experience.positionPlaceholder }
+                              placeholder={ t.dashboard.sections.projects.project.technologiesPlaceholder }
                             />
-                            {errors.position && (
-                                <p className="mt-1.5 text-sm text-red-600">{Array.isArray(errors.position) ? errors.position[0] : errors.position}</p>
+                            {errors.technologies && (
+                                <p className="mt-1.5 text-sm text-red-600">{Array.isArray(errors.technologies) ? errors.technologies[0] : errors.technologies}</p>
                             )}
                           </div>
                         </div>
@@ -202,17 +228,17 @@ let data = {...experience }
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">
-                              { t.dashboard.sections.experiences.experience.startDate }{" "}
+                              { t.dashboard.sections.projects.project.startDate }{" "}
                               <span className="text-slate-400 font-normal text-xs">
-                                ({ t.dashboard.sections.experiences.experience.startDateHint })
+                                ({ t.dashboard.sections.projects.project.startDateHint })
                               </span>
                             </label>
                             <input
                               type="date"
-                              value={experience.startDate}
+                              value={projectState.startDate || ""}
                               onChange={(e) =>
-                                setExperience(
-                                  {...experience, startDate :e.target.value}
+                                setProject(
+                                  {...projectState, startDate :e.target.value}
                                   
                                 )
                               }
@@ -221,72 +247,50 @@ let data = {...experience }
                           </div>
                           <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">
-                              { t.dashboard.sections.experiences.experience.endDate }{" "}
+                              { t.dashboard.sections.projects.project.endDate }{" "}
                               <span className="text-slate-400 font-normal text-xs">
-                                ({ t.dashboard.sections.experiences.experience.endDateHint })
+                                ({ t.dashboard.sections.projects.project.endDateHint })
                               </span>
                             </label>
                             <input
                               type="date"
-                              value={experience.endDate || ""}
+                              value={projectState.endDate || ""}
                               onChange={(e) =>
-                                setExperience(
-                                  {...experience, endDate :e.target.value}
+                                setProject(
+                                  {...projectState, endDate :e.target.value}
                                   
                                 )
                               }
-                              disabled={experience.is_present}
-                              className={`w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3 ${
-                                experience.is_present ? 'opacity-50 cursor-not-allowed bg-slate-50' : ''
-                              }`}
+                              className="w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3"
                             />
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id={`is-present-${index}`}
-                            checked={experience.is_present || false}
-                            onChange={(e) => {
-                              setExperience({
-                                ...experience,
-                                is_present: e.target.checked,
-                                endDate: e.target.checked ? null : experience.endDate
-                              });
-                            }}
-                            className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 focus:ring-2"
-                          />
-                          <label htmlFor={`is-present-${index}`} className="text-sm font-semibold text-slate-700 cursor-pointer">
-                            { t.dashboard.sections.experiences.experience.isPresent }
-                          </label>
-                        </div>
-
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            { t.dashboard.sections.experiences.experience.description }{" "}
+                            { t.dashboard.sections.projects.project.description }{" "}
                             <span className="text-slate-400 font-normal text-xs">
-                              ({ t.dashboard.sections.experiences.experience.descriptionHint })
+                              ({ t.dashboard.sections.projects.project.descriptionHint })
                             </span>
                           </label>
                           <textarea
                             rows={4}
-                            value={experience.description}
+                            value={projectState.description || ""}
                             onChange={(e) =>
-                                setExperience(
-                                  {...experience, description :e.target.value}
+                                setProject(
+                                  {...projectState, description :e.target.value}
                                   
                                 )
                               }
                             className="w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm p-4 resize-none"
-                            placeholder={ t.dashboard.sections.experiences.experience.descriptionPlaceholder }
+                            placeholder={ t.dashboard.sections.projects.project.descriptionPlaceholder }
                           />
                         </div>
 
                         <div className="flex justify-end pt-2">
                     <button 
                         type="button"
-                        onClick={ ()=> { !edit ? handleStoreExperience(index) : handleUpdateExperience(index) } } 
+                        onClick={ ()=> { !edit ? handleStoreProject(index) : handleUpdateProject(index) } } 
                         disabled={hasValidationErrors() || isLoading}
                         className={`${buttonVariants.primary} ${
                             hasValidationErrors() || isLoading ? disabledButtonClasses : ""
@@ -310,3 +314,4 @@ let data = {...experience }
     )
 
 }
+

@@ -140,6 +140,12 @@
             "noCard": "Pas de carte bancaire",
             "instant": "Téléchargement instantané"
         },
+        "templates": {
+            "title": "Modèles Professionnels",
+            "subtitle": "Choisissez parmi notre collection de modèles de CV conçus professionnellement",
+            "more": "Et bien d'autres modèles disponibles",
+            "cta": "Choisissez Votre Modèle"
+        },
         "stats": {
             "candidates": "Candidats",
             "resumes": "CV Créés"
@@ -245,6 +251,7 @@
         "interests": "Intérêts",
         "certifications": "Certifications",
         "languages": "Langues",
+        "projects": "Projets",
         "present": "En cours",
         "graduated": "Diplômé",
         "fullPageView": "Vue Plein Écran",
@@ -364,6 +371,15 @@
                 "summaryPlaceholder": "Rédigez un bref résumé professionnel...",
                 "summaryHint": "Bref aperçu de votre carrière"
             },
+            "socialMedia": {
+                "title": "Réseaux Sociaux",
+                "linkedin": "LinkedIn",
+                "linkedinPlaceholder": "https://linkedin.com/in/votreprofil",
+                "github": "GitHub",
+                "githubPlaceholder": "https://github.com/votrenom",
+                "website": "Site Web",
+                "websitePlaceholder": "https://votresite.com"
+            },
             "experiences": {
                 "title": "Expériences professionnelles",
                 "addExperience": "Ajouter une expérience",
@@ -378,6 +394,7 @@
                     "startDateHint": "Quand vous avez commencé",
                     "endDate": "Date de Fin",
                     "endDateHint": "Laisser vide si poste actuel",
+                    "isPresent": "C'est mon poste actuel",
                     "description": "Réalisations Clés",
                     "descriptionHint": "Utilisez des puces pour plus de clarté",
                     "descriptionPlaceholder": "• Développé et lancé la fonctionnalité X qui a augmenté l'engagement des utilisateurs de Y%\n• Dirigé une équipe de X développeurs pour livrer le projet Y en avance\n• Réduit le temps de réponse du système de X%"
@@ -461,6 +478,29 @@
                     "fluent": "Courant",
                     "intermediate": "Intermédiaire",
                     "basic": "Basique"
+                }
+            },
+            "projects": {
+                "title": "Projets",
+                "addProject": "Ajouter un Projet",
+                "project": {
+                    "title": "Projet",
+                    "name": "Nom du Projet",
+                    "nameHint": "Nom de votre projet",
+                    "namePlaceholder": "ex., Site E-commerce, Application Mobile",
+                    "description": "Description du Projet",
+                    "descriptionHint": "Décrivez ce que fait le projet et votre rôle",
+                    "descriptionPlaceholder": "• Construit une plateforme e-commerce full-stack avec React et Node.js\n• Implémenté l'intégration de passerelle de paiement\n• Atteint une augmentation de 40% de l'engagement des utilisateurs",
+                    "technologies": "Technologies Utilisées",
+                    "technologiesHint": "Technologies, frameworks ou outils utilisés",
+                    "technologiesPlaceholder": "ex., React, Node.js, MongoDB, AWS",
+                    "url": "URL du Projet",
+                    "urlHint": "Lien vers le projet en direct ou le dépôt",
+                    "urlPlaceholder": "https://exemple.com ou https://github.com/username/projet",
+                    "startDate": "Date de Début",
+                    "startDateHint": "Quand vous avez commencé le projet",
+                    "endDate": "Date de Fin",
+                    "endDateHint": "Quand le projet a été terminé (laisser vide si en cours)"
                 }
             }
         }

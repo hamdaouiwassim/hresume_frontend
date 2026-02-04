@@ -6,14 +6,200 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
   const interests = resume.interests || [];
   const certifications = resume.certifications || [];
   const languages = resume.languages || [];
+  const projects = resume.projects || [];
 
   const contactLine = [
     contact.location,
     contact.email,
     contact.phone,
     contact.linkedin,
+    contact.github,
     contact.website,
   ].filter(Boolean);
+
+  // Default section order if not specified
+  const sectionOrder = resume.section_order || ['personal', 'socialMedia', 'experience', 'education', 'skills', 'hobbies', 'certificates', 'languages', 'projects'];
+
+  console.log('🎨 ClassicTemplate received section_order:', sectionOrder);
+
+  // Define sections with their data and render functions
+  const availableSections = [
+    {
+      key: 'experience',
+      hasData: experience.length > 0,
+      render: () => (
+        <>
+          <h2>{labels.workExperience || "Work Experience"}</h2>
+          {experience.map((role, idx) => (
+            <div className="section" key={`exp-${idx}`}>
+              <div className="role-row">
+                <div>
+                  {role.title && <h3>{role.title}</h3>}
+                  {(role.company || role.location) && (
+                    <p className="subheading">
+                      {role.company}
+                      {role.company && role.location ? ", " : ""}
+                      {role.location}
+                    </p>
+                  )}
+                </div>
+                {(role.start || role.end) && (
+                  <p className="subheading">
+                    {role.start}
+                    {role.start && role.end ? " – " : ""}
+                    {role.end}
+                  </p>
+                )}
+              </div>
+              {role.summary && <p>{role.summary}</p>}
+              {role.bullets && role.bullets.length > 0 && (
+                <ul>
+                  {role.bullets.map((bullet, bulletIdx) => (
+                    <li key={`exp-${idx}-bullet-${bulletIdx}`}>{bullet}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </>
+      )
+    },
+    {
+      key: 'education',
+      hasData: education.length > 0,
+      render: () => (
+        <>
+          <h2>{labels.education || "Education"}</h2>
+          {education.map((edu, idx) => (
+            <div className="section" key={`edu-${idx}`}>
+              <div className="role-row">
+                <div>
+                  {edu.degree && <h3>{edu.degree}</h3>}
+                  {(edu.school || edu.location) && (
+                    <p className="subheading">
+                      {edu.school}
+                      {edu.school && edu.location ? ", " : ""}
+                      {edu.location}
+                    </p>
+                  )}
+                </div>
+                {edu.graduated && (
+                  <p className="subheading">
+                    {(labels.graduated || "Graduated") + ": "}{edu.graduated}
+                  </p>
+                )}
+              </div>
+              {edu.details && <p>{edu.details}</p>}
+            </div>
+          ))}
+        </>
+      )
+    },
+    {
+      key: 'skills',
+      hasData: skills.length > 0,
+      render: () => (
+        <>
+          <h2>{labels.skills || "Skills"}</h2>
+          <ul className="list-simple">
+            {skills.map((skill, idx) => (
+              <li key={`skill-${idx}`}>{skill}</li>
+            ))}
+          </ul>
+        </>
+      )
+    },
+    {
+      key: 'hobbies',
+      hasData: interests.length > 0,
+      render: () => (
+        <>
+          <h2>{labels.interests || "Interests"}</h2>
+          <ul className="list-simple">
+            {interests.map((interest, idx) => (
+              <li key={`interest-${idx}`}>{interest}</li>
+            ))}
+          </ul>
+        </>
+      )
+    },
+    {
+      key: 'certificates',
+      hasData: certifications.length > 0,
+      render: () => (
+        <>
+          <h2>{labels.certifications || "Certifications"}</h2>
+          <ul className="list-simple">
+            {certifications.map((cert, idx) => (
+              <li key={`cert-${idx}`}>{cert}</li>
+            ))}
+          </ul>
+        </>
+      )
+    },
+    {
+      key: 'languages',
+      hasData: languages.length > 0,
+      render: () => (
+        <>
+          <h2>{labels.languages || "Languages"}</h2>
+          <ul className="list-simple">
+            {languages.map((lang, idx) => (
+              <li key={`lang-${idx}`}>{lang}</li>
+            ))}
+          </ul>
+        </>
+      )
+    },
+    {
+      key: 'projects',
+      hasData: projects.length > 0,
+      render: () => (
+        <>
+          <h2>{labels.projects || "Projects"}</h2>
+          {projects.map((project, idx) => (
+            <div className="section" key={`project-${idx}`}>
+              <div className="role-row">
+                <div>
+                  {project.name && <h3>{project.name}</h3>}
+                  {project.technologies && (
+                    <p className="subheading">{project.technologies}</p>
+                  )}
+                  {project.url && (
+                    <p className="subheading" style={{ fontSize: '11px', color: '#6B7280' }}>
+                      {project.url}
+                    </p>
+                  )}
+                </div>
+                {(project.start || project.end) && (
+                  <p className="subheading">
+                    {project.start}
+                    {project.start && project.end ? " – " : ""}
+                    {project.end}
+                  </p>
+                )}
+              </div>
+              {project.description && <p>{project.description}</p>}
+              {project.bullets && project.bullets.length > 0 && (
+                <ul>
+                  {project.bullets.map((bullet, bulletIdx) => (
+                    <li key={`project-${idx}-bullet-${bulletIdx}`}>{bullet}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </>
+      )
+    },
+  ];
+
+  // Get sections that have data, ordered by sectionOrder
+  const orderedSections = sectionOrder
+    .map(sectionKey => availableSections.find(section => section.key === sectionKey))
+    .filter(section => section && section.hasData);
+
+  console.log('📋 ClassicTemplate orderedSections:', orderedSections.map(s => s.key));
 
   return (
     <div className="pdf-template-preview" data-cv-preview="true">
@@ -138,114 +324,10 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
         </>
       )}
 
-      {experience.length > 0 && (
-        <>
-          <h2>{labels.workExperience || "Work Experience"}</h2>
-          {experience.map((role, idx) => (
-            <div className="section" key={`exp-${idx}`}>
-              <div className="role-row">
-                <div>
-                  {role.title && <h3>{role.title}</h3>}
-                  {(role.company || role.location) && (
-                    <p className="subheading">
-                      {role.company}
-                      {role.company && role.location ? ", " : ""}
-                      {role.location}
-                    </p>
-                  )}
-                </div>
-                {(role.start || role.end) && (
-                  <p className="subheading">
-                    {role.start}
-                    {role.start && role.end ? " – " : ""}
-                    {role.end}
-                  </p>
-                )}
-              </div>
-              {role.summary && <p>{role.summary}</p>}
-              {role.bullets && role.bullets.length > 0 && (
-                <ul>
-                  {role.bullets.map((bullet, bulletIdx) => (
-                    <li key={`exp-${idx}-bullet-${bulletIdx}`}>{bullet}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </>
-      )}
-
-      {education.length > 0 && (
-        <>
-          <h2>{labels.education || "Education"}</h2>
-          {education.map((edu, idx) => (
-            <div className="section" key={`edu-${idx}`}>
-              <div className="role-row">
-                <div>
-                  {edu.degree && <h3>{edu.degree}</h3>}
-                  {(edu.school || edu.location) && (
-                    <p className="subheading">
-                      {edu.school}
-                      {edu.school && edu.location ? ", " : ""}
-                      {edu.location}
-                    </p>
-                  )}
-                </div>
-                {edu.graduated && (
-                  <p className="subheading">
-                    {(labels.graduated || "Graduated") + ": "}{edu.graduated}
-                  </p>
-                )}
-              </div>
-              {edu.details && <p>{edu.details}</p>}
-            </div>
-          ))}
-        </>
-      )}
-
-      {skills.length > 0 && (
-        <>
-          <h2>{labels.skills || "Skills"}</h2>
-          <ul className="list-simple">
-            {skills.map((skill, idx) => (
-              <li key={`skill-${idx}`}>{skill}</li>
+      {/* Render sections dynamically based on section_order */}
+      {orderedSections.map((section) => (
+        <div key={section.key}>{section.render()}</div>
             ))}
-          </ul>
-        </>
-      )}
-
-      {interests.length > 0 && (
-        <>
-          <h2>{labels.interests || "Interests"}</h2>
-          <ul className="list-simple">
-            {interests.map((interest, idx) => (
-              <li key={`interest-${idx}`}>{interest}</li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {certifications.length > 0 && (
-        <>
-          <h2>{labels.certifications || "Certifications"}</h2>
-          <ul className="list-simple">
-            {certifications.map((cert, idx) => (
-              <li key={`cert-${idx}`}>{cert}</li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {languages.length > 0 && (
-        <>
-          <h2>{labels.languages || "Languages"}</h2>
-          <ul className="list-simple">
-            {languages.map((lang, idx) => (
-              <li key={`lang-${idx}`}>{lang}</li>
-            ))}
-          </ul>
-        </>
-      )}
     </div>
   );
 };

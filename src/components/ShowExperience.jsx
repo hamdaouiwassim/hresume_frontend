@@ -57,9 +57,9 @@ export default function ShowExperience({ exp, index, hide, resumeId, onSave, onD
                                 <p className="text-sm text-slate-600 mb-2">
                                     {exp.position}
                                 </p>
-                                {exp.startDate && exp.endDate && (
+                                {exp.startDate && (
                                     <p className="text-xs text-slate-500">
-                                        {new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                        {new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - {exp.is_present ? 'Present' : (exp.endDate ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '')}
                                     </p>
                                 )}
                                 {exp.description && (

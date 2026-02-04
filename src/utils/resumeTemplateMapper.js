@@ -34,14 +34,18 @@ export const buildResumeTemplateData = (
     email: data.email || "",
     phone: data.phone || "",
     linkedin: data.linkedin || "",
-    website: data.website || data.github || "",
+    github: data.github || "",
+    website: data.website || "",
+    profile_picture: data.profile_picture || data.profilePicture || "",
   };
 
   const experience = Array.isArray(data.experiences)
     ? data.experiences.map((exp) => {
         const start = formatDate(exp.startDate || exp.start_date, locale);
-        const endValue =
-          exp.endDate || exp.end_date
+        const isPresent = exp.is_present || false;
+        const endValue = isPresent
+          ? presentLabel
+          : exp.endDate || exp.end_date
             ? formatDate(exp.endDate || exp.end_date, locale)
             : start
             ? presentLabel
@@ -64,7 +68,9 @@ export const buildResumeTemplateData = (
         degree: edu.degree || "",
         school: edu.institution || edu.school || "",
         location: edu.location || "",
-        graduated: edu.end_date
+        graduated: edu.is_present
+          ? presentLabel
+          : edu.end_date
           ? new Date(edu.end_date).getFullYear().toString()
           : "",
         details: edu.description || "",
@@ -119,6 +125,28 @@ export const buildResumeTemplateData = (
         .filter(Boolean)
     : [];
 
+  const projects = Array.isArray(data.projects)
+    ? data.projects.map((project) => {
+        const start = formatDate(project.startDate || project.start_date, locale);
+        const endValue =
+          project.endDate || project.end_date
+            ? formatDate(project.endDate || project.end_date, locale)
+            : start
+            ? presentLabel
+            : "";
+
+        return {
+          name: project.name || "",
+          description: project.description || "",
+          technologies: project.technologies || "",
+          url: project.url || "",
+          start,
+          end: endValue,
+          bullets: splitDescription(project.description || ""),
+        };
+      })
+    : [];
+
   return {
     name: data.full_name || data.name || "",
     tagline: data.job_title || data.tagline || "",
@@ -132,6 +160,8 @@ export const buildResumeTemplateData = (
     certifications,
     interests,
     languages,
+    projects,
+    section_order: data.section_order || null,
   };
 };
 

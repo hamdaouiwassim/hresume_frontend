@@ -1,11 +1,13 @@
 import { useLanguage } from "../context/LanguageContext";
 import ClassicTemplate from "./templates/ClassicTemplate";
 import ExecutiveSplitTemplate from "./templates/ExecutiveSplitTemplate";
+import ModernProfessionalTemplate from "./templates/ModernProfessionalTemplate";
 import { TEMPLATE_LAYOUTS } from "../utils/templateStyles";
 
 const TEMPLATE_COMPONENTS = {
   [TEMPLATE_LAYOUTS.EXECUTIVE_SPLIT]: ExecutiveSplitTemplate,
   [TEMPLATE_LAYOUTS.CLASSIC]: ClassicTemplate,
+  [TEMPLATE_LAYOUTS.MODERN_PROFESSIONAL]: ModernProfessionalTemplate,
 };
 
 const ResumeTemplatePreview = ({

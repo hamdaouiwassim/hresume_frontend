@@ -58,7 +58,7 @@ export default function AdminProfile() {
       [name]: value,
     }));
     setIsChanged(true);
-    
+
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -93,11 +93,11 @@ export default function AdminProfile() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name || formData.name.trim() === "") {
       newErrors.name = ["Name is required"];
     }
-    
+
     if (!formData.email || formData.email.trim() === "") {
       newErrors.email = ["Email is required"];
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -123,7 +123,7 @@ export default function AdminProfile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -135,18 +135,18 @@ export default function AdminProfile() {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("email", formData.email);
-      
+
       if (formData.avatarFile) {
         formDataToSend.append("avatar", formData.avatarFile, formData.avatarFile.name);
       }
-      
+
       if (formData.password) {
         formDataToSend.append("password", formData.password);
         formDataToSend.append("password_confirmation", formData.password_confirmation);
       }
 
       const response = await updateProfile(formDataToSend);
-      
+
       if (response.data.status) {
         setUser(response.data.user);
         setFormData((prev) => ({
@@ -158,7 +158,7 @@ export default function AdminProfile() {
         }));
         setIsChanged(false);
         toast.success("Profile updated successfully!");
-        
+
         if (formData.avatar && formData.avatar.startsWith('blob:')) {
           URL.revokeObjectURL(formData.avatar);
         }
@@ -176,9 +176,11 @@ export default function AdminProfile() {
   if (isLoadingProfile) {
     return (
       <AdminLayout>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+        <div className="bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+            </div>
           </div>
         </div>
       </AdminLayout>
@@ -187,8 +189,8 @@ export default function AdminProfile() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="animate-in fade-in duration-500">
+        <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8 animate-slide-in">
             <div className="flex items-center gap-2 mb-2">
@@ -261,9 +263,8 @@ export default function AdminProfile() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
-                      errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
-                    }`}
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
+                      }`}
                     placeholder="Enter your full name"
                   />
                   {errors.name && (
@@ -283,9 +284,8 @@ export default function AdminProfile() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
-                      errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
-                    }`}
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
+                      }`}
                     placeholder="Enter your email address"
                   />
                   {errors.email && (
@@ -296,7 +296,7 @@ export default function AdminProfile() {
                 {/* Password Fields */}
                 <div className="border-t border-gray-200 pt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
-                  
+
                   <div className="space-y-6">
                     <div>
                       <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
@@ -310,9 +310,8 @@ export default function AdminProfile() {
                           name="password"
                           value={formData.password}
                           onChange={handleChange}
-                          className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors pr-10 ${
-                            errors.password ? "border-red-300 bg-red-50" : "border-gray-300"
-                          }`}
+                          className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors pr-10 ${errors.password ? "border-red-300 bg-red-50" : "border-gray-300"
+                            }`}
                           placeholder="Leave blank to keep current password"
                         />
                         <button
@@ -339,9 +338,8 @@ export default function AdminProfile() {
                           name="password_confirmation"
                           value={formData.password_confirmation}
                           onChange={handleChange}
-                          className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors pr-10 ${
-                            errors.password_confirmation ? "border-red-300 bg-red-50" : "border-gray-300"
-                          }`}
+                          className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors pr-10 ${errors.password_confirmation ? "border-red-300 bg-red-50" : "border-gray-300"
+                            }`}
                           placeholder="Confirm your new password"
                         />
                         <button
@@ -372,11 +370,10 @@ export default function AdminProfile() {
                   <button
                     type="submit"
                     disabled={hasValidationErrors() || isLoading || !isChanged}
-                    className={`flex items-center px-6 py-2.5 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl ${
-                      hasValidationErrors() || isLoading || !isChanged
+                    className={`flex items-center px-6 py-2.5 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl ${hasValidationErrors() || isLoading || !isChanged
                         ? 'bg-gray-400 text-white cursor-not-allowed'
                         : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:from-purple-600 hover:to-pink-700'
-                    }`}
+                      }`}
                   >
                     {isLoading ? (
                       <>

@@ -67,7 +67,7 @@ export default function TemplatesManagement() {
 
     const confirmDelete = async () => {
         if (!deleteDialog.template) return;
-        
+
         setIsDeleting(true);
         try {
             await deleteAdminTemplate(deleteDialog.template.id);
@@ -108,7 +108,7 @@ export default function TemplatesManagement() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validation
         const newErrors = {};
         if (!formData.name.trim()) newErrors.name = 'Name is required';
@@ -174,9 +174,9 @@ export default function TemplatesManagement() {
     if (isLoading && templates.length === 0) {
         return (
             <AdminLayout>
-                <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50 py-12">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center justify-center min-h-[600px]">
+                <div className="bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex items-center justify-center min-h-[400px]">
                             <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
                         </div>
                     </div>
@@ -187,8 +187,8 @@ export default function TemplatesManagement() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="animate-in fade-in duration-500">
+                <div className="max-w-7xl mx-auto">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 animate-slide-in">
                         <div>
@@ -221,11 +221,10 @@ export default function TemplatesManagement() {
                                 <button
                                     key={category}
                                     onClick={() => setSelectedCategory(category)}
-                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                                        selectedCategory === category
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${selectedCategory === category
                                             ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
                                             : 'bg-white text-gray-700 hover:bg-gray-100 shadow-sm'
-                                    }`}
+                                        }`}
                                 >
                                     {category}
                                 </button>
@@ -334,9 +333,8 @@ export default function TemplatesManagement() {
                                             setFormData({ ...formData, name: e.target.value });
                                             if (errors.name) setErrors({ ...errors, name: null });
                                         }}
-                                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                                            errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                        }`}
+                                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                            }`}
                                         placeholder="e.g., Modern Professional"
                                     />
                                     {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
@@ -359,9 +357,8 @@ export default function TemplatesManagement() {
                                             setFormData({ ...formData, category: e.target.value });
                                             if (errors.category) setErrors({ ...errors, category: null });
                                         }}
-                                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                                            errors.category ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                        }`}
+                                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.category ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                            }`}
                                     >
                                         <option value="Corporate">Corporate</option>
                                         <option value="Creative">Creative</option>

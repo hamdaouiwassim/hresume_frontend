@@ -47,9 +47,9 @@ export default function AdminDashboard() {
     if (isLoading) {
         return (
             <AdminLayout>
-                <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50 py-12">
+                <div className="bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center justify-center min-h-[600px]">
+                        <div className="flex items-center justify-center min-h-[400px]">
                             <div className="text-center">
                                 <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
                                 <p className="text-gray-600">Loading dashboard...</p>
@@ -63,8 +63,8 @@ export default function AdminDashboard() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="animate-in fade-in duration-500">
+                <div className="max-w-7xl mx-auto">
                     {/* Header */}
                     <div className="mb-8 animate-slide-in">
                         <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>

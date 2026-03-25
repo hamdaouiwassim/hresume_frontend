@@ -9,7 +9,7 @@ import { useLanguage } from '../../context/LanguageContext';
 export default function AdminBlog() {
   const { t } = useLanguage();
   const blog = t?.admin?.blog || {};
-  
+
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,17 +100,17 @@ export default function AdminBlog() {
     setIsSubmitting(true);
     try {
       // Create FormData if file is present, otherwise use regular data
-      const submitData = featuredImageFile 
+      const submitData = featuredImageFile
         ? (() => {
-            const formDataObj = new FormData();
-            Object.keys(formData).forEach(key => {
-              if (formData[key] !== '') {
-                formDataObj.append(key, formData[key]);
-              }
-            });
-            formDataObj.append('featured_image_file', featuredImageFile);
-            return formDataObj;
-          })()
+          const formDataObj = new FormData();
+          Object.keys(formData).forEach(key => {
+            if (formData[key] !== '') {
+              formDataObj.append(key, formData[key]);
+            }
+          });
+          formDataObj.append('featured_image_file', featuredImageFile);
+          return formDataObj;
+        })()
         : formData;
 
       let response;
@@ -144,7 +144,7 @@ export default function AdminBlog() {
 
   const handleDelete = async () => {
     if (!deleteDialog.post) return;
-    
+
     setIsDeleting(true);
     try {
       const response = await deleteBlogPost(deleteDialog.post.id);
@@ -211,8 +211,8 @@ export default function AdminBlog() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-pink-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="animate-in fade-in duration-500">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8 animate-slide-in">
             <div className="flex justify-between items-center mb-2">
@@ -308,11 +308,10 @@ export default function AdminBlog() {
                           <div className="text-sm text-gray-700">{post.user?.name || 'Admin'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            post.status === 'published'
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${post.status === 'published'
                               ? 'bg-emerald-100 text-emerald-700'
                               : 'bg-amber-100 text-amber-700'
-                          }`}>
+                            }`}>
                             {post.status === 'published' ? (blog.published || "Published") : (blog.draft || "Draft")}
                           </span>
                         </td>
@@ -383,178 +382,176 @@ export default function AdminBlog() {
                 <X className="h-6 w-6" />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {blog.titleLabel || "Title"} <span className="text-red-500">*</span>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {blog.titleLabel || "Title"} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.title ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
+                />
+                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {blog.excerptLabel || "Excerpt"}
+                </label>
+                <textarea
+                  name="excerpt"
+                  value={formData.excerpt}
+                  onChange={handleInputChange}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-y"
+                  placeholder={blog.excerptPlaceholder || "Brief summary of the post..."}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {blog.contentLabel || "Content"} <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="content"
+                  value={formData.content}
+                  onChange={handleInputChange}
+                  rows={12}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm transition-all duration-200 resize-y ${errors.content ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
+                  placeholder={blog.contentPlaceholder || "Write your blog post content here (HTML supported)..."}
+                />
+                {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {blog.featuredImageLabel || "Featured Image"}
+                </label>
+
+                {/* Image Preview */}
+                {(featuredImagePreview || formData.featured_image) && (
+                  <div className="mb-4 relative">
+                    <img
+                      src={featuredImagePreview || formData.featured_image}
+                      alt="Featured preview"
+                      className="max-w-full h-48 object-cover rounded-xl border-2 border-gray-300 shadow-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFeaturedImageFile(null);
+                        setFeaturedImagePreview(null);
+                        setFormData(prev => ({ ...prev, featured_image: '' }));
+                        const fileInput = document.querySelector('input[type="file"]');
+                        if (fileInput) fileInput.value = '';
+                      }}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors shadow-lg"
+                      title="Remove image"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* File Upload */}
+                <div className="mb-3">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                    onChange={handleFileChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    {blog.imageUploadHint || "Upload an image (max 5MB) or use URL below"}
+                  </p>
+                </div>
+
+                {/* URL Input (fallback) */}
+                <div className="mt-3">
+                  <label className="block text-xs font-semibold text-gray-600 mb-2">
+                    {blog.orUseUrl || "Or use image URL:"}
                   </label>
                   <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
+                    type="url"
+                    name="featured_image"
+                    value={formData.featured_image}
                     onChange={handleInputChange}
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                      errors.title ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                    }`}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                    placeholder="https://example.com/image.jpg"
                   />
-                  {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    {blog.statusLabel || "Status"} <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium"
+                  >
+                    <option value="draft">{blog.draft || "Draft"}</option>
+                    <option value="published">{blog.published || "Published"}</option>
+                  </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {blog.excerptLabel || "Excerpt"}
+                    {blog.publishedAtLabel || "Published At"}
                   </label>
-                  <textarea
-                    name="excerpt"
-                    value={formData.excerpt}
+                  <input
+                    type="datetime-local"
+                    name="published_at"
+                    value={formData.published_at}
                     onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-y"
-                    placeholder={blog.excerptPlaceholder || "Brief summary of the post..."}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {blog.contentLabel || "Content"} <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    name="content"
-                    value={formData.content}
-                    onChange={handleInputChange}
-                    rows={12}
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm transition-all duration-200 resize-y ${
-                      errors.content ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                    }`}
-                    placeholder={blog.contentPlaceholder || "Write your blog post content here (HTML supported)..."}
-                  />
-                  {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {blog.featuredImageLabel || "Featured Image"}
-                  </label>
-                  
-                  {/* Image Preview */}
-                  {(featuredImagePreview || formData.featured_image) && (
-                    <div className="mb-4 relative">
-                      <img
-                        src={featuredImagePreview || formData.featured_image}
-                        alt="Featured preview"
-                        className="max-w-full h-48 object-cover rounded-xl border-2 border-gray-300 shadow-md"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFeaturedImageFile(null);
-                          setFeaturedImagePreview(null);
-                          setFormData(prev => ({ ...prev, featured_image: '' }));
-                          const fileInput = document.querySelector('input[type="file"]');
-                          if (fileInput) fileInput.value = '';
-                        }}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors shadow-lg"
-                        title="Remove image"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewPostDialog(false);
+                    setEditDialog({ isOpen: false, post: null });
+                    resetForm();
+                  }}
+                  className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  {blog.cancel || "Cancel"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      {blog.saving || "Saving..."}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-5 w-5" />
+                      {blog.save || "Save"}
+                    </>
                   )}
-                  
-                  {/* File Upload */}
-                  <div className="mb-3">
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                      onChange={handleFileChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
-                    />
-                    <p className="mt-2 text-xs text-gray-500">
-                      {blog.imageUploadHint || "Upload an image (max 5MB) or use URL below"}
-                    </p>
-                  </div>
-                  
-                  {/* URL Input (fallback) */}
-                  <div className="mt-3">
-                    <label className="block text-xs font-semibold text-gray-600 mb-2">
-                      {blog.orUseUrl || "Or use image URL:"}
-                    </label>
-                    <input
-                      type="url"
-                      name="featured_image"
-                      value={formData.featured_image}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
-                      placeholder="https://example.com/image.jpg"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      {blog.statusLabel || "Status"} <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium"
-                    >
-                      <option value="draft">{blog.draft || "Draft"}</option>
-                      <option value="published">{blog.published || "Published"}</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      {blog.publishedAtLabel || "Published At"}
-                    </label>
-                    <input
-                      type="datetime-local"
-                      name="published_at"
-                      value={formData.published_at}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNewPostDialog(false);
-                      setEditDialog({ isOpen: false, post: null });
-                      resetForm();
-                    }}
-                    className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-                  >
-                    {blog.cancel || "Cancel"}
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        {blog.saving || "Saving..."}
-                      </>
-                    ) : (
-                      <>
-                        <Save className="h-5 w-5" />
-                        {blog.save || "Save"}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
+                </button>
+              </div>
+            </form>
           </div>
-        )}
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog

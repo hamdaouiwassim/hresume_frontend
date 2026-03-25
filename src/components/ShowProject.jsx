@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import ConfirmDialog from "./ConfirmDialog";
 import { Edit2, Trash2, Loader2, ExternalLink } from "lucide-react";
 
-export default function ShowProject({ project, index, hide, resumeId, onSave, onDelete, onPreviewChange, onPreviewClear }) {
+export default function ShowProject({ project, index, hide, resumeId, experiences = [], onSave, onDelete, onPreviewChange, onPreviewClear }) {
     const [edit, setEdit] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -42,6 +42,7 @@ export default function ShowProject({ project, index, hide, resumeId, onSave, on
                     edit={true}
                     hide={handleHide}
                     resumeId={resumeId}
+                    experiences={experiences}
                     onSave={onSave}
                     onPreviewChange={onPreviewChange}
                     onPreviewClear={onPreviewClear}
@@ -54,6 +55,14 @@ export default function ShowProject({ project, index, hide, resumeId, onSave, on
                                 <h5 className="text-base font-semibold text-slate-900 mb-1">
                                     {project.name}
                                 </h5>
+                                {project.experience_id && experiences?.length > 0 && (() => {
+                                    const exp = experiences.find((e) => e.id === project.experience_id || e.id === Number(project.experience_id));
+                                    return exp ? (
+                                        <p className="text-xs text-slate-500 mb-1">
+                                            Under: {exp.company}{exp.position ? ` – ${exp.position}` : ""}
+                                        </p>
+                                    ) : null;
+                                })()}
                                 {project.technologies && (
                                     <p className="text-sm text-slate-500 mb-2">
                                         {project.technologies}

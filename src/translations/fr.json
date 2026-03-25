@@ -1,7 +1,7 @@
 {
     "common": {
-        "update" : "Mettre a jour",
-        "save" : "Enregistrer",
+        "update": "Mettre a jour",
+        "save": "Enregistrer",
         "creatingResume": "Creating Resume...",
         "startEditingResume": "Start Editing Resume",
         "appName": "Créateur de CV",
@@ -10,7 +10,8 @@
         "required": "Ce champ est obligatoire",
         "edit": "Modifier",
         "delete": "Supprimer",
-        "download": "Télécharger"
+        "download": "Télécharger",
+        "templateApplied": "Modèle appliqué !"
     },
     "share": {
         "button": "Partager",
@@ -234,6 +235,7 @@
         "preview": "Aperçu du CV",
         "download": "Télécharger PDF",
         "myResumes": "Mes CV",
+        "myCoverLetters": "Lettres de Motivation",
         "templates": "Modèles",
         "profile": "Profil",
         "review": "Laisser un Avis",
@@ -242,6 +244,17 @@
         "fullPage": "Plein Écran",
         "adminPanel": "Panneau d'administration",
         "recruiterHub": "Espace recruteur"
+    },
+    "customisePdf": {
+        "title": "Personnaliser le PDF",
+        "button": "Style PDF",
+        "description": "Personnalisez la police et la taille utilisées lors de la génération de votre CV en PDF.",
+        "fontFamily": "Police de caractères",
+        "fontSize": "Taille de police",
+        "preview": "Aperçu",
+        "save": "Enregistrer",
+        "saved": "Paramètres PDF enregistrés !",
+        "error": "Échec de l'enregistrement des paramètres PDF."
     },
     "preview": {
         "professionalSummary": "Résumé Professionnel",
@@ -369,7 +382,8 @@
                 "locationHint": "Ville, Pays",
                 "summary": "Résumé Professionnel",
                 "summaryPlaceholder": "Rédigez un bref résumé professionnel...",
-                "summaryHint": "Bref aperçu de votre carrière"
+                "summaryHint": "Bref aperçu de votre carrière",
+                "showPhotoOnCv": "Afficher la photo sur le CV"
             },
             "socialMedia": {
                 "title": "Réseaux Sociaux",
@@ -383,8 +397,8 @@
             "experiences": {
                 "title": "Expériences professionnelles",
                 "addExperience": "Ajouter une expérience",
-                "experience" :{
-                    "company" :"Nom de l'Entreprise",
+                "experience": {
+                    "company": "Nom de l'Entreprise",
                     "companyHint": "Où vous avez travaillé",
                     "companyPlaceholder": "ex., Google, Inc.",
                     "position": "Poste",
@@ -398,19 +412,18 @@
                     "description": "Réalisations Clés",
                     "descriptionHint": "Utilisez des puces pour plus de clarté",
                     "descriptionPlaceholder": "• Développé et lancé la fonctionnalité X qui a augmenté l'engagement des utilisateurs de Y%\n• Dirigé une équipe de X développeurs pour livrer le projet Y en avance\n• Réduit le temps de réponse du système de X%"
-
                 }
             },
             "educations": {
                 "title": "Educations",
                 "addEducation": "Ajouter une education",
-                "education" :{
-                    "institution" :"Etablisement",
+                "education": {
+                    "institution": "Etablisement",
                     "institutionHint": "Votre Etablisement",
                     "institutionPlaceholder": "Votre Etablisement",
                     "degree": "Diplôme",
-                    "degreeHint":"Type de diplôme obtenu",
-                    "degreePlaceholder":"ex., Master",
+                    "degreeHint": "Type de diplôme obtenu",
+                    "degreePlaceholder": "ex., Master",
                     "startDate": "Date de Début",
                     "startDateHint": "Quand vous avez commencé",
                     "endDate": "Date de Fin",
@@ -418,7 +431,6 @@
                     "description": "Réalisations Clés",
                     "descriptionHint": "Utilisez des puces pour plus de clarté",
                     "descriptionPlaceholder": "• Développé et lancé la fonctionnalité X qui a augmenté l'engagement des utilisateurs de Y%\n• Dirigé une équipe de X développeurs pour livrer le projet Y en avance\n• Réduit le temps de réponse du système de X%"
-
                 }
             },
             "skills": {
@@ -486,6 +498,7 @@
                 "project": {
                     "title": "Projet",
                     "name": "Nom du Projet",
+                    "underExperience": "Sous l'expérience",
                     "nameHint": "Nom de votre projet",
                     "namePlaceholder": "ex., Site E-commerce, Application Mobile",
                     "description": "Description du Projet",
@@ -507,8 +520,8 @@
     },
     "createResume": {
         "title": "Créer un Nouveau CV",
-        "nameLabel" : "Nom du CV",
-        "namePlaceholder" : "ex: Mon CV Professionnel",
+        "nameLabel": "Nom du CV",
+        "namePlaceholder": "ex: Mon CV Professionnel",
         "templateLabel": "Modèle de CV",
         "selectTemplate": "Sélectionner un Modèle",
         "chooseTemplate": "Choisissez un modèle pour commencer à créer votre CV.",
@@ -691,13 +704,13 @@
             }
         ]
     },
-        "contact": {
+    "contact": {
         "title": "Contactez-Nous",
         "subtitle": "Vous avez une question ou besoin d'aide ? Nous sommes là pour vous aider. Envoyez-nous un message et nous vous répondrons dans les plus brefs délais.",
         "info": {
             "title": "Restons en Contact",
             "emailLabel": "Email",
-                "email": "contact@hresume.pro",
+            "email": "contact@hresume.pro",
             "phoneLabel": "Téléphone",
             "phone": "+216 92 045 389",
             "addressLabel": "Adresse",
@@ -850,6 +863,59 @@
                 "titleRequired": "Le titre est obligatoire",
                 "contentRequired": "Le contenu est obligatoire"
             }
+        }
+    },
+    "coverLetter": {
+        "title": "Mes Lettres de Motivation",
+        "subtitle": "Créez et gérez vos lettres de motivation professionnelles",
+        "createNew": "Nouvelle Lettre de Motivation",
+        "noLetters": "Aucune Lettre de Motivation",
+        "noLettersDesc": "Créez votre première lettre de motivation professionnelle pour accompagner votre CV",
+        "createFirst": "Créer votre première lettre",
+        "letterCountOne": "lettre de motivation",
+        "letterCountOther": "lettres de motivation",
+        "lastModified": "Dernière modification",
+        "form": {
+            "internalTitle": "Titre Interne (pour votre référence)",
+            "recipientName": "Nom du destinataire",
+            "recipientCompany": "Entreprise du destinataire",
+            "recipientAddress": "Adresse du destinataire",
+            "recipientEmail": "Email du destinataire",
+            "city": "Ville",
+            "country": "Pays",
+            "date": "Date",
+            "subject": "Objet",
+            "content": "Contenu de la lettre",
+            "style": "Style du modèle"
+        },
+        "templates": {
+            "quickStart": "Démarrage Rapide : Choisissez un modèle",
+            "types": {
+                "software_engineer": "Ingénieur Logiciel",
+                "digital_marketing": "Marketing Digital",
+                "customer_success": "Responsable Succès Client"
+            },
+            "content": {
+                "software_engineer": {
+                    "subject": "Candidature pour le poste de [Nom du Poste] - [Votre Nom]",
+                    "text": "Madame, Monsieur,\n\nC'est avec un vif intérêt que je vous soumets ma candidature pour le poste de [Nom du Poste] au sein de [Nom de l'Entreprise]. Fort d'une solide expérience en développement full-stack et passionné par la création d'applications évolutives, je suis convaincu que mes compétences en [Technologies] font de moi un candidat idéal pour votre équipe.\n\nLors de ma précédente expérience chez [Entreprise Précédente], j'ai dirigé le développement de [Nom du Projet], ce qui a permis d'augmenter les performances du système de [Pourcentage]%. J'apprécie relever des défis architecturaux complexes et je suis un fervent défenseur du code propre et maintenable.\n\nJe suis avec attention les récents travaux de [Nom de l'Entreprise] sur [Projet Spécifique] et je suis impressionné par votre engagement envers l'innovation. Je suis impatient d'apporter mon expertise technique pour aider [Nom de l'Entreprise] à atteindre ses objectifs.\n\nJe vous remercie de l'attention que vous porterez à ma candidature et reste à votre entière disposition pour un entretien.\n\nJe vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.\n\n[Votre Nom]"
+                },
+                "digital_marketing": {
+                    "subject": "Candidature pour le poste de Spécialiste Marketing Digital - [Votre Nom]",
+                    "text": "Madame, Monsieur,\n\nJe suis ravi de vous présenter ma candidature pour le poste de Spécialiste Marketing Digital au sein de [Nom de l'Entreprise]. En tant que marketeur axé sur les données avec une expérience confirmée dans la gestion de campagnes multicanales, j'ai l'habitude d'accroître la visibilité des marques et de générer un ROI mesurable.\n\nDans mon dernier poste chez [Entreprise Précédente], j'ai piloté une stratégie qui a permis de doubler notre taux d'engagement en six mois. Je maîtrise le SEO, le SEM et l'analyse de performance, et je suis fier de ma capacité à traduire des données complexes en informations exploitables.\n\nLa réputation de [Nom de l'Entreprise] pour [Valeur Spécifique] résonne profondément avec ma philosophie professionnelle. Je suis impatient de mettre à profit mon esprit stratégique pour atteindre de nouveaux publics et renforcer la position de marché de [Nom de l'Entreprise].\n\nJe serais ravi d'échanger avec vous sur la manière dont mon expertise en stratégie digitale peut aider [Nom de l'Entreprise] à atteindre ses ambitieux objectifs de croissance.\n\nBien cordialement,\n\n[Votre Nom]"
+                },
+                "customer_success": {
+                    "subject": "Candidature pour le poste de Responsable Succès Client - [Votre Nom]",
+                    "text": "Madame, Monsieur,\n\nJe suis enchanté par l'opportunité de rejoindre [Nom de l'Entreprise] en tant que Responsable Succès Client. Riche d'une expérience dans des rôles en contact direct avec la clientèle et animé par une passion profonde pour la satisfaction des utilisateurs, j'ai à cœur d'aider les clients de [Nom de l'Entreprise] à exploiter tout leur potentiel.\n\nTout au long de ma carrière chez [Entreprise Précédente], j'ai maintenu un taux de fidélisation client élevé et j'ai géré avec succès l'intégration de nombreux comptes stratégiques. Je suis convaincu que le véritable succès client passe par une communication proactive et une compréhension approfondie des besoins business uniques de chaque client.\n\nAdmirateur de longue date de l'approche de [Nom de l'Entreprise] concernant [Fonctionnalité Spécifique], je suis certain que ma capacité à bâtir des relations solides et durables sera un atout précieux pour votre équipe.\n\nJe vous remercie de l'intérêt porté à ma candidature et espère avoir l'occasion de vous rencontrer prochainement.\n\nJe vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.\n\n[Votre Nom]"
+                }
+            }
+        },
+        "messages": {
+            "loadError": "Échec du chargement des lettres",
+            "saveSuccess": "Lettre de motivation enregistrée avec succès",
+            "saveError": "Échec de l'enregistrement de la lettre",
+            "deleteSuccess": "Lettre de motivation supprimée avec succès",
+            "deleteError": "Échec de la suppression de la lettre"
         }
     }
 }

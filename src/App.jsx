@@ -19,12 +19,15 @@ const SharedWithMe = lazy(() => import('./pages/SharedWithMe'));
 const Templates = lazy(() => import('./pages/templates'));
 const CreateResume = lazy(() => import('./pages/createResume'));
 const EditResume = lazy(() => import('./pages/EditResume'));
+const CoverLetters = lazy(() => import('./pages/CoverLetters'));
+const EditCoverLetter = lazy(() => import('./pages/EditCoverLetter'));
 const SharedResumeView = lazy(() => import('./pages/SharedResumeView'));
 const AcceptCollaboration = lazy(() => import('./pages/AcceptCollaboration'));
 const Profile = lazy(() => import('./pages/Profile'));
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminUsersList = lazy(() => import('./pages/admin/UsersList'));
 const AdminTemplatesManagement = lazy(() => import('./pages/admin/TemplatesManagement'));
+const AdminCoverLetterTemplatesManagement = lazy(() => import('./pages/admin/CoverLetterTemplatesManagement'));
 const AdminProfile = lazy(() => import('./pages/admin/AdminProfile'));
 const RecruiterResumes = lazy(() => import('./pages/recruiter/Resumes'));
 const RecruiterTemplateProposals = lazy(() => import('./pages/recruiter/TemplateProposals'));
@@ -45,6 +48,7 @@ const AdminBlog = lazy(() => import('./pages/admin/Blog'));
 const AdminUserDetails = lazy(() => import('./pages/admin/UserDetails'));
 const AdminUserCVs = lazy(() => import('./pages/admin/UserCVs'));
 const AdminGeneratedCV = lazy(() => import('./pages/admin/GeneratedCV'));
+const AdminFontManagement = lazy(() => import('./pages/admin/FontManagement'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -77,36 +81,43 @@ function App() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
-                        
+
 
             <Route path="/resume/edit/:id" element={<PrivateRoute><EditResume />  </PrivateRoute>} />
-               <Route path="/resumes" element={<PrivateRoute><Resumes /></PrivateRoute>} />
-               <Route path="/shared-with-me" element={<PrivateRoute><SharedWithMe /></PrivateRoute>} />
+            <Route path="/resumes" element={<PrivateRoute><Resumes /></PrivateRoute>} />
+            <Route path="/shared-with-me" element={<PrivateRoute><SharedWithMe /></PrivateRoute>} />
             <Route path="/templates" element={<PrivateRoute><Templates /></PrivateRoute>} />
-          {/* New path for creating a resume */}
-          <Route path="/resume/create" element={<PrivateRoute><CreateResume /></PrivateRoute>} />
-          {/* Profile page */}
-          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-          {/* Review page */}
-          <Route path="/review" element={<PrivateRoute><Review /></PrivateRoute>} />
-          
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/users" element={<AdminRoute><AdminUsersList /></AdminRoute>} />
-          <Route path="/admin/users/:id" element={<AdminRoute><AdminUserDetails /></AdminRoute>} />
-          <Route path="/admin/users/:id/cvs" element={<AdminRoute><AdminUserCVs /></AdminRoute>} />
-          <Route path="/admin/cvs" element={<AdminRoute><AdminGeneratedCV /></AdminRoute>} />
-          <Route path="/admin/templates" element={<AdminRoute><AdminTemplatesManagement /></AdminRoute>} />
-          <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
-          <Route path="/admin/profile" element={<AdminRoute><AdminProfile /></AdminRoute>} />
-          
-          {/* Recruiter routes */}
-          <Route path="/recruiter/resumes" element={<RecruiterRoute><RecruiterResumes /></RecruiterRoute>} />
-          <Route path="/recruiter/templates" element={<RecruiterRoute><RecruiterTemplateProposals /></RecruiterRoute>} />
-          <Route path="/recruiter/profile" element={<RecruiterRoute><RecruiterProfile /></RecruiterRoute>} />
-          <Route path="/recruiter/pending" element={<PrivateRoute><RecruiterPendingActivation /></PrivateRoute>} />
-          <Route path="/403" element={<Forbidden />} />
-         
+            {/* New path for creating a resume */}
+            <Route path="/resume/create" element={<PrivateRoute><CreateResume /></PrivateRoute>} />
+            {/* Profile page */}
+            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            {/* Review page */}
+            <Route path="/review" element={<PrivateRoute><Review /></PrivateRoute>} />
+
+            {/* Cover Letter routes */}
+            <Route path="/cover-letters" element={<PrivateRoute><CoverLetters /></PrivateRoute>} />
+            <Route path="/cover-letter/create" element={<PrivateRoute><EditCoverLetter /></PrivateRoute>} />
+            <Route path="/cover-letter/edit/:id" element={<PrivateRoute><EditCoverLetter /></PrivateRoute>} />
+
+            {/* Admin routes */}
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><AdminUsersList /></AdminRoute>} />
+            <Route path="/admin/users/:id" element={<AdminRoute><AdminUserDetails /></AdminRoute>} />
+            <Route path="/admin/users/:id/cvs" element={<AdminRoute><AdminUserCVs /></AdminRoute>} />
+            <Route path="/admin/cvs" element={<AdminRoute><AdminGeneratedCV /></AdminRoute>} />
+            <Route path="/admin/templates" element={<AdminRoute><AdminTemplatesManagement /></AdminRoute>} />
+            <Route path="/admin/cover-letter-templates" element={<AdminRoute><AdminCoverLetterTemplatesManagement /></AdminRoute>} />
+            <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
+            <Route path="/admin/fonts" element={<AdminRoute><AdminFontManagement /></AdminRoute>} />
+            <Route path="/admin/profile" element={<AdminRoute><AdminProfile /></AdminRoute>} />
+
+            {/* Recruiter routes */}
+            <Route path="/recruiter/resumes" element={<RecruiterRoute><RecruiterResumes /></RecruiterRoute>} />
+            <Route path="/recruiter/templates" element={<RecruiterRoute><RecruiterTemplateProposals /></RecruiterRoute>} />
+            <Route path="/recruiter/profile" element={<RecruiterRoute><RecruiterProfile /></RecruiterRoute>} />
+            <Route path="/recruiter/pending" element={<PrivateRoute><RecruiterPendingActivation /></PrivateRoute>} />
+            <Route path="/403" element={<Forbidden />} />
+
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Suspense>

@@ -9,30 +9,30 @@ import { useLanguage } from '../context/LanguageContext';
 
 
 export default function AuthLayout({ children }) {
-    const { user , setUser } = useContext(AuthContext);
+    const { user, setUser } = useContext(AuthContext);
     const { t } = useLanguage();
     const navStrings = t?.nav || {};
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    console.log("user inside" , user);
-    
+    console.log("user inside", user);
+
     const signout = async () => {
         try {
-        const res = await logout();
-        // Add logout logic here
-        localStorage.clear();
-         setUser(null);
-        // Redirect to login page after logout
-        navigate('/login');
-        }catch (error) {
+            const res = await logout();
+            // Add logout logic here
+            localStorage.clear();
+            setUser(null);
+            // Redirect to login page after logout
+            navigate('/login');
+        } catch (error) {
             console.log(error);
-            
+
         }
-       
+
     }
-  
+
 
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
     const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -47,9 +47,9 @@ export default function AuthLayout({ children }) {
                         <div className="flex">
                             <div className="flex-shrink-0 flex items-center">
                                 <Link to="/" className="flex items-center space-x-2 group">
-                                    <img 
-                                        src="/logo.png" 
-                                        alt="HResume Logo" 
+                                    <img
+                                        src="/logo.png"
+                                        alt="HResume Logo"
                                         className="h-10 w-auto group-hover:scale-110 transition-transform duration-300"
                                     />
                                     <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
@@ -59,23 +59,32 @@ export default function AuthLayout({ children }) {
                             </div>
                             {/* Desktop Navigation */}
                             <div className="hidden md:ml-6 md:flex md:items-center md:space-x-2">
-                                <Link 
+                                <Link
                                     to="/resumes"
-                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                                        location.pathname === '/resumes' || (location.pathname.startsWith('/resume/') && !location.pathname.startsWith('/resume/edit/'))
+                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${location.pathname === '/resumes' || (location.pathname.startsWith('/resume/') && !location.pathname.startsWith('/resume/edit/'))
                                             ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/50'
                                             : 'text-gray-600 hover:text-blue-600 hover:bg-gray-100'
-                                    }`}
+                                        }`}
                                 >
+                                    <FileText className="h-4 w-4 mr-1.5" />
                                     {navStrings.myResumes || 'My Resumes'}
                                 </Link>
-                                <Link 
+                                <Link
+                                    to="/cover-letters"
+                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${location.pathname === '/cover-letters' || location.pathname.startsWith('/cover-letter/')
+                                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                                            : 'text-gray-600 hover:text-blue-600 hover:bg-gray-100'
+                                        }`}
+                                >
+                                    <FileText className="h-4 w-4 mr-1.5" />
+                                    {navStrings.myCoverLetters || 'Cover Letters'}
+                                </Link>
+                                <Link
                                     to="/shared-with-me"
-                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                                        location.pathname === '/shared-with-me'
+                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${location.pathname === '/shared-with-me'
                                             ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/50'
                                             : 'text-gray-600 hover:text-purple-600 hover:bg-gray-100'
-                                    }`}
+                                        }`}
                                 >
                                     <Users className="h-4 w-4 mr-1.5" />
                                     Shared with Me
@@ -114,32 +123,32 @@ export default function AuthLayout({ children }) {
                                 {/* Dropdown menu */}
                                 {isDropdownOpen && (
                                     <>
-                                        <div 
-                                            className="fixed inset-0 z-10" 
+                                        <div
+                                            className="fixed inset-0 z-10"
                                             onClick={toggleDropdown}
                                         ></div>
                                         <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-xl py-1.5 bg-white/95 backdrop-blur-md ring-1 ring-black ring-opacity-5 focus:outline-none z-20 animate-in slide-in-from-top-2 duration-200">
                                             <div className="px-3 py-2.5 border-b border-gray-200">
                                                 <p className="text-sm font-semibold text-gray-900">{user.name}</p>
                                                 <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                                        </div>
-                                        <Link
-                                            to="/profile"
+                                            </div>
+                                            <Link
+                                                to="/profile"
                                                 onClick={toggleDropdown}
                                                 className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600 transition-all duration-200"
-                                        >
+                                            >
                                                 <User className="h-4 w-4 mr-2.5" />
-                                            {navStrings.profile || 'Profile'}
-                                        </Link>
-                                        <Link
-                                            to="/review"
+                                                {navStrings.profile || 'Profile'}
+                                            </Link>
+                                            <Link
+                                                to="/review"
                                                 onClick={toggleDropdown}
                                                 className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 hover:text-pink-600 transition-all duration-200"
-                                        >
+                                            >
                                                 <Heart className="h-4 w-4 mr-2.5" />
-                                            {navStrings.review || 'Leave a Review'}
-                                        </Link>
-                                        {/* <Link
+                                                {navStrings.review || 'Leave a Review'}
+                                            </Link>
+                                            {/* <Link
                                             to="/settings"
                                                 onClick={toggleDropdown}
                                                 className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600 transition-all duration-200"
@@ -171,14 +180,14 @@ export default function AuthLayout({ children }) {
                                                 </Link>
                                             )}
                                             <div className="border-t border-gray-200 my-1"></div>
-                                        <button
-                                                onClick={() => {signout(); toggleDropdown();}}
+                                            <button
+                                                onClick={() => { signout(); toggleDropdown(); }}
                                                 className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200"
-                                        >
+                                            >
                                                 <LogOut className="h-4 w-4 mr-2.5" />
-                                            {navStrings.logout || 'Sign out'}
-                                        </button>
-                                    </div>
+                                                {navStrings.logout || 'Sign out'}
+                                            </button>
+                                        </div>
                                     </>
                                 )}
                             </div>
@@ -205,53 +214,61 @@ export default function AuthLayout({ children }) {
                 </div>
 
                 {/* Mobile menu with smooth animation */}
-                <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-                    isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-                }`}>
+                <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
                     <div className="px-3 pt-2 pb-3 space-y-1 bg-white/95 backdrop-blur-md border-t border-gray-200">
-                            <Link
-                                to="/resumes"
+                        <Link
+                            to="/resumes"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
-                                location.pathname === '/resumes' || (location.pathname.startsWith('/resume/') && !location.pathname.startsWith('/resume/edit/'))
+                            className={`flex items-center px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${location.pathname === '/resumes' || (location.pathname.startsWith('/resume/') && !location.pathname.startsWith('/resume/edit/'))
                                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                                     : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
-                            }`}
-                                >
-                                {navStrings.myResumes || 'My Resumes'}
-                            </Link>
-                            <Link
-                                to="/shared-with-me"
+                                }`}
+                        >
+                            <FileText className="h-4 w-4 mr-2" />
+                            {navStrings.myResumes || 'My Resumes'}
+                        </Link>
+                        <Link
+                            to="/cover-letters"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
-                                location.pathname === '/shared-with-me'
+                            className={`flex items-center px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${location.pathname === '/cover-letters' || location.pathname.startsWith('/cover-letter/')
+                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                                    : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+                                }`}
+                        >
+                            <FileText className="h-4 w-4 mr-2" />
+                            {navStrings.myCoverLetters || 'Cover Letters'}
+                        </Link>
+                        <Link
+                            to="/shared-with-me"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${location.pathname === '/shared-with-me'
                                     ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
                                     : 'text-gray-600 hover:bg-gray-100 hover:text-purple-600'
-                            }`}
-                                >
-                                <Users className="h-4 w-4 inline mr-2" />
-                                Shared with Me
-                            </Link>
-                            <Link
-                                to="/templates"
+                                }`}
+                        >
+                            <Users className="h-4 w-4 inline mr-2" />
+                            Shared with Me
+                        </Link>
+                        <Link
+                            to="/templates"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
-                                location.pathname === '/templates'
+                            className={`block px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${location.pathname === '/templates'
                                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
                                     : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
-                            }`}
-                                >
-                                {navStrings.templates || 'Templates'}
-                            </Link>
-                        
+                                }`}
+                        >
+                            {navStrings.templates || 'Templates'}
+                        </Link>
+
                         {/* Mobile user menu */}
                         <div className="pt-3 border-t border-gray-200 mt-3">
                             <div className="flex items-center px-3 py-2.5 mb-2 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50">
-                                    <img
+                                <img
                                     className="h-10 w-10 rounded-full border-2 border-blue-500"
                                     src={user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"}
-                                        alt={user.name}
-                                    />
+                                    alt={user.name}
+                                />
                                 <div className="ml-2.5">
                                     <div className="text-sm font-semibold text-gray-900">{user.name}</div>
                                     <div className="text-xs text-gray-500 truncate">{user.email}</div>
@@ -304,7 +321,7 @@ export default function AuthLayout({ children }) {
                                 )}
                                 <div className="border-t border-gray-200 my-1.5"></div>
                                 <button
-                                    onClick={() => {signout(); setIsMobileMenuOpen(false);}}
+                                    onClick={() => { signout(); setIsMobileMenuOpen(false); }}
                                     className="flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-all duration-200"
                                 >
                                     <LogOut className="h-4 w-4 mr-2.5" />

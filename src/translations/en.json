@@ -1,7 +1,7 @@
 {
     "common": {
-        "update" : "Update",
-        "save" : "Save",
+        "update": "Update",
+        "save": "Save",
         "creatingResume": "Creating Resume...",
         "startEditingResume": "Start Editing Resume",
         "appName": "CV Builder",
@@ -10,7 +10,8 @@
         "required": "This field is required",
         "edit": "Edit",
         "delete": "Delete",
-        "download": "Download"
+        "download": "Download",
+        "templateApplied": "Template applied!"
     },
     "share": {
         "button": "Share",
@@ -234,6 +235,7 @@
         "preview": "CV Preview",
         "download": "Download PDF",
         "myResumes": "My Resumes",
+        "myCoverLetters": "Cover Letters",
         "templates": "Templates",
         "profile": "Profile",
         "review": "Leave a Review",
@@ -242,6 +244,17 @@
         "fullPage": "Full Page",
         "adminPanel": "Admin Panel",
         "recruiterHub": "Recruiter Hub"
+    },
+    "customisePdf": {
+        "title": "Customise PDF",
+        "button": "PDF Style",
+        "description": "Customise the font and size used when generating your PDF resume.",
+        "fontFamily": "Font Family",
+        "fontSize": "Font Size",
+        "preview": "Preview",
+        "save": "Save Settings",
+        "saved": "PDF settings saved!",
+        "error": "Failed to save PDF settings."
     },
     "preview": {
         "professionalSummary": "Professional Summary",
@@ -369,9 +382,8 @@
                 "locationHint": "City, Country",
                 "summary": "Professional Summary",
                 "summaryPlaceholder": "Write a brief professional summary...",
-                "summaryHint": "Brief overview of your career"
-                
-                
+                "summaryHint": "Brief overview of your career",
+                "showPhotoOnCv": "Show photo on CV"
             },
             "experiences": {
                 "title": "Professional experiences",
@@ -393,19 +405,18 @@
                     "descriptionHint": "Use bullet points for better readability",
                     "descriptionPlaceholder": "• Developed and launched feature X that increased user engagement by Y%\n• Led a team of X developers to deliver project Y ahead of schedule\n• Reduced system response time by X% through optimization",
                     "addButton": "Add Experience"
-
                 }
             },
-             "educations": {
+            "educations": {
                 "title": "Educations",
-                "addEducation" : "Add Education",
-                "education" :{
-                    "institution" :"institution",
+                "addEducation": "Add Education",
+                "education": {
+                    "institution": "institution",
                     "institutionHint": "Votre Etablisement",
                     "institutionPlaceholder": "Votre Etablisement",
                     "degree": "Diplôme",
-                    "degreeHint":"Type de diplôme obtenu",
-                    "degreePlaceholder":"ex., Master",
+                    "degreeHint": "Type de diplôme obtenu",
+                    "degreePlaceholder": "ex., Master",
                     "startDate": "Date de Début",
                     "startDateHint": "Quand vous avez commencé",
                     "endDate": "Date de Fin",
@@ -413,7 +424,6 @@
                     "description": "Réalisations Clés",
                     "descriptionHint": "Utilisez des puces pour plus de clarté",
                     "descriptionPlaceholder": "• Développé et lancé la fonctionnalité X qui a augmenté l'engagement des utilisateurs de Y%\n• Dirigé une équipe de X développeurs pour livrer le projet Y en avance\n• Réduit le temps de réponse du système de X%"
-
                 }
             },
             "skills": {
@@ -481,6 +491,7 @@
                 "project": {
                     "title": "Project",
                     "name": "Project Name",
+                    "underExperience": "Under experience",
                     "nameHint": "Name of your project",
                     "namePlaceholder": "e.g., E-commerce Website, Mobile App",
                     "description": "Project Description",
@@ -502,7 +513,7 @@
     },
     "createResume": {
         "title": "Create Your Resume",
-        "nameLabel" : "Resume Name",
+        "nameLabel": "Resume Name",
         "namePlaceholder": "e.g., John_Doe_Resume",
         "templateLabel": "Resume Template",
         "subtitle": "Fill in the details to build your professional resume",
@@ -693,13 +704,13 @@
             }
         ]
     },
-        "contact": {
+    "contact": {
         "title": "Contact Us",
         "subtitle": "Have a question or need help? We're here to assist you. Send us a message and we'll get back to you as soon as possible.",
         "info": {
             "title": "Get in Touch",
             "emailLabel": "Email",
-                "email": "contact@hresume.pro",
+            "email": "contact@hresume.pro",
             "phoneLabel": "Phone",
             "phone": "+216 92 045 389",
             "addressLabel": "Address",
@@ -852,6 +863,59 @@
                 "titleRequired": "Title is required",
                 "contentRequired": "Content is required"
             }
+        }
+    },
+    "coverLetter": {
+        "title": "My Cover Letters",
+        "subtitle": "Create and manage your professional cover letters",
+        "createNew": "Create New Cover Letter",
+        "noLetters": "No Cover Letters Yet",
+        "noLettersDesc": "Create your first professional cover letter to accompany your resume",
+        "createFirst": "Create Your First Cover Letter",
+        "letterCountOne": "cover letter",
+        "letterCountOther": "cover letters",
+        "lastModified": "Last Modified",
+        "form": {
+            "internalTitle": "Internal Title (for your reference)",
+            "recipientName": "Recipient Name",
+            "recipientCompany": "Recipient Company",
+            "recipientAddress": "Recipient Address",
+            "recipientEmail": "Recipient Email",
+            "city": "City",
+            "country": "Country",
+            "date": "Date",
+            "subject": "Subject Line",
+            "content": "Cover Letter Content",
+            "style": "Template Style"
+        },
+        "templates": {
+            "quickStart": "Quick Start: Choose a template",
+            "types": {
+                "software_engineer": "Software Engineer",
+                "digital_marketing": "Digital Marketing",
+                "customer_success": "Customer Success"
+            },
+            "content": {
+                "software_engineer": {
+                    "subject": "Application for [Position Name] - [Your Name]",
+                    "text": "Dear [Hiring Manager Name],\n\nI am writing to express my strong interest in the [Position Name] role at [Company Name]. With a solid background in full-stack development and a passion for building scalable applications, I am confident that my skills in [Tech Stack] make me an ideal candidate for your team.\n\nAt my previous role at [Previous Company], I led the development of a [Project Name] that resulted in a [Percentage]% increase in system performance. I enjoy tackling complex architectural challenges and am a firm believer in clean, maintainable code.\n\nI have followed [Company Name]’s recent work on [Specific Project] and am impressed by your commitment to innovation. I am eager to bring my technical expertise to help [Company Name] achieve its goals.\n\nThank you for your time and consideration. I look forward to the possibility of discussing how my background can contribute to your team.\n\nSincerely,\n[Your Name]"
+                },
+                "digital_marketing": {
+                    "subject": "Application for Digital Marketing Specialist - [Your Name]",
+                    "text": "Dear [Hiring Manager Name],\n\nI am excited to submit my application for the Digital Marketing Specialist position at [Company Name]. As a data-driven marketer with experience in managing multi-channel campaigns, I have a proven track record of increasing brand visibility and driving measurable ROI.\n\nIn my most recent position at [Previous Company], I spearheaded a strategy that doubled our engagement rate within six months. I am proficient in SEO, SEM, and performance analytics, and I pride myself on my ability to translate complex data into actionable insights.\n\n[Company Name]’s reputation for [Specific Value] resonates deeply with my professional philosophy. I am eager to leverage my strategic mindset to reach new audiences and strengthen [Company Name]’s market position.\n\nI would welcome the opportunity to discuss how my expertise in digital strategy can help [Company Name] reach its ambitious growth targets.\n\nBest regards,\n[Your Name]"
+                },
+                "customer_success": {
+                    "subject": "Application for Customer Success Manager - [Your Name]",
+                    "text": "Dear [Hiring Manager Name],\n\nI was thrilled to see the opening for a Customer Success Manager at [Company Name]. With a background in client-facing roles and a deep-seated passion for ensuring user satisfaction, I am eager to help [Company Name]’s clients achieve their fullest potential.\n\nThroughout my career at [Previous Company], I maintained a high client retention rate and successfully onboarded numerous enterprise accounts. I believe that true customer success comes from proactive communication and a thorough understanding of the client’s unique business needs.\n\nI have been a long-time admirer of [Company Name]’s approach to [Specific Feature], and I am confident that my ability to build strong, lasting relationships will be a valuable asset to your team.\n\nThank you for considering my application. I look forward to hearing from you.\n\nSincerely,\n[Your Name]"
+                }
+            }
+        },
+        "messages": {
+            "loadError": "Failed to load cover letters",
+            "saveSuccess": "Cover letter saved successfully",
+            "saveError": "Failed to save cover letter",
+            "deleteSuccess": "Cover letter deleted successfully",
+            "deleteError": "Failed to delete cover letter"
         }
     }
 }

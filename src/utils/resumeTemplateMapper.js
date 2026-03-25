@@ -29,6 +29,7 @@ export const buildResumeTemplateData = (
 
   const presentLabel =
     labels.present || (locale.startsWith("fr") ? "En cours" : "Present");
+  const showPhotoOnCv = data.show_photo_on_cv !== false;
   const contact = {
     location: data.location || "",
     email: data.email || "",
@@ -36,9 +37,31 @@ export const buildResumeTemplateData = (
     linkedin: data.linkedin || "",
     github: data.github || "",
     website: data.website || "",
-    profile_picture: data.profile_picture || data.profilePicture || "",
+    profile_picture: showPhotoOnCv
+      ? (data.profile_picture || data.profilePicture || data.avatar || "")
+      : "",
   };
 
+  const formatProject = (project) => {
+    const start = formatDate(project.startDate || project.start_date, locale);
+    const endValue =
+      project.endDate || project.end_date
+        ? formatDate(project.endDate || project.end_date, locale)
+        : start
+        ? presentLabel
+        : "";
+    return {
+      name: project.name || "",
+      description: project.description || "",
+      technologies: project.technologies || "",
+      url: project.url || "",
+      start,
+      end: endValue,
+      bullets: splitDescription(project.description || ""),
+    };
+  };
+
+  const rawProjects = Array.isArray(data.projects) ? data.projects : [];
   const experience = Array.isArray(data.experiences)
     ? data.experiences.map((exp) => {
         const start = formatDate(exp.startDate || exp.start_date, locale);
@@ -50,7 +73,10 @@ export const buildResumeTemplateData = (
             : start
             ? presentLabel
             : "";
-
+        const expId = exp.id ?? exp.experience_id;
+        const roleProjects = exp.projects && exp.projects.length > 0
+          ? exp.projects.map(formatProject)
+          : rawProjects.filter((p) => (p.experience_id ?? p.experienceId) == expId).map(formatProject);
         return {
           title: exp.position || exp.title || "",
           company: exp.company || "",
@@ -59,6 +85,7 @@ export const buildResumeTemplateData = (
           end: endValue,
           summary: exp.summary || "",
           bullets: splitDescription(exp.description || exp.details || ""),
+          projects: roleProjects,
         };
       })
     : [];
@@ -125,27 +152,9 @@ export const buildResumeTemplateData = (
         .filter(Boolean)
     : [];
 
-  const projects = Array.isArray(data.projects)
-    ? data.projects.map((project) => {
-        const start = formatDate(project.startDate || project.start_date, locale);
-        const endValue =
-          project.endDate || project.end_date
-            ? formatDate(project.endDate || project.end_date, locale)
-            : start
-            ? presentLabel
-            : "";
-
-        return {
-          name: project.name || "",
-          description: project.description || "",
-          technologies: project.technologies || "",
-          url: project.url || "",
-          start,
-          end: endValue,
-          bullets: splitDescription(project.description || ""),
-        };
-      })
-    : [];
+  const projects = rawProjects
+    .filter((p) => !(p.experience_id ?? p.experienceId))
+    .map(formatProject);
 
   return {
     name: data.full_name || data.name || "",
@@ -162,6 +171,7 @@ export const buildResumeTemplateData = (
     languages,
     projects,
     section_order: data.section_order || null,
+    typography: data.typography || null,
   };
 };
 

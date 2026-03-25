@@ -1,3 +1,5 @@
+import { useFontLoader } from "../../hooks/useFontLoader";
+
 const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
   const contact = resume.contact || {};
   const experience = resume.experience || [];
@@ -128,6 +130,31 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
                   ))}
                 </ul>
               )}
+              {role.projects && role.projects.length > 0 && (
+                <div className="mt-3 ml-2 border-l-2 border-slate-200 pl-3">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">{labels.projects || "Projects"}</p>
+                  {role.projects.map((project, pIdx) => (
+                    <div key={`exp-${idx}-proj-${pIdx}`} className="mb-2">
+                      <div className="exec-role">
+                        <span className="exec-role-title">{project.name}</span>
+                      </div>
+                      {formatTimeline(project.start, project.end) && (
+                        <p className="exec-timeline">{formatTimeline(project.start, project.end)}</p>
+                      )}
+                      {project.technologies && <p className="exec-company text-xs">{project.technologies}</p>}
+                      {project.url && <p className="text-xs" style={{ color: '#6B7280' }}>{project.url}</p>}
+                      {project.description && <p className="exec-summary text-xs">{project.description}</p>}
+                      {project.bullets && project.bullets.length > 0 && (
+                        <ul className="exec-bullets text-xs">
+                          {project.bullets.map((bullet, bIdx) => (
+                            <li key={`exp-${idx}-proj-${pIdx}-b-${bIdx}`}>{bullet}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -218,16 +245,28 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
     { label: "Website", value: contact.website },
   ].filter((item) => item.value);
 
+  const typo = resume.typography || {};
+  const baseSize = typo.font_size || 13;
+  const s = baseSize / 13;
+  const fontFamily = typo.font_family || "'Source Sans Pro', 'Segoe UI', Arial, sans-serif";
+  const fontUrl = useFontLoader(typo.font_id);
+
+  const fontFormat = typo.font_format || "truetype";
+  const fontFaceRule = fontUrl && typo.font_family
+    ? `@font-face { font-family: '${typo.font_family}'; src: url(${fontUrl}) format('${fontFormat}'); }`
+    : "";
+
   return (
     <div className="exec-template" data-cv-preview="true">
       <style>
         {`
+          ${fontFaceRule}
           .exec-template {
-            font-family: 'Source Sans Pro', 'Segoe UI', Arial, sans-serif;
+            font-family: ${fontFamily};
             background: #fff;
             padding: 32px;
             color: #0f172a;
-            font-size: 13px;
+            font-size: ${baseSize}px;
             line-height: 1.45;
           }
           .exec-template * {
@@ -238,13 +277,13 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
             margin-bottom: 24px;
           }
           .exec-name {
-            font-size: 32px;
+            font-size: ${Math.round(32 * s)}px;
             letter-spacing: 0.08em;
             margin: 0;
           }
           .exec-role {
             margin-top: 6px;
-            font-size: 13px;
+            font-size: ${Math.round(13 * s)}px;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             color: #475569;
@@ -262,7 +301,7 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
             margin-bottom: 24px;
           }
           .exec-section h3 {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             margin: 0 0 10px;
@@ -273,14 +312,14 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
           }
           .exec-contact-label {
             font-weight: 600;
-            font-size: 11px;
+            font-size: ${Math.round(11 * s)}px;
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             display: block;
           }
           .exec-contact-value {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             color: #0f172a;
           }
           .exec-list {
@@ -289,19 +328,19 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
             margin: 0;
           }
           .exec-list li {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             margin-bottom: 6px;
             color: #0f172a;
           }
           .exec-main .section-title {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             margin: 0 0 10px;
             color: #1e293b;
           }
           .exec-summary {
-            font-size: 12.5px;
+            font-size: ${Math.round(12.5 * s)}px;
             line-height: 1.5;
             color: #1e293b;
             margin-bottom: 24px;
@@ -313,7 +352,7 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
             margin-bottom: 4px;
           }
           .exec-role-title {
-            font-size: 14px;
+            font-size: ${Math.round(14 * s)}px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.03em;
@@ -321,14 +360,14 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
             width: 100%;
           }
           .exec-timeline {
-            font-size: 11px;
+            font-size: ${Math.round(11 * s)}px;
             color: #64748b;
             margin: 0 0 6px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
           }
           .exec-company {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             color: #475569;
             margin-bottom: 8px;
             text-align: left;
@@ -339,7 +378,7 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
             padding: 0;
           }
           .exec-bullets li {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             margin-bottom: 6px;
             color: #0f172a;
           }
@@ -374,6 +413,15 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
 
       <div className="exec-body">
         <aside className="exec-sidebar">
+          {contact.profile_picture && (
+            <div className="flex justify-center mb-4">
+              <img
+                src={contact.profile_picture}
+                alt={resume.name || "Profile"}
+                className="w-24 h-24 rounded-full object-cover border-2 border-slate-200"
+              />
+            </div>
+          )}
           {contactItems.length > 0 && (
             <section className="exec-section">
               <h3>{labels.contact || "Contact"}</h3>

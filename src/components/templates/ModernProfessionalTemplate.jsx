@@ -1,3 +1,5 @@
+import { useFontLoader } from "../../hooks/useFontLoader";
+
 const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
   const contact = resume.contact || {};
   const experience = resume.experience || [];
@@ -128,6 +130,31 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
                   ))}
                 </ul>
               )}
+              {role.projects && role.projects.length > 0 && (
+                <div className="mt-3 ml-2 border-l-2 border-slate-200 pl-3">
+                  <p className="modern-section-title text-xs mb-2">{labels.projects || "Projects"}</p>
+                  {role.projects.map((project, pIdx) => (
+                    <div key={`exp-${idx}-proj-${pIdx}`} className="modern-item mb-2">
+                      <div className="modern-item-header">
+                        <strong className="modern-item-title">{project.name}</strong>
+                        {formatTimeline(project.start, project.end) && (
+                          <span className="modern-item-date">{formatTimeline(project.start, project.end)}</span>
+                        )}
+                      </div>
+                      {project.technologies && <p className="modern-item-subtitle">{project.technologies}</p>}
+                      {project.url && <p className="text-xs" style={{ color: '#6B7280' }}>{project.url}</p>}
+                      {project.description && <p className="modern-item-description">{project.description}</p>}
+                      {project.bullets && project.bullets.length > 0 && (
+                        <ul className="modern-bullets">
+                          {project.bullets.map((bullet, bIdx) => (
+                            <li key={`exp-${idx}-proj-${pIdx}-b-${bIdx}`}>{bullet}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </section>
@@ -208,14 +235,26 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
     { label: "Website", value: contact.website },
   ].filter((item) => item.value);
 
+  const typo = resume.typography || {};
+  const baseSize = typo.font_size || 13;
+  const s = baseSize / 13;
+  const fontFamily = typo.font_family || "'Segoe UI', Arial, sans-serif";
+  const fontUrl = useFontLoader(typo.font_id);
+
+  const fontFormat = typo.font_format || "truetype";
+  const fontFaceRule = fontUrl && typo.font_family
+    ? `@font-face { font-family: '${typo.font_family}'; src: url(${fontUrl}) format('${fontFormat}'); }`
+    : "";
+
   return (
     <div className="modern-template" data-cv-preview="true">
       <style>
         {`
+          ${fontFaceRule}
           .modern-template {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: ${fontFamily};
             color: #333;
-            font-size: 13px;
+            font-size: ${baseSize}px;
             line-height: 1.5;
           }
           .modern-template * {
@@ -223,7 +262,7 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
           }
           .modern-body {
             display: grid;
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 24px;
             background: #fff;
             padding: 24px;
@@ -246,7 +285,7 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
             margin-bottom: 20px;
           }
           .modern-section-title {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -257,7 +296,7 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
           }
           .modern-contact-item {
             margin-bottom: 10px;
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
           }
           .modern-contact-label {
             font-weight: 600;
@@ -275,7 +314,7 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
             margin: 0;
           }
           .modern-list li {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             margin-bottom: 6px;
             color: #333;
             padding-left: 0;
@@ -289,25 +328,25 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
             margin-bottom: 16px;
           }
           .modern-name {
-            font-size: 28px;
+            font-size: ${Math.round(28 * s)}px;
             font-weight: 700;
             margin: 0 0 4px;
             color: #333;
           }
           .modern-title {
-            font-size: 16px;
+            font-size: ${Math.round(16 * s)}px;
             color: #666;
             margin: 0 0 8px;
           }
           .modern-location {
-            font-size: 13px;
+            font-size: ${Math.round(13 * s)}px;
             color: #666;
             display: flex;
             align-items: center;
             gap: 4px;
           }
           .modern-summary {
-            font-size: 13px;
+            font-size: ${Math.round(13 * s)}px;
             line-height: 1.6;
             color: #333;
             margin-bottom: 20px;
@@ -322,22 +361,22 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
             margin-bottom: 4px;
           }
           .modern-item-title {
-            font-size: 14px;
+            font-size: ${Math.round(14 * s)}px;
             font-weight: 600;
             color: #333;
           }
           .modern-item-date {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             color: #666;
             white-space: nowrap;
           }
           .modern-item-subtitle {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             color: #666;
             margin: 0 0 8px;
           }
           .modern-item-description {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             color: #333;
             line-height: 1.5;
             margin: 0 0 8px;
@@ -348,7 +387,7 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
             list-style: disc;
           }
           .modern-bullets li {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             margin-bottom: 4px;
             color: #333;
           }

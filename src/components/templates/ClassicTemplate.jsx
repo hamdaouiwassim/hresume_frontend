@@ -1,3 +1,5 @@
+import { useFontLoader } from "../../hooks/useFontLoader";
+
 const ClassicTemplate = ({ resume = {}, labels = {} }) => {
   const contact = resume.contact || {};
   const experience = resume.experience || [];
@@ -58,6 +60,35 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
                     <li key={`exp-${idx}-bullet-${bulletIdx}`}>{bullet}</li>
                   ))}
                 </ul>
+              )}
+              {role.projects && role.projects.length > 0 && (
+                <div className="mt-3 ml-2 border-l-2 border-slate-200 pl-4">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">{labels.projects || "Projects"}</p>
+                  {role.projects.map((project, pIdx) => (
+                    <div key={`exp-${idx}-proj-${pIdx}`} className="mb-3">
+                      <div className="role-row">
+                        <div>
+                          {project.name && <h4 className="text-sm font-semibold text-slate-800">{project.name}</h4>}
+                          {project.technologies && <p className="subheading text-xs">{project.technologies}</p>}
+                          {project.url && <p className="subheading" style={{ fontSize: '11px', color: '#6B7280' }}>{project.url}</p>}
+                        </div>
+                        {(project.start || project.end) && (
+                          <p className="subheading text-xs">
+                            {project.start}{project.start && project.end ? " – " : ""}{project.end}
+                          </p>
+                        )}
+                      </div>
+                      {project.description && <p className="text-sm">{project.description}</p>}
+                      {project.bullets && project.bullets.length > 0 && (
+                        <ul className="list-simple text-sm">
+                          {project.bullets.map((bullet, bIdx) => (
+                            <li key={`exp-${idx}-proj-${pIdx}-b-${bIdx}`}>{bullet}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           ))}
@@ -201,41 +232,54 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
 
   console.log('📋 ClassicTemplate orderedSections:', orderedSections.map(s => s.key));
 
+  const typo = resume.typography || {};
+  const baseSize = typo.font_size || 14;
+  const s = baseSize / 14;
+  const fontFamily = typo.font_family || "'Source Sans Pro', 'Segoe UI', Arial, sans-serif";
+  const fontUrl = useFontLoader(typo.font_id);
+
+  const fontFormat = typo.font_format || "truetype";
+  const fontFaceRule = fontUrl && typo.font_family
+    ? `@font-face { font-family: '${typo.font_family}'; src: url(${fontUrl}) format('${fontFormat}'); }`
+    : "";
+
   return (
     <div className="pdf-template-preview" data-cv-preview="true">
       <style>
         {`
+          ${fontFaceRule}
           .pdf-template-preview {
-            font-family: 'Source Sans Pro', 'Segoe UI', Arial, sans-serif;
+            font-family: ${fontFamily};
             background: #ffffff;
             padding: 18px 24px 24px;
             color: #111;
             line-height: 1.5;
+            font-size: ${baseSize}px;
           }
           .pdf-template-preview * {
             box-sizing: border-box;
           }
           .pdf-template-preview h1 {
-            font-size: 32px;
+            font-size: ${Math.round(32 * s)}px;
             letter-spacing: 0.08em;
             text-align: center;
             margin: 0 0 6px;
           }
           .pdf-template-preview .tagline {
             text-align: center;
-            font-size: 14px;
+            font-size: ${Math.round(14 * s)}px;
             font-weight: 600;
             text-transform: uppercase;
             margin: 0 0 4px;
           }
           .pdf-template-preview .contact-line {
             text-align: center;
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             color: #374151;
             margin: 0 0 20px;
           }
           .pdf-template-preview h2 {
-            font-size: 15px;
+            font-size: ${Math.round(15 * s)}px;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -244,18 +288,18 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
             padding-bottom: 6px;
           }
           .pdf-template-preview h3 {
-            font-size: 14px;
+            font-size: ${Math.round(14 * s)}px;
             font-weight: 700;
             margin: 0;
           }
           .pdf-template-preview .subheading {
-            font-size: 12px;
+            font-size: ${Math.round(12 * s)}px;
             font-weight: 600;
             color: #374151;
             margin: 0;
           }
           .pdf-template-preview p {
-            font-size: 14px;
+            font-size: ${Math.round(14 * s)}px;
           }
           .pdf-template-preview ul {
             margin: 8px 0 12px 18px;
@@ -263,7 +307,7 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
           }
           .pdf-template-preview ul li {
             margin-bottom: 4px;
-            font-size: 14px;
+            font-size: ${Math.round(14 * s)}px;
           }
           .pdf-template-preview .role-row {
             display: flex;
@@ -284,38 +328,49 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
               padding: 12px 16px 16px;
             }
             .pdf-template-preview h1 {
-              font-size: 24px;
+              font-size: ${Math.round(24 * s)}px;
             }
             .pdf-template-preview .tagline {
-              font-size: 12px;
+              font-size: ${Math.round(12 * s)}px;
             }
             .pdf-template-preview .contact-line {
-              font-size: 10px;
+              font-size: ${Math.round(10 * s)}px;
             }
             .pdf-template-preview h2 {
-              font-size: 13px;
+              font-size: ${Math.round(13 * s)}px;
             }
             .pdf-template-preview h3 {
-              font-size: 12px;
+              font-size: ${Math.round(12 * s)}px;
             }
             .pdf-template-preview .subheading {
-              font-size: 11px;
+              font-size: ${Math.round(11 * s)}px;
             }
             .pdf-template-preview p {
-              font-size: 12px;
+              font-size: ${Math.round(12 * s)}px;
             }
             .pdf-template-preview ul li {
-              font-size: 12px;
+              font-size: ${Math.round(12 * s)}px;
             }
           }
         `}
       </style>
 
-      {resume.name && <h1>{resume.name.toUpperCase()}</h1>}
-      {resume.tagline && <p className="tagline">{resume.tagline}</p>}
-      {contactLine.length > 0 && (
-        <p className="contact-line">{contactLine.join(" | ")}</p>
-      )}
+      <div className="flex flex-col items-center gap-3 mb-4">
+        {contact.profile_picture && (
+          <img
+            src={contact.profile_picture}
+            alt={resume.name || "Profile"}
+            className="h-24 w-24 rounded-full object-cover border-2 border-slate-200"
+          />
+        )}
+        <div className="text-center">
+          {resume.name && <h1>{resume.name.toUpperCase()}</h1>}
+          {resume.tagline && <p className="tagline">{resume.tagline}</p>}
+          {contactLine.length > 0 && (
+            <p className="contact-line">{contactLine.join(" | ")}</p>
+          )}
+        </div>
+      </div>
 
       {resume.summary && (
         <>

@@ -29,13 +29,15 @@ import {
   Trash2,
   FolderGit,
   GripVertical,
+  Settings,
 } from "lucide-react";
 import { generatePDF } from "../services/PDFService";
 import { useLanguage } from "../context/LanguageContext";
-import { storeBasicInfo } from "../services/basicInfoService";
+import { storeBasicInfo, uploadResumeAvatar } from "../services/basicInfoService";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
 import { getByResumeId, update as updateResume, getTemplates } from "../services/resumeService";
+import { getActivePdfFonts } from "../services/adminService";
 import { generateShareableLink, getCurrentShareableLink, deactivateShareableLink } from "../services/ShareableLinkService";
 import { inviteCollaborator, getCollaborators, removeCollaborator } from "../services/CollaborationService";
 import ShowExperience from "../components/ShowExperience";
@@ -100,6 +102,21 @@ export default function EditResume() {
   const [templates, setTemplates] = useState([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isChangingTemplate, setIsChangingTemplate] = useState(false);
+  const [showCustomisePdfModal, setShowCustomisePdfModal] = useState(false);
+  const [typography, setTypography] = useState({ font_family: "sans-serif", font_size: 14, font_id: null });
+  const [isSavingTypography, setIsSavingTypography] = useState(false);
+
+  // Built-in fonts that Dompdf always supports
+  const builtInFontOptions = [
+    { value: "sans-serif", label: "Helvetica (Sans-Serif)" },
+    { value: "serif", label: "Times (Serif)" },
+    { value: "monospace", label: "Courier (Monospace)" },
+    { value: "dejavu sans", label: "DejaVu Sans" },
+    { value: "dejavu serif", label: "DejaVu Serif" },
+    { value: "dejavu sans mono", label: "DejaVu Sans Mono" },
+  ];
+  const [customFontOptions, setCustomFontOptions] = useState([]);
+  const pdfFontOptions = [...builtInFontOptions, ...customFontOptions];
   const [selectedSections, setSelectedSections] = useState([
     'basic_info',
     'experiences',
@@ -168,6 +185,7 @@ export default function EditResume() {
     website: "",
     professional_summary: "",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=default",
+    show_photo_on_cv: true,
     experiences: [],
     educations: [],
     skills: [],
@@ -250,7 +268,7 @@ const fetchResumeData = useCallback(async () => {
         console.log("Resume ID from URL:", id);
         const response = await getByResumeId(id);
         const resumeRecord = response.data.data || {};
-        const basicInfo = resumeRecord.basic_info || {};
+        const basicInfo = resumeRecord.basic_info || resumeRecord.basicInfo || {};
         const templateLayout = deriveTemplateLayout(resumeRecord.template);
         const templateId =
           resumeRecord.template_id ||
@@ -296,6 +314,16 @@ const fetchResumeData = useCallback(async () => {
         const { languages } = resumeRecord;
         const { projects } = resumeRecord;
         const sectionOrderFromDB = resumeRecord.section_order;
+        const typographyFromDB = resumeRecord.typography;
+        
+        // Load typography settings if they exist
+        if (typographyFromDB && typeof typographyFromDB === 'object') {
+          setTypography({
+            font_family: typographyFromDB.font_family || "sans-serif",
+            font_size: typographyFromDB.font_size || 14,
+            font_id: typographyFromDB.font_id ?? null,
+          });
+        }
          
         // Set section order if it exists, otherwise use default
         // Always ensure fixed sections are at the beginning
@@ -362,6 +390,38 @@ const fetchResumeData = useCallback(async () => {
     };
     fetchTemplates();
   }, []);
+
+  // Fetch active custom PDF fonts
+  useEffect(() => {
+    const fetchActiveFonts = async () => {
+      try {
+        const response = await getActivePdfFonts();
+        if (response.data.status && response.data.data) {
+          const custom = response.data.data.map((f) => ({
+            value: f.family_name.toLowerCase(),
+            label: f.family_name,
+            id: f.id,
+            format: f.format || "truetype",
+          }));
+          setCustomFontOptions(custom);
+        }
+      } catch (error) {
+        console.warn("Could not load custom fonts:", error);
+      }
+    };
+    fetchActiveFonts();
+  }, []);
+
+  // When custom fonts load, derive font_id and font_format from font_family if missing (e.g. loaded from DB)
+  useEffect(() => {
+    if (!customFontOptions.length || !typography.font_family) return;
+    const match = customFontOptions.find((o) => o.value === typography.font_family);
+    if (!match?.id) return;
+    const updates = {};
+    if (!typography.font_id) updates.font_id = match.id;
+    if (!typography.font_format) updates.font_format = match.format;
+    if (Object.keys(updates).length) setTypography((prev) => ({ ...prev, ...updates }));
+  }, [customFontOptions, typography.font_family, typography.font_id, typography.font_format]);
 
   const { t, language } = useLanguage();
   const locale = language === "fr" ? "fr-FR" : "en-US";
@@ -437,7 +497,7 @@ const fetchResumeData = useCallback(async () => {
   const resumePreviewData = useMemo(
     () => {
       const data = buildResumeTemplateData(
-        { ...previewSourceData, section_order: sectionOrder },
+        { ...previewSourceData, section_order: sectionOrder, typography },
         locale,
         {
         present: t?.preview?.present,
@@ -446,7 +506,7 @@ const fetchResumeData = useCallback(async () => {
       console.log('📋 Resume Preview Data section_order:', data.section_order);
       return data;
     },
-    [previewSourceData, locale, t?.preview?.present, sectionOrder]
+    [previewSourceData, locale, t?.preview?.present, sectionOrder, typography]
   );
 
   const openSection = (section) => {
@@ -766,7 +826,8 @@ const fetchResumeData = useCallback(async () => {
       }.pdf`;
       const resumePayload = buildResumeTemplateData({
         ...formData,
-        section_order: sectionOrder
+        section_order: sectionOrder,
+        typography,
       }, locale, {
         present: t?.preview?.present,
       });
@@ -799,6 +860,20 @@ const fetchResumeData = useCallback(async () => {
           "Failed to generate PDF. Please try again.",
         { id: "pdf-generation" }
       );
+    }
+  };
+
+  const handleSaveTypography = async () => {
+    setIsSavingTypography(true);
+    try {
+      await updateResume(id, { typography });
+      toast.success(t?.customisePdf?.saved || "PDF settings saved!");
+      setShowCustomisePdfModal(false);
+    } catch (error) {
+      console.error("Error saving typography:", error);
+      toast.error(t?.customisePdf?.error || "Failed to save PDF settings.");
+    } finally {
+      setIsSavingTypography(false);
     }
   };
 
@@ -864,6 +939,7 @@ const fetchResumeData = useCallback(async () => {
         linkedin: formData.linkedin,
         github: formData.github,
         website: formData.website,
+        avatar: formData.avatar || null,
       });   
       toast.success(response.data.message || "Basic info saved successfully!");
     } catch (error) {
@@ -891,18 +967,25 @@ const fetchResumeData = useCallback(async () => {
     }
   };
 
-  const handleAvatarChange = (e) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+    if (!file || !id) return;
+    try {
+      toast.loading("Uploading avatar...", { id: "avatar-upload" });
+      const response = await uploadResumeAvatar(id, file);
+      if (response.data?.status && response.data?.avatar_url) {
         setFormData((prev) => ({
           ...prev,
-          avatar: reader.result,
+          avatar: response.data.avatar_url,
         }));
-      };
-      reader.readAsDataURL(file);
+        toast.success("Avatar uploaded successfully.", { id: "avatar-upload" });
+      } else {
+        toast.error("Failed to upload avatar", { id: "avatar-upload" });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to upload avatar", { id: "avatar-upload" });
     }
+    e.target.value = "";
   };
 
   // Handlers to keep accordions open and refetch data after save
@@ -1412,6 +1495,26 @@ const fetchResumeData = useCallback(async () => {
                           />
                         </label>
                       </div>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 py-3">
+                      <span className="text-sm font-medium text-gray-700">
+                        {t.dashboard.sections.personalInfo?.showPhotoOnCv ?? "Show photo on CV"}
+                      </span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={formData.show_photo_on_cv}
+                        onClick={() => setFormData((prev) => ({ ...prev, show_photo_on_cv: !prev.show_photo_on_cv }))}
+                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                          formData.show_photo_on_cv ? "bg-blue-600" : "bg-gray-200"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
+                            formData.show_photo_on_cv ? "translate-x-5" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
                     </div>
                     <div className="grid grid-cols-1 gap-6">
                       <div>
@@ -2294,6 +2397,7 @@ const fetchResumeData = useCallback(async () => {
                           clearPreviewSection("projects", { isNew: true });
                         }}
                         resumeId={id}
+                        experiences={formData.experiences || []}
                         onSave={handleProjectSave}
                         onPreviewChange={(draft) => updatePreviewSection("projects", draft, { isNew: true })}
                         onPreviewClear={() => clearPreviewSection("projects", { isNew: true })}
@@ -2310,6 +2414,7 @@ const fetchResumeData = useCallback(async () => {
                             index={index}
                             hide={() => setShowNewProject(false)}
                             resumeId={id}
+                            experiences={formData.experiences || []}
                             onSave={handleProjectSave}
                             onDelete={handleProjectSave}
                             onPreviewChange={(draft) =>
@@ -2374,6 +2479,14 @@ const fetchResumeData = useCallback(async () => {
                   >
                     <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     <span className={toolbarLabelClass}>Collaborate</span>
+                  </button>
+                  <button
+                    onClick={() => setShowCustomisePdfModal(true)}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 border-amber-300 text-amber-700 hover:bg-amber-50 group flex items-center overflow-hidden transition-all duration-200`}
+                    title={t?.customisePdf?.title || "Customise PDF"}
+                  >
+                    <Settings className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className={toolbarLabelClass}>{t?.customisePdf?.button || "PDF Style"}</span>
                   </button>
                   <button
                     onClick={handleDownload}
@@ -2721,6 +2834,130 @@ const fetchResumeData = useCallback(async () => {
                     )}
                   </>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customise PDF Modal */}
+      {showCustomisePdfModal && (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-75"
+          onClick={() => setShowCustomisePdfModal(false)}
+        >
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="relative bg-white rounded-lg shadow-xl w-full max-w-md my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <Settings className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {t?.customisePdf?.title || "Customise PDF"}
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setShowCustomisePdfModal(false)}
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+                  title="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6 space-y-6">
+                <p className="text-sm text-gray-500">
+                  {t?.customisePdf?.description || "Customise the font and size used when generating your PDF resume."}
+                </p>
+
+                {/* Font Family */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t?.customisePdf?.fontFamily || "Font Family"}
+                  </label>
+                  <select
+                    value={typography.font_family}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const opt = pdfFontOptions.find((o) => o.value === val);
+                      setTypography((prev) => ({
+                        ...prev,
+                        font_family: val,
+                        font_id: opt?.id ?? null,
+                        font_format: opt?.format ?? null,
+                      }));
+                    }}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 bg-white"
+                  >
+                    {pdfFontOptions.map((font) => (
+                      <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                        {font.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Font Size */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t?.customisePdf?.fontSize || "Font Size"} — <span className="text-amber-600 font-semibold">{typography.font_size}px</span>
+                  </label>
+                  <input
+                    type="range"
+                    min={10}
+                    max={20}
+                    step={1}
+                    value={typography.font_size}
+                    onChange={(e) => setTypography((prev) => ({ ...prev, font_size: parseInt(e.target.value) }))}
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-amber-500 bg-gray-200"
+                  />
+                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>10px</span>
+                    <span>14px</span>
+                    <span>20px</span>
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <p className="text-xs text-gray-400 mb-2">{t?.customisePdf?.preview || "Preview"}</p>
+                  <p style={{ fontFamily: typography.font_family, fontSize: `${typography.font_size}px` }}>
+                    The quick brown fox jumps over the lazy dog.
+                  </p>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+                <button
+                  onClick={() => setShowCustomisePdfModal(false)}
+                  className={`${buttonVariants.outline} px-4 py-2 text-sm`}
+                >
+                  {t?.common?.cancel || "Cancel"}
+                </button>
+                <button
+                  onClick={handleSaveTypography}
+                  disabled={isSavingTypography}
+                  className={`${buttonVariants.primary} px-4 py-2 text-sm ${isSavingTypography ? disabledButtonClasses : ""}`}
+                >
+                  {isSavingTypography ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>{t?.common?.loading || "Saving..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      <span>{t?.customisePdf?.save || "Save Settings"}</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>

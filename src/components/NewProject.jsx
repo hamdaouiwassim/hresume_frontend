@@ -8,14 +8,15 @@ import {
 import { storeProject, updateProject } from "../services/ProjectService";
 import { toast } from "sonner";
 
-export default function NewProject({project = {
-        name : "",
-        description : "",
-        technologies : "",
-        url : "",
-        startDate : null,
-        endDate : null
-    } ,index = null  , hide , resumeId , edit=false , onSave, onPreviewChange, onPreviewClear}) {
+export default function NewProject({ project = {
+    name: "",
+    description: "",
+    technologies: "",
+    url: "",
+    startDate: null,
+    endDate: null,
+    experience_id: null,
+}, index = null, hide, resumeId, experiences = [], edit = false, onSave, onPreviewChange, onPreviewClear }) {
 const { t } = useLanguage();
 const [errors,setErrors]=useState({});
 const [isLoading, setIsLoading] = useState(false);
@@ -49,9 +50,10 @@ const handleStoreProject = async () => {
     }
    
     setIsLoading(true);
-    let data = {...projectState , resume_id : resumeId }
-    try{
-    const response = await storeProject(data);
+    const payload = { ...projectState, resume_id: resumeId };
+    if (payload.experience_id === "" || payload.experience_id === undefined) payload.experience_id = null;
+    try {
+    const response = await storeProject(payload);
     closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
@@ -73,9 +75,10 @@ const handleUpdateProject = async () => {
         return;
     }
     setIsLoading(true);
-let data = {...projectState }
-    try{
-    const response = await updateProject(data,projectState.id);
+    const payload = { ...projectState };
+    if (payload.experience_id === "" || payload.experience_id === undefined) payload.experience_id = null;
+    try {
+    const response = await updateProject(payload, projectState.id);
     closeForm();
     toast.success(response.data.message || "");
     if (onSave) onSave();
@@ -135,6 +138,27 @@ let data = {...projectState }
                       </div>
 
                       <div className="grid grid-cols-1 gap-5">
+                        {experiences && experiences.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            {t.dashboard.sections.projects?.project?.underExperience ?? "Under experience"}{" "}
+                            <span className="text-slate-400 font-normal text-xs">(optional)</span>
+                          </label>
+                          <select
+                            value={projectState.experience_id ?? ""}
+                            onChange={(e) => setProject({ ...projectState, experience_id: e.target.value || null })}
+                            className="w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3"
+                          >
+                            <option value="">— None (standalone project) —</option>
+                            {experiences.map((exp) => (
+                              <option key={exp.id} value={exp.id}>
+                                {exp.company || "Company"} – {exp.position || "Position"}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        )}
+
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
                             { t.dashboard.sections.projects.project.name }{" "}

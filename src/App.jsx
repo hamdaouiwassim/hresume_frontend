@@ -49,6 +49,7 @@ const AdminUserDetails = lazy(() => import('./pages/admin/UserDetails'));
 const AdminUserCVs = lazy(() => import('./pages/admin/UserCVs'));
 const AdminGeneratedCV = lazy(() => import('./pages/admin/GeneratedCV'));
 const AdminFontManagement = lazy(() => import('./pages/admin/FontManagement'));
+const AdminReviewsManagement = lazy(() => import('./pages/admin/ReviewsManagement'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -109,6 +110,7 @@ function App() {
             <Route path="/admin/cover-letter-templates" element={<AdminRoute><AdminCoverLetterTemplatesManagement /></AdminRoute>} />
             <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
             <Route path="/admin/fonts" element={<AdminRoute><AdminFontManagement /></AdminRoute>} />
+            <Route path="/admin/reviews" element={<AdminRoute><AdminReviewsManagement /></AdminRoute>} />
             <Route path="/admin/profile" element={<AdminRoute><AdminProfile /></AdminRoute>} />
 
             {/* Recruiter routes */}

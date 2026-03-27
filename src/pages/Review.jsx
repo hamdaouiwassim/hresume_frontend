@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import AuthLayout from "../Layouts/AuthLayout";
-import { Star, MessageSquare, Send, Loader2, CheckCircle, Heart, ThumbsUp } from 'lucide-react';
+import { Star, MessageSquare, Send, Loader2, CheckCircle, Heart, ThumbsUp, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import { submitReview, getUserReview } from '../services/reviewService';
 import { toast } from 'sonner';
 
 export default function Review() {
   const { t } = useLanguage();
+  const { user } = useContext(AuthContext);
   const review = t?.review || {};
+  
+  const isVerified = !!user?.email_verified_at;
   
   const [formData, setFormData] = useState({
     rating: 0,
@@ -248,6 +253,23 @@ export default function Review() {
                 )}
               </div>
 
+              {/* Verification Alert */}
+              {!isVerified && (
+                <div className="p-6 bg-red-50 border border-red-200 rounded-xl mb-8">
+                  <div className="flex items-start gap-4">
+                    <ShieldAlert className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="text-red-800 font-bold mb-1">
+                        {review.verificationRequiredTitle || "Email Verification Required"}
+                      </h3>
+                      <p className="text-red-700 text-sm leading-relaxed">
+                        {review.verificationRequiredMessage || "To ensure the authenticity of our reviews, only verified users can share their experience. Please verify your email address to enable review submission."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Title Section */}
               <div>
                 <label htmlFor="title" className="block text-lg font-semibold text-gray-900 mb-2">
@@ -365,9 +387,9 @@ export default function Review() {
                 <div className="flex items-center gap-4">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !isVerified}
                     className={`flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2 ${
-                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                      isSubmitting || !isVerified ? 'opacity-50 cursor-not-allowed transform-none shadow-none grayscale' : ''
                     }`}
                   >
                     {isSubmitting ? (

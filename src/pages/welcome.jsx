@@ -259,7 +259,11 @@ export default function Welcome() {
                 ))
               ) : (
                 templates.map((template, index) => (
-                  <div key={template.id || index} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden group">
+                  <Link
+                    key={template.id || index}
+                    to={`/templates/public/preview/${template.id}`}
+                    className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden group block"
+                  >
                     <div className="relative">
                       {template.preview_image_url ? (
                         <img
@@ -297,9 +301,9 @@ export default function Welcome() {
                         </p>
                       </div>
                       <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
-                        <button className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                        <span className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
                           Preview Template
-                        </button>
+                        </span>
                       </div>
                     </div>
                     <div className="p-6">
@@ -318,7 +322,7 @@ export default function Welcome() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>

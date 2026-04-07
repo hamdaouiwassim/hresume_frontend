@@ -70,6 +70,7 @@ export default function AdminLayout({ children }) {
         { path: '/admin/cover-letter-templates', icon: Mail, label: 'CL Templates' },
         { path: '/admin/blog', icon: FileText, label: 'Blog' },
         { path: '/admin/cvs', icon: FileText, label: 'Generated CVs' },
+        { path: '/admin/cover-letters', icon: Mail, label: 'Generated CLs' },
         { path: '/admin/reviews', icon: MessageSquare, label: 'Reviews' },
         { path: '/admin/fonts', icon: Type, label: 'Fonts' },
     ];

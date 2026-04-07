@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 
 export default function Templates() {
   const { t } = useLanguage();
-  const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [filteredTemplates, setFilteredTemplates] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -177,13 +176,13 @@ export default function Templates() {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
-                      <button
-                        onClick={() => handlePreview(template)}
+                      <Link
+                        to={`/templates/preview/${template.id}`}
                         className="px-6 py-3 bg-white text-blue-600 rounded-xl flex items-center font-semibold transform translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:shadow-xl"
                       >
                         <Eye className="h-5 w-5 mr-2" />
                         {t.templates.preview}
-                      </button>
+                      </Link>
                     </div>
                     <div className="absolute top-4 right-4 flex gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(template.category)}`}>

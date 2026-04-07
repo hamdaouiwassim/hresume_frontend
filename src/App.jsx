@@ -40,6 +40,7 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
 const ResumeTemplates = lazy(() => import('./pages/ResumeTemplates'));
+const TemplatePreviewPage = lazy(() => import('./pages/TemplatePreviewPage'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const Review = lazy(() => import('./pages/Review'));
 const Blog = lazy(() => import('./pages/Blog'));
@@ -48,6 +49,7 @@ const AdminBlog = lazy(() => import('./pages/admin/Blog'));
 const AdminUserDetails = lazy(() => import('./pages/admin/UserDetails'));
 const AdminUserCVs = lazy(() => import('./pages/admin/UserCVs'));
 const AdminGeneratedCV = lazy(() => import('./pages/admin/GeneratedCV'));
+const AdminCoverLettersManagement = lazy(() => import('./pages/admin/CoverLettersManagement'));
 const AdminFontManagement = lazy(() => import('./pages/admin/FontManagement'));
 const AdminReviewsManagement = lazy(() => import('./pages/admin/ReviewsManagement'));
 
@@ -79,6 +81,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/templates/public" element={<ResumeTemplates />} />
+            <Route path="/templates/public/preview/:id" element={<TemplatePreviewPage />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
@@ -88,6 +91,7 @@ function App() {
             <Route path="/resumes" element={<PrivateRoute><Resumes /></PrivateRoute>} />
             <Route path="/shared-with-me" element={<PrivateRoute><SharedWithMe /></PrivateRoute>} />
             <Route path="/templates" element={<PrivateRoute><Templates /></PrivateRoute>} />
+            <Route path="/templates/preview/:id" element={<PrivateRoute><TemplatePreviewPage /></PrivateRoute>} />
             {/* New path for creating a resume */}
             <Route path="/resume/create" element={<PrivateRoute><CreateResume /></PrivateRoute>} />
             {/* Profile page */}
@@ -106,6 +110,7 @@ function App() {
             <Route path="/admin/users/:id" element={<AdminRoute><AdminUserDetails /></AdminRoute>} />
             <Route path="/admin/users/:id/cvs" element={<AdminRoute><AdminUserCVs /></AdminRoute>} />
             <Route path="/admin/cvs" element={<AdminRoute><AdminGeneratedCV /></AdminRoute>} />
+            <Route path="/admin/cover-letters" element={<AdminRoute><AdminCoverLettersManagement /></AdminRoute>} />
             <Route path="/admin/templates" element={<AdminRoute><AdminTemplatesManagement /></AdminRoute>} />
             <Route path="/admin/cover-letter-templates" element={<AdminRoute><AdminCoverLetterTemplatesManagement /></AdminRoute>} />
             <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />

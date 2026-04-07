@@ -39,6 +39,14 @@ export const getAdminResumes = (params = {}) => {
 
 export const getAdminResume = (id) => axiosInstance.get(`/admin/resumes/${id}`);
 
+// Cover Letters
+export const getAdminCoverLetters = (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return axiosInstance.get(`/admin/cover-letters?${queryString}`);
+};
+export const getAdminCoverLetter = (id) => axiosInstance.get(`/admin/cover-letters/${id}`);
+export const deleteAdminCoverLetter = (id) => axiosInstance.delete(`/admin/cover-letters/${id}`);
+
 // PDF Fonts
 export const getAdminFonts = () => axiosInstance.get("/admin/fonts");
 export const uploadAdminFont = (formData) =>

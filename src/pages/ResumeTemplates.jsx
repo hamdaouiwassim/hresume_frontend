@@ -127,6 +127,27 @@ export default function ResumeTemplates() {
             </div>
           </div>
 
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">Template Preview Pages</h2>
+              <p className="text-gray-600">Open each CV template with sample data to see the full layout.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link to="/templates/public/preview/1" className="block rounded-xl border border-gray-200 p-5 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                <p className="font-semibold text-gray-900">Classic</p>
+                <p className="text-sm text-gray-600 mt-1">Traditional and ATS-friendly.</p>
+              </Link>
+              <Link to="/templates/public/preview/2" className="block rounded-xl border border-gray-200 p-5 hover:border-purple-300 hover:bg-purple-50 transition-colors">
+                <p className="font-semibold text-gray-900">Executive Split</p>
+                <p className="text-sm text-gray-600 mt-1">Premium split-column structure.</p>
+              </Link>
+              <Link to="/templates/public/preview/3" className="block rounded-xl border border-gray-200 p-5 hover:border-green-300 hover:bg-green-50 transition-colors">
+                <p className="font-semibold text-gray-900">Modern Professional</p>
+                <p className="text-sm text-gray-600 mt-1">Balanced modern two-column design.</p>
+              </Link>
+            </div>
+          </div>
+
           {/* Future Templates Section */}
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
             <div className="text-center mb-8">

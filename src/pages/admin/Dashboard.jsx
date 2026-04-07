@@ -72,7 +72,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
                         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="p-3 bg-blue-100 rounded-xl">
@@ -135,6 +135,17 @@ export default function AdminDashboard() {
                             <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats?.total_resumes || 0}</h3>
                             <p className="text-sm text-gray-600">Total created</p>
                         </div>
+
+                        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-amber-100 rounded-xl">
+                                    <FileText className="h-6 w-6 text-amber-600" />
+                                </div>
+                                <span className="text-sm text-gray-500">Cover Letters</span>
+                            </div>
+                            <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats?.total_cover_letters || 0}</h3>
+                            <p className="text-sm text-gray-600">Generated total</p>
+                        </div>
                     </div>
 
                     {/* Activity Stats */}
@@ -152,6 +163,10 @@ export default function AdminDashboard() {
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-600">Active (7d)</span>
                                     <span className="text-2xl font-bold text-gray-900">{stats?.active_users_7d || 0}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">Cover letters (month)</span>
+                                    <span className="text-2xl font-bold text-gray-900">{stats?.cover_letters_this_month || 0}</span>
                                 </div>
                             </div>
                         </div>
@@ -179,7 +194,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Recent Users */}
                         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                             <div className="flex items-center justify-between mb-4">
@@ -233,6 +248,27 @@ export default function AdminDashboard() {
                                     ))
                                 ) : (
                                     <p className="text-gray-500 text-center py-4">No recent templates</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-bold text-gray-900">Recent Cover Letters</h2>
+                            </div>
+                            <div className="space-y-3">
+                                {stats?.recent_cover_letters?.length > 0 ? (
+                                    stats.recent_cover_letters.map((letter) => (
+                                        <div key={letter.id} className="p-3 bg-gray-50 rounded-lg">
+                                            <p className="font-semibold text-gray-900">{letter.title}</p>
+                                            <p className="text-sm text-gray-500">
+                                                {letter.user?.name || "Unknown user"} • {letter.style || "classic"}
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">{formatDate(letter.created_at)}</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-500 text-center py-4">No generated cover letters</p>
                                 )}
                             </div>
                         </div>

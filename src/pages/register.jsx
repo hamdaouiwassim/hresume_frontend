@@ -37,9 +37,13 @@ const { user, setUser } = useContext(AuthContext);
       const newUser = res.data.user;
       const token = res.data.token;
 
-      localStorage.setItem("token", token);
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        localStorage.removeItem("token");
+      }
       localStorage.setItem("user", JSON.stringify(newUser));
-      setUser({ token, ...newUser });
+      setUser(newUser);
 
       toast.success("Account created! Please verify your email to continue.");
 

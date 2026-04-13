@@ -1,7 +1,6 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect } from "react";
 import axiosInstance from "../api/axiosInstance";
-import { toast } from "sonner";
 
 export const AuthContext = createContext(null);
 
@@ -11,18 +10,13 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const res = await axiosInstance.get("/me");
         setUser(res.data.user);
-      } catch (err) {
+      } catch {
         localStorage.removeItem("token");
-        toast.error("Session expired, please login again.");
+        localStorage.removeItem("user");
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -31,7 +25,6 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Show loader while verifying token
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100">

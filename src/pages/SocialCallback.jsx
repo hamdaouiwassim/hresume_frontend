@@ -8,9 +8,15 @@ import { Loader2, ShieldCheck, AlertCircle, Home } from "lucide-react";
 
 const getHomePath = (currentUser) => {
   if (currentUser?.is_admin) return "/admin";
-  if (currentUser?.is_recruiter && currentUser?.recruiter_status === "approved")
+  if (
+    currentUser?.is_recruiter &&
+    currentUser?.recruiter_status === "approved"
+  )
     return "/recruiter/resumes";
-  if (currentUser?.recruiter_status && currentUser.recruiter_status !== "approved")
+  if (
+    currentUser?.recruiter_status &&
+    currentUser.recruiter_status !== "approved"
+  )
     return "/403";
   return "/resumes";
 };
@@ -22,23 +28,27 @@ export default function SocialCallback() {
   const [status, setStatus] = useState("processing");
   const [message, setMessage] = useState("Connecting to your account...");
 
-  const query = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const query = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
 
   useEffect(() => {
     const handleSocialLogin = async () => {
       const statusParam = query.get("status");
-      const token = query.get("token");
       const provider = query.get("provider") || "google";
       const errorMessage = query.get("message");
 
-      if (statusParam !== "success" || !token) {
+      if (statusParam !== "success") {
         setStatus("error");
-        setMessage(errorMessage || "We could not verify your " + provider + " session.");
+        setMessage(
+          errorMessage ||
+            `We could not verify your ${provider} session.`
+        );
         return;
       }
 
       try {
-        localStorage.setItem("token", token);
         const meResponse = await axiosInstance.get("/me");
         const profile = meResponse.data?.user;
 
@@ -46,8 +56,9 @@ export default function SocialCallback() {
           throw new Error("Unable to fetch profile");
         }
 
+        localStorage.removeItem("token");
         localStorage.setItem("user", JSON.stringify(profile));
-        setUser({ token, ...profile });
+        setUser(profile);
 
         if (!profile.email_verified_at) {
           toast.info("Please verify your email to continue.");
@@ -81,7 +92,9 @@ export default function SocialCallback() {
             <p className="text-sm uppercase tracking-[0.35em] text-slate-400">
               Signing you in
             </p>
-            <h1 className="text-2xl font-semibold text-slate-900">Please hold tight</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">
+              Please hold tight
+            </h1>
             <p className="text-slate-600">{message}</p>
           </div>
         </div>
@@ -99,7 +112,9 @@ export default function SocialCallback() {
           <p className="text-sm uppercase tracking-[0.35em] text-slate-400">
             Social login error
           </p>
-          <h1 className="text-2xl font-semibold text-slate-900">We couldn’t finish signing in</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            We couldn’t finish signing in
+          </h1>
           <p className="text-slate-600">{message}</p>
           <div className="flex flex-col gap-3">
             <button
@@ -124,4 +139,3 @@ export default function SocialCallback() {
     </GuestLayout>
   );
 }
-

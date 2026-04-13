@@ -44,9 +44,13 @@ export default function Login() {
       const loggedInUser = res.data.user;
       const token = res.data.token;
 
-      setUser({ token, ...loggedInUser });
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        localStorage.removeItem("token");
+      }
       localStorage.setItem("user", JSON.stringify(loggedInUser));
-      localStorage.setItem("token", token);
+      setUser(loggedInUser);
       setFormData({
         email: "",
         password: "",

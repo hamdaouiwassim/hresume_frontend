@@ -1,100 +1,129 @@
 import axios from "axios";
 import { toast } from "sonner";
 import config from "../config";
+import { createPrepareSpaRequest } from "./sanctumPrep";
 
-// Create instance
 const axiosInstance = axios.create({
-  baseURL: config.API_URL, // change to your API URL
+  baseURL: config.API_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    "X-Requested-With": "XMLHttpRequest",
   },
 });
 
-// Request interceptor: add token
+export const prepareSpaRequest = createPrepareSpaRequest(axiosInstance);
+
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token"); // store token after login
+  async (req) => {
+    const method = (req.method || "get").toLowerCase();
+    if (["post", "put", "patch", "delete"].includes(method)) {
+      const skipCsrf =
+        req.url?.includes("csrf-token") || req.headers?.["X-Skip-Csrf-Prep"];
+      if (!skipCsrf && !req.headers["X-XSRF-TOKEN"]) {
+        await prepareSpaRequest(false);
+      }
+    }
+
+    const token = localStorage.getItem("token");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      req.headers.Authorization = `Bearer ${token}`;
     }
-    // Remove Content-Type for FormData to let browser set it with boundary
-    if (config.data instanceof FormData) {
-      delete config.headers['Content-Type'];
+    if (req.data instanceof FormData) {
+      delete req.headers["Content-Type"];
     }
-    return config;
+    return req;
   },
   (error) => Promise.reject(error)
 );
 
-// Helper function to format validation errors
 const formatValidationErrors = (errors) => {
-  if (!errors || typeof errors !== 'object') {
+  if (!errors || typeof errors !== "object") {
     return [];
   }
-  
+
   const errorMessages = [];
   Object.keys(errors).forEach((field) => {
-    const fieldErrors = Array.isArray(errors[field]) ? errors[field] : [errors[field]];
+    const fieldErrors = Array.isArray(errors[field])
+      ? errors[field]
+      : [errors[field]];
     fieldErrors.forEach((errorMsg) => {
       if (errorMsg) {
-        // Format: "Field name: error message"
-        const fieldLabel = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const fieldLabel = field
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase());
         errorMessages.push(`${fieldLabel}: ${errorMsg}`);
       }
     });
   });
-  
+
   return errorMessages;
 };
 
-// Response interceptor: handle errors
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response) {
       const { status, data } = error.response;
-      
-      // Handle 401 Unauthorized
+      const reqUrl = error.config?.url || "";
+
+      if (status === 419 && !error.config?._csrfRetry) {
+        delete axiosInstance.defaults.headers.common["X-XSRF-TOKEN"];
+        try {
+          await prepareSpaRequest(true);
+          const retryConfig = {
+            ...error.config,
+            _csrfRetry: true,
+          };
+          return axiosInstance.request(retryConfig);
+        } catch {
+          return Promise.reject(error);
+        }
+      }
+
       if (status === 401) {
+        const isSilentAuthCheck =
+          reqUrl.includes("/me") || reqUrl.endsWith("me");
         localStorage.removeItem("token");
-        window.location.href = "/login"; // redirect to login
+        if (!isSilentAuthCheck) {
+          window.location.href = "/login";
+        }
         return Promise.reject(error);
       }
-      
-      // Handle 422 Validation Errors
+
       if (status === 422) {
         const errorData = data || {};
         const errors = errorData.errors || {};
         const message = errorData.message || "Validation failed";
-        
-        // Format validation errors for toast
+
         const formattedErrors = formatValidationErrors(errors);
-        
+
         if (formattedErrors.length > 0) {
-          // Show first error as main message, and list all errors
           if (formattedErrors.length === 1) {
             toast.error(formattedErrors[0], {
               duration: 5000,
             });
           } else {
-            // Show main message and list all errors in description
-            // Create a formatted list of errors
-            const errorList = formattedErrors.map((err, idx) => `${idx + 1}. ${err}`).join('\n');
+            const errorList = formattedErrors
+              .map((err, idx) => `${idx + 1}. ${err}`)
+              .join("\n");
             toast.error(message, {
               description: errorList,
               duration: 6000,
             });
           }
         } else {
-          // Fallback to general message if no formatted errors
-          toast.error(message || "Validation failed. Please check your input.", {
-            duration: 5000,
-          });
+          toast.error(
+            message || "Validation failed. Please check your input.",
+            {
+              duration: 5000,
+            }
+          );
         }
       }
     }
-    
+
     return Promise.reject(error);
   }
 );

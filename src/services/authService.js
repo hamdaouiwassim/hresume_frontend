@@ -1,25 +1,31 @@
-import axiosInstance from "../api/axiosInstance";
+import axiosInstance, { prepareSpaRequest } from "../api/axiosInstance";
 
-// Register
-export const register = (data) => axiosInstance.post("/register", data);
+export { prepareSpaRequest };
 
-// Login
-export const login = async (data) => {
-   return axiosInstance.post("/login", data);
-  
+export const register = async (payload) => {
+  await prepareSpaRequest(true);
+  const res = await axiosInstance.post("/register", payload);
+  await prepareSpaRequest(true);
+  return res;
+};
+
+export const login = async (payload) => {
+  await prepareSpaRequest(true);
+  const res = await axiosInstance.post("/login", payload);
+  await prepareSpaRequest(true);
+  return res;
 };
 
 export const getGoogleAuthUrl = () => axiosInstance.get("/auth/google/url");
 
-export const resendVerificationEmail = () =>
-  axiosInstance.post("/email/verification-notification");
+export const resendVerificationEmail = async () => {
+  await prepareSpaRequest(true);
+  return axiosInstance.post("/email/verification-notification");
+};
 
-// Get current user
 export const getMe = () => axiosInstance.get("/me");
 
-// Logout
 export const logout = async () => {
- return  axiosInstance.post("/logout");
- 
-  
+  await prepareSpaRequest(true);
+  return axiosInstance.post("/logout");
 };

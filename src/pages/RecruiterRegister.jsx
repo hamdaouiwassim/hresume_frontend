@@ -143,9 +143,13 @@ export default function RecruiterRegister() {
       const registeredUser = response.data.user;
       const token = response.data.token;
 
-      localStorage.setItem("token", token);
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        localStorage.removeItem("token");
+      }
       localStorage.setItem("user", JSON.stringify(registeredUser));
-      setUser({ token, ...registeredUser });
+      setUser(registeredUser);
 
       toast.success(
         "Please verify your email. We'll notify you once an admin activates your recruiter access."

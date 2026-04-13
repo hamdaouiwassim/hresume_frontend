@@ -18,11 +18,25 @@ export const prepareSpaRequest = createPrepareSpaRequest(axiosInstance);
 axiosInstance.interceptors.request.use(
   async (req) => {
     const method = (req.method || "get").toLowerCase();
+    const reqUrl = (req.url || "").toLowerCase();
+
+    // Session can rotate after social auth/login flows; always refresh CSRF before logout.
+    // This avoids stale token mismatches that surface as 419 in production.
+    if (method === "post" && (reqUrl.endsWith("/logout") || reqUrl === "logout")) {
+      await prepareSpaRequest(true);
+    }
+
     if (["post", "put", "patch", "delete"].includes(method)) {
       const skipCsrf =
         req.url?.includes("csrf-token") || req.headers?.["X-Skip-Csrf-Prep"];
-      if (!skipCsrf && !req.headers["X-XSRF-TOKEN"]) {
+      if (!skipCsrf && !req.headers["X-CSRF-TOKEN"]) {
         await prepareSpaRequest(false);
+      }
+
+      // Ensure the current request always carries the latest CSRF token header.
+      const csrfHeader = axiosInstance.defaults.headers.common["X-CSRF-TOKEN"];
+      if (csrfHeader && !req.headers["X-CSRF-TOKEN"]) {
+        req.headers["X-CSRF-TOKEN"] = csrfHeader;
       }
     }
 
@@ -69,6 +83,7 @@ axiosInstance.interceptors.response.use(
       const reqUrl = error.config?.url || "";
 
       if (status === 419 && !error.config?._csrfRetry) {
+        delete axiosInstance.defaults.headers.common["X-CSRF-TOKEN"];
         delete axiosInstance.defaults.headers.common["X-XSRF-TOKEN"];
         try {
           await prepareSpaRequest(true);

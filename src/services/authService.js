@@ -17,6 +17,8 @@ export const login = async (payload) => {
 };
 
 export const getGoogleAuthUrl = () => axiosInstance.get("/auth/google/url");
+export const exchangeSocialAuthCode = (code) =>
+  axiosInstance.post("/auth/social/exchange", { code });
 
 export const resendVerificationEmail = async () => {
   await prepareSpaRequest(true);

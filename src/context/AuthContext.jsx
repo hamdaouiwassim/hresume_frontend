@@ -10,13 +10,25 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const tokenAtRequestStart = localStorage.getItem("token");
       try {
         const res = await axiosInstance.get("/me");
         setUser(res.data.user);
       } catch {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setUser(null);
+        // Avoid wiping a fresh token set by social-login exchange while this request was in flight.
+        const currentToken = localStorage.getItem("token");
+        if (!currentToken || currentToken === tokenAtRequestStart) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+        } else {
+          try {
+            const retryRes = await axiosInstance.get("/me");
+            setUser(retryRes.data.user);
+          } catch {
+            setUser(null);
+          }
+        }
       } finally {
         setLoading(false);
       }

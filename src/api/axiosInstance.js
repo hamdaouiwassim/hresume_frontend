@@ -100,7 +100,18 @@ axiosInstance.interceptors.response.use(
       if (status === 401) {
         const isSilentAuthCheck =
           reqUrl.includes("/me") || reqUrl.endsWith("me");
-        localStorage.removeItem("token");
+        const currentToken = localStorage.getItem("token");
+        const requestAuthHeader =
+          error.config?.headers?.Authorization ||
+          error.config?.headers?.authorization;
+        const requestToken = requestAuthHeader?.startsWith("Bearer ")
+          ? requestAuthHeader.slice(7)
+          : null;
+
+        // Do not clear a token that was refreshed/set after this request started.
+        if (!requestToken || currentToken === requestToken) {
+          localStorage.removeItem("token");
+        }
         if (!isSilentAuthCheck) {
           window.location.href = "/login";
         }

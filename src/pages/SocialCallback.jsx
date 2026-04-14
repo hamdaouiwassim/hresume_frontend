@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import GuestLayout from "../Layouts/GuestLayout";
 import { AuthContext } from "../context/AuthContext";
 import axiosInstance from "../api/axiosInstance";
+import { exchangeSocialAuthCode } from "../services/authService";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, AlertCircle, Home } from "lucide-react";
 
@@ -38,6 +39,7 @@ export default function SocialCallback() {
       const statusParam = query.get("status");
       const provider = query.get("provider") || "google";
       const errorMessage = query.get("message");
+      const code = query.get("code");
 
       if (statusParam !== "success") {
         setStatus("error");
@@ -49,14 +51,27 @@ export default function SocialCallback() {
       }
 
       try {
-        const meResponse = await axiosInstance.get("/me");
-        const profile = meResponse.data?.user;
+        let profile = null;
+        let token = null;
+
+        if (code) {
+            const exchangeResponse = await exchangeSocialAuthCode(code);
+            profile = exchangeResponse.data?.user;
+            token = exchangeResponse.data?.token || null;
+        } else {
+            const meResponse = await axiosInstance.get("/me");
+            profile = meResponse.data?.user;
+        }
 
         if (!profile) {
           throw new Error("Unable to fetch profile");
         }
 
-        localStorage.removeItem("token");
+        if (token) {
+          localStorage.setItem("token", token);
+        } else {
+          localStorage.removeItem("token");
+        }
         localStorage.setItem("user", JSON.stringify(profile));
         setUser(profile);
 

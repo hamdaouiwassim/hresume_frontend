@@ -30,7 +30,6 @@ export default function CoverLetters() {
                 toast.error(strings.messages?.loadError || 'Failed to load cover letters');
             }
         } catch (error) {
-            console.error("Error fetching cover letters:", error);
             toast.error(strings.messages?.loadError || 'Failed to load cover letters');
         } finally {
             setIsLoading(false);
@@ -51,7 +50,6 @@ export default function CoverLetters() {
             setLetters(letters.filter(l => l.id !== deleteDialog.letter.id));
             setDeleteDialog({ isOpen: false, letter: null });
         } catch (error) {
-            console.error("Error deleting letter:", error);
             toast.error(error.response?.data?.message || strings.messages?.deleteError || 'Failed to delete');
         } finally {
             setIsDeleting(false);
@@ -69,7 +67,6 @@ export default function CoverLetters() {
             link.click();
             link.remove();
         } catch (error) {
-            console.error("Download error:", error);
             toast.error('Failed to download PDF');
         }
     };

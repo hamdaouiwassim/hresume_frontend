@@ -30,7 +30,6 @@ const SectionOrderManager = ({
       onToggleReorderMode(false);
     } catch (error) {
       toast.error("Failed to save section order");
-      console.error(error);
     } finally {
       setIsSaving(false);
     }

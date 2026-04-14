@@ -30,7 +30,6 @@ export default function SharedWithMe() {
         toast.error('Failed to load shared resumes');
       }
     } catch (error) {
-      console.error("Error fetching shared resumes:", error);
       toast.error('Failed to load shared resumes. Please try again.');
     } finally {
       setIsLoading(false);

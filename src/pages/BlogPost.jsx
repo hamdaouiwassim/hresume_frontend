@@ -28,7 +28,6 @@ export default function BlogPostDetail() {
         setPost(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching blog post:', error);
       setError(error.response?.data?.message || 'Blog post not found');
     } finally {
       setIsLoading(false);

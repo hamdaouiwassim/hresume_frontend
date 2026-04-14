@@ -36,7 +36,6 @@ export default function Templates() {
         toast.error('Failed to load templates');
       }
     } catch (error) {
-      console.error('Error fetching templates:', error);
       toast.error('Failed to load templates. Please try again.');
     } finally {
       setIsLoading(false);

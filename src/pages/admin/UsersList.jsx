@@ -72,7 +72,6 @@ export default function UsersList() {
                 toast.error('Failed to load users');
             }
         } catch (error) {
-            console.error('Error fetching users:', error);
             toast.error('Failed to load users');
         } finally {
             setIsLoading(false);
@@ -93,7 +92,6 @@ export default function UsersList() {
             setUsers(users.filter(u => u.id !== deleteDialog.user.id));
             setDeleteDialog({ isOpen: false, user: null });
         } catch (error) {
-            console.error("Error deleting user:", error);
             toast.error(error.response?.data?.message || 'Failed to delete user');
         } finally {
             setIsDeleting(false);

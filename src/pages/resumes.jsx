@@ -36,7 +36,6 @@ export default function Resumes() {
         toast.error('Failed to load resumes');
       }
     } catch (error) {
-      console.error("Error fetching resumes:", error);
       toast.error('Failed to load resumes. Please try again.');
     } finally {
       setIsLoading(false);
@@ -58,7 +57,6 @@ export default function Resumes() {
       setSharedResumes(sharedResumes.filter(r => r.id !== deleteDialog.resume.id));
       setDeleteDialog({ isOpen: false, resume: null });
     } catch (error) {
-      console.error("Error deleting resume:", error);
       toast.error(error.response?.data?.message || 'Failed to delete resume');
     } finally {
       setIsDeleting(false);

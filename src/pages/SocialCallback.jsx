@@ -82,7 +82,6 @@ export default function SocialCallback() {
         }
         navigate(getHomePath(profile), { replace: true });
       } catch (error) {
-        console.error("Social login error", error);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setStatus("error");

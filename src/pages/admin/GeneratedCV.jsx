@@ -75,7 +75,6 @@ export default function GeneratedCV() {
                 toast.error('Failed to load resumes');
             }
         } catch (error) {
-            console.error('Error fetching resumes:', error);
             toast.error('Failed to load resumes');
         } finally {
             setIsLoading(false);
@@ -92,7 +91,6 @@ export default function GeneratedCV() {
                 toast.error('Failed to load resume details');
             }
         } catch (error) {
-            console.error('Error fetching resume:', error);
             toast.error('Failed to load resume details');
         }
     };
@@ -107,7 +105,6 @@ export default function GeneratedCV() {
                 toast.error('Failed to load resume for preview');
             }
         } catch (error) {
-            console.error('Error fetching resume for preview:', error);
             toast.error('Failed to load resume for preview');
         }
     };

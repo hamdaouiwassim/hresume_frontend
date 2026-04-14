@@ -59,7 +59,6 @@ const handleStoreProject = async () => {
     if (onSave) onSave();
     }catch(error) {
       if (error.response && error.response.data && error.response.data.errors) {
-        console.log(error.response.data.errors);
         setErrors(error.response.data.errors);
       }
       toast.error("Error saving project. Please try again.");
@@ -84,7 +83,6 @@ const handleUpdateProject = async () => {
     if (onSave) onSave();
     }catch(error) {
       if (error.response && error.response.data && error.response.data.errors) {
-        console.log(error.response.data.errors);
         setErrors(error.response.data.errors);
       }
       toast.error("Error updating project. Please try again.");

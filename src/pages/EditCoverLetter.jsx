@@ -59,7 +59,6 @@ export default function EditCoverLetter() {
                 setTemplates(response.data.data);
             }
         } catch (error) {
-            console.error("Error fetching templates:", error);
         } finally {
             setIsTemplatesLoading(false);
         }
@@ -73,7 +72,6 @@ export default function EditCoverLetter() {
                 setFormData(response.data.data);
             }
         } catch (error) {
-            console.error("Error fetching cover letter:", error);
             toast.error(strings.messages?.loadError || 'Failed to load cover letter');
             navigate('/cover-letters');
         } finally {
@@ -108,7 +106,6 @@ export default function EditCoverLetter() {
                 }
             }
         } catch (error) {
-            console.error("Error saving cover letter:", error);
             toast.error(strings.messages?.saveError || 'Failed to save');
         } finally {
             setIsSaving(false);
@@ -132,7 +129,6 @@ export default function EditCoverLetter() {
             link.click();
             link.remove();
         } catch (error) {
-            console.error("Download error:", error);
             toast.error('Failed to download PDF');
         } finally {
             setIsDownloading(false);

@@ -49,7 +49,6 @@ export default function Review() {
     } catch (error) {
       // User hasn't submitted a review yet, which is fine
       if (error.response?.status !== 404) {
-        console.error('Error fetching review:', error);
       }
     } finally {
       setIsLoading(false);
@@ -132,7 +131,6 @@ export default function Review() {
         }, 5000);
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
       toast.error(error.response?.data?.message || review.errorMessage || "Failed to submit review. Please try again.");
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);

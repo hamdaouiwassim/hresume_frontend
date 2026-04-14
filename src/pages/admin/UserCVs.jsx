@@ -74,7 +74,6 @@ export default function UserCVs() {
                 toast.error('Failed to load CVs');
             }
         } catch (error) {
-            console.error('Error fetching user CVs:', error);
             toast.error('Failed to load CVs');
         } finally {
             setIsLoading(false);
@@ -91,7 +90,6 @@ export default function UserCVs() {
                 toast.error('Failed to load resume details');
             }
         } catch (error) {
-            console.error('Error fetching resume:', error);
             toast.error('Failed to load resume details');
         }
     };

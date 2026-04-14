@@ -51,7 +51,6 @@ export default function NewSkill({skill = {
             if (onSave) onSave();
         } catch (error) {
             if (error.response && error.response.data && error.response.data.errors) {
-                console.log(error.response.data.errors);
                 setErrors(error.response.data.errors);
             }
             toast.error("Error saving skill. Please try again.");
@@ -75,7 +74,6 @@ export default function NewSkill({skill = {
             if (onSave) onSave();
         } catch (error) {
             if (error.response && error.response.data && error.response.data.errors) {
-                console.log(error.response.data.errors);
                 setErrors(error.response.data.errors);
             }
             toast.error("Error updating skill. Please try again.");

@@ -92,7 +92,6 @@ export default function ContactUs() {
         setSubmitStatus(null);
       }, 5000);
     } catch (error) {
-      console.error('Error submitting contact form:', error);
       setSubmitStatus('error');
       
       // Reset error message after 5 seconds

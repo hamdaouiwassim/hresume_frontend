@@ -44,7 +44,6 @@ export default function CollaborationNotifications() {
         setInvitations(response.data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching invitations:', error);
     } finally {
       setIsLoading(false);
     }

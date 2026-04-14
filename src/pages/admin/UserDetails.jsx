@@ -47,7 +47,6 @@ export default function UserDetails() {
                 navigate('/admin/users');
             }
         } catch (error) {
-            console.error('Error fetching user details:', error);
             toast.error('Failed to load user details');
             navigate('/admin/users');
         } finally {
@@ -412,7 +411,6 @@ export default function UserDetails() {
                                             toast.success('Email queued successfully.');
                                             setEmailForm({ subject: '', message: '' });
                                         } catch (error) {
-                                            console.error('Failed to send email:', error);
                                             toast.error(error?.response?.data?.message || 'Failed to send email.');
                                         } finally {
                                             setIsSendingEmail(false);

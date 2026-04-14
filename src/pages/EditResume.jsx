@@ -166,10 +166,6 @@ export default function EditResume() {
   const [draggedSectionIndex, setDraggedSectionIndex] = useState(null);
   const [dragOverSectionIndex, setDragOverSectionIndex] = useState(null);
 
-  // Debug logging for section order
-    console.log('🔄 Section Order State:', sectionOrder);
-    console.log('🔒 Fixed Sections:', fixedSections);
-    console.log('🎯 Is Reorder Mode:', isReorderMode);
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -265,7 +261,6 @@ export default function EditResume() {
   
 const fetchResumeData = useCallback(async () => {
  try {
-        console.log("Resume ID from URL:", id);
         const response = await getByResumeId(id);
         const resumeRecord = response.data.data || {};
         const basicInfo = resumeRecord.basic_info || resumeRecord.basicInfo || {};
@@ -299,7 +294,6 @@ const fetchResumeData = useCallback(async () => {
               }
             }
           } catch (error) {
-            console.error("Error fetching collaborators:", error);
             // Default to no permissions if we can't check
             setUserPermissions([]);
           }
@@ -358,7 +352,6 @@ const fetchResumeData = useCallback(async () => {
         resetPreviewDrafts();
 
       } catch (error) {
-        console.error("Error fetching resume data:", error);
         }
 }, [id, resetPreviewDrafts, user?.id]);
   useEffect(() => {
@@ -372,17 +365,12 @@ const fetchResumeData = useCallback(async () => {
     const fetchTemplates = async () => {
       setIsLoadingTemplates(true);
       try {
-        console.log('Fetching templates...');
         const response = await getTemplates();
-        console.log('Templates response:', response.data);
         if (response.data.status === 'success' && response.data.data) {
           setTemplates(response.data.data);
-          console.log('Templates loaded:', response.data.data.length);
         } else {
-          console.warn('Templates response format unexpected:', response.data);
         }
       } catch (error) {
-        console.error('Error fetching templates:', error);
         toast.error('Failed to load templates');
       } finally {
         setIsLoadingTemplates(false);
@@ -406,7 +394,6 @@ const fetchResumeData = useCallback(async () => {
           setCustomFontOptions(custom);
         }
       } catch (error) {
-        console.warn("Could not load custom fonts:", error);
       }
     };
     fetchActiveFonts();
@@ -503,7 +490,6 @@ const fetchResumeData = useCallback(async () => {
         present: t?.preview?.present,
         }
       );
-      console.log('📋 Resume Preview Data section_order:', data.section_order);
       return data;
     },
     [previewSourceData, locale, t?.preview?.present, sectionOrder, typography]
@@ -636,7 +622,6 @@ const fetchResumeData = useCallback(async () => {
         setShareableLink(null);
       }
     } catch (error) {
-      console.warn("No active shareable link", error);
       setShareableLink(null);
     } finally {
       setIsLoadingLink(false);
@@ -687,7 +672,6 @@ const fetchResumeData = useCallback(async () => {
       toast.success(shareStrings.copySuccess || "Link copied to clipboard!");
       setTimeout(() => setLinkCopied(false), 2000);
     } catch (error) {
-      console.error("Failed to copy share link", error);
       toast.error(shareStrings.copyError || "Failed to copy link");
     }
   };
@@ -719,7 +703,6 @@ const fetchResumeData = useCallback(async () => {
         setCollaborators(response.data.data || []);
       }
     } catch (error) {
-      console.error("Failed to load collaborators", error);
       toast.error("Failed to load collaborators");
     } finally {
       setIsLoadingCollaborators(false);
@@ -838,10 +821,6 @@ const fetchResumeData = useCallback(async () => {
         locale: localeCode,
       });
 
-      console.log('PDF response received:', response);
-      console.log('PDF response status:', response.status);
-      console.log('PDF response headers:', response.headers);
-
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -854,7 +833,6 @@ const fetchResumeData = useCallback(async () => {
 
       toast.success("PDF downloaded successfully!", { id: "pdf-generation" });
     } catch (error) {
-      console.error("PDF generation error:", error);
       toast.error(
         error.response?.data?.message ||
           "Failed to generate PDF. Please try again.",
@@ -870,7 +848,6 @@ const fetchResumeData = useCallback(async () => {
       toast.success(t?.customisePdf?.saved || "PDF settings saved!");
       setShowCustomisePdfModal(false);
     } catch (error) {
-      console.error("Error saving typography:", error);
       toast.error(t?.customisePdf?.error || "Failed to save PDF settings.");
     } finally {
       setIsSavingTypography(false);
@@ -944,7 +921,6 @@ const fetchResumeData = useCallback(async () => {
       toast.success(response.data.message || "Basic info saved successfully!");
     } catch (error) {
       if (error.response && error.response.data && error.response.data.errors) {
-        console.log(error.response.data.errors);
         setErrors(error.response.data.errors);
       }
       toast.error("Error saving basic info. Please try again.");
@@ -1075,7 +1051,6 @@ const fetchResumeData = useCallback(async () => {
         toast.error('Failed to change template');
       }
     } catch (error) {
-      console.error('Error changing template:', error);
       toast.error(error.response?.data?.message || 'Failed to change template');
     } finally {
       setIsChangingTemplate(false);
@@ -1137,7 +1112,6 @@ const fetchResumeData = useCallback(async () => {
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", sectionKey);
       e.currentTarget.style.opacity = "0.5";
-      console.log('🚀 Drag Start:', { sectionKey, index, sectionOrder, isFixed: false });
     };
 
   const handleSectionDragEnd = (e) => {
@@ -1145,7 +1119,6 @@ const fetchResumeData = useCallback(async () => {
     e.currentTarget.style.opacity = "1";
     setDraggedSectionIndex(null);
     setDragOverSectionIndex(null);
-    console.log('🏁 Drag End');
   };
 
     const handleSectionDragOver = (e, sectionKey) => {
@@ -1173,7 +1146,6 @@ const fetchResumeData = useCallback(async () => {
     e.preventDefault();
 
     const draggedSectionKey = e.dataTransfer.getData("text/plain");
-    console.log('📦 Drop Event:', { draggedSectionKey, dropSectionKey });
 
     if (!draggedSectionKey || draggedSectionKey === dropSectionKey || fixedSections.includes(draggedSectionKey)) {
       setDragOverSectionIndex(null);
@@ -1189,7 +1161,6 @@ const fetchResumeData = useCallback(async () => {
     const draggedIndex = sectionOrder.indexOf(draggedSectionKey);
     const dropIndex = sectionOrder.indexOf(dropSectionKey);
 
-    console.log('📊 Indices:', { draggedIndex, dropIndex, sectionOrder });
 
     if (draggedIndex === -1 || dropIndex === -1) return;
 
@@ -1216,7 +1187,6 @@ const fetchResumeData = useCallback(async () => {
     setSectionOrder(ensureFixedSectionsFirst(newOrder));
     setDragOverSectionIndex(null);
     setDraggedSectionIndex(null);
-    console.log('✨ New Order:', newOrder);
   };
 
   

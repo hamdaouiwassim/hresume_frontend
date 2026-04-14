@@ -44,7 +44,6 @@ export default function Blog() {
         });
       }
     } catch (error) {
-      console.error('Error fetching blog posts:', error);
     } finally {
       setIsLoading(false);
     }

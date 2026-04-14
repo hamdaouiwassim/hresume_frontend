@@ -50,7 +50,6 @@ export default function AdminBlog() {
         toast.error(blog.fetchError || 'Failed to load blog posts');
       }
     } catch (error) {
-      console.error('Error fetching blog posts:', error);
       toast.error(blog.fetchError || 'Failed to load blog posts');
     } finally {
       setIsLoading(false);
@@ -132,7 +131,6 @@ export default function AdminBlog() {
         fetchPosts();
       }
     } catch (error) {
-      console.error('Error saving blog post:', error);
       toast.error(error.response?.data?.message || blog.saveError || 'Failed to save blog post');
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
@@ -154,7 +152,6 @@ export default function AdminBlog() {
         fetchPosts();
       }
     } catch (error) {
-      console.error('Error deleting blog post:', error);
       toast.error(blog.deleteError || 'Failed to delete blog post');
     } finally {
       setIsDeleting(false);

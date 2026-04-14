@@ -24,7 +24,6 @@ export function useFontLoader(fontId) {
         objectUrl = URL.createObjectURL(response.data);
         setFontUrl(objectUrl);
       } catch (err) {
-        console.warn("Failed to load font:", err);
       }
     };
 

@@ -60,7 +60,6 @@ export default function ReviewsCarousel() {
         setReviewList(publicReviews);
       }
     } catch (error) {
-      console.error('Error fetching reviews:', error);
       // Silently fail - don't show carousel if there's an error
     } finally {
       setIsLoading(false);

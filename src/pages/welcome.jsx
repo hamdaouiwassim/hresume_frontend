@@ -33,7 +33,6 @@ export default function Welcome() {
         setStats(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching stats:', error);
     } finally {
       setIsLoadingStats(false);
     }
@@ -46,7 +45,6 @@ export default function Welcome() {
         setTemplates(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching templates:', error);
     } finally {
       setIsLoadingTemplates(false);
     }

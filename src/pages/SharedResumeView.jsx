@@ -65,7 +65,6 @@ export default function SharedResumeView() {
 
       toast.success("PDF downloaded successfully!", { id: "pdf-generation" });
     } catch (error) {
-      console.error("PDF generation error:", error);
       toast.error(
         error.response?.data?.message || "Failed to generate PDF",
         { id: "pdf-generation" }

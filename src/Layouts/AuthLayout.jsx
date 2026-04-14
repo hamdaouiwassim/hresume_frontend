@@ -16,7 +16,6 @@ export default function AuthLayout({ children }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    console.log("user inside", user);
 
     const signout = async () => {
         try {
@@ -27,8 +26,6 @@ export default function AuthLayout({ children }) {
             // Redirect to login page after logout
             navigate('/login');
         } catch (error) {
-            console.log(error);
-
         }
 
     }

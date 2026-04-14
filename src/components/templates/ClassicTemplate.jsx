@@ -22,7 +22,6 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
   // Default section order if not specified
   const sectionOrder = resume.section_order || ['personal', 'socialMedia', 'experience', 'education', 'skills', 'hobbies', 'certificates', 'languages', 'projects'];
 
-  console.log('🎨 ClassicTemplate received section_order:', sectionOrder);
 
   // Define sections with their data and render functions
   const availableSections = [
@@ -230,7 +229,6 @@ const ClassicTemplate = ({ resume = {}, labels = {} }) => {
     .map(sectionKey => availableSections.find(section => section.key === sectionKey))
     .filter(section => section && section.hasData);
 
-  console.log('📋 ClassicTemplate orderedSections:', orderedSections.map(s => s.key));
 
   const typo = resume.typography || {};
   const baseSize = typo.font_size || 14;

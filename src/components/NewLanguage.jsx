@@ -55,7 +55,6 @@ const handleStoreLanguage = async () => {
     if (onSave) onSave();
     }catch(error) {
       if (error.response && error.response.data && error.response.data.errors) {
-        console.log(error.response.data.errors);
         setErrors(error.response.data.errors);
       }
       toast.error("Error saving language. Please try again.");
@@ -79,7 +78,6 @@ const handleUpdateLanguage = async () => {
     if (onSave) onSave();
     }catch(error) {
       if (error.response && error.response.data && error.response.data.errors) {
-        console.log(error.response.data.errors);
         setErrors(error.response.data.errors);
       }
       toast.error("Error updating language. Please try again.");

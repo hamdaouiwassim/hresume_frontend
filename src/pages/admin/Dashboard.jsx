@@ -23,7 +23,6 @@ export default function AdminDashboard() {
                 toast.error('Failed to load dashboard stats');
             }
         } catch (error) {
-            console.error('Error fetching dashboard stats:', error);
             toast.error('Failed to load dashboard stats');
         } finally {
             setIsLoading(false);

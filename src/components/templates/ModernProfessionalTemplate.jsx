@@ -13,7 +13,6 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
   // Default section order if not specified
   const sectionOrder = resume.section_order || ['personal', 'socialMedia', 'experience', 'education', 'skills', 'hobbies', 'certificates', 'languages', 'projects'];
 
-  console.log('🎨 ModernProfessionalTemplate received section_order:', sectionOrder);
 
   // Define all sections with their data and render functions
   const availableSections = [
@@ -202,8 +201,6 @@ const ModernProfessionalTemplate = ({ resume = {}, labels = {} }) => {
     .map(sectionKey => availableSections.find(section => section.key === sectionKey))
     .filter(section => section && section.hasData && !section.isSidebar);
 
-  console.log('📋 ModernProfessionalTemplate orderedSidebarSections:', orderedSidebarSections.map(s => s.key));
-  console.log('📋 ModernProfessionalTemplate orderedMainSections:', orderedMainSections.map(s => s.key));
 
   const formatTimelineLabel = (value) => {
     if (!value) return "";

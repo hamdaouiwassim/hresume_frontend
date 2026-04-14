@@ -47,7 +47,6 @@ export default function CoverLetterTemplatesManagement() {
                 toast.error('Failed to load templates');
             }
         } catch (error) {
-            console.error('Error fetching templates:', error);
             toast.error('Failed to load templates');
         } finally {
             setIsLoading(false);
@@ -68,7 +67,6 @@ export default function CoverLetterTemplatesManagement() {
             setTemplates(templates.filter(t => t.id !== deleteDialog.template.id));
             setDeleteDialog({ isOpen: false, template: null });
         } catch (error) {
-            console.error("Error deleting template:", error);
             toast.error(error.response?.data?.message || 'Failed to delete template');
         } finally {
             setIsDeleting(false);

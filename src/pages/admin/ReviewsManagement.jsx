@@ -46,7 +46,6 @@ export default function ReviewsManagement() {
                 });
             }
         } catch (error) {
-            console.error('Error fetching reviews:', error);
             toast.error('Failed to load reviews');
         } finally {
             setIsLoading(false);
@@ -64,7 +63,6 @@ export default function ReviewsManagement() {
                 toast.success('Review visibility updated');
             }
         } catch (error) {
-            console.error('Error toggling review:', error);
             toast.error('Failed to update visibility');
         } finally {
             setIsToggling(null);
@@ -85,7 +83,6 @@ export default function ReviewsManagement() {
                 toast.success('Review deleted successfully');
             }
         } catch (error) {
-            console.error('Error deleting review:', error);
             toast.error('Failed to delete review');
         } finally {
             setIsDeleting(null);

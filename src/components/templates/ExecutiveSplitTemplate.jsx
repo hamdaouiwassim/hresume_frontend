@@ -14,7 +14,6 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
   // Default section order if not specified
   const sectionOrder = resume.section_order || ['personal', 'socialMedia', 'experience', 'education', 'skills', 'hobbies', 'certificates', 'languages', 'projects'];
 
-  console.log('🎨 ExecutiveSplitTemplate received section_order:', sectionOrder);
 
   // Define all sections with their data and render functions
   const availableSections = [
@@ -211,8 +210,6 @@ const ExecutiveSplitTemplate = ({ resume = {}, labels = {} }) => {
     .map(sectionKey => availableSections.find(section => section.key === sectionKey))
     .filter(section => section && section.hasData && !section.isSidebar);
 
-  console.log('📋 ExecutiveSplitTemplate orderedSidebarSections:', orderedSidebarSections.map(s => s.key));
-  console.log('📋 ExecutiveSplitTemplate orderedMainSections:', orderedMainSections.map(s => s.key));
 
   const formatTimelineLabel = (value) => {
     if (!value) return "";

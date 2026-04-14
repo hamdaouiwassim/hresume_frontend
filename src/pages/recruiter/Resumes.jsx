@@ -41,7 +41,6 @@ export default function RecruiterResumes() {
         setTemplates(response.data.data || response.data.templates || []);
       }
     } catch (error) {
-      console.error(error);
     }
   };
 
@@ -60,7 +59,6 @@ export default function RecruiterResumes() {
         toast.error("Failed to load resumes");
       }
     } catch (error) {
-      console.error(error);
       toast.error("Failed to load resumes");
     } finally {
       setIsLoading(false);

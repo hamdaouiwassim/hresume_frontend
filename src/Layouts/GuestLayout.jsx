@@ -24,7 +24,6 @@ export default function GuestLayout({ children }) {
                     setResumeCount(response.data.data?.total_resumes ?? null);
                 }
             } catch (error) {
-                console.error('Failed to load stats', error);
             }
         };
 

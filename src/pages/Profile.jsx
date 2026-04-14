@@ -152,27 +152,13 @@ export default function Profile() {
       
       // Only append avatar file if a new one was selected
       if (formData.avatarFile) {
-        console.log("Appending avatar file:", {
-          file: formData.avatarFile,
-          name: formData.avatarFile.name,
-          size: formData.avatarFile.size,
-          type: formData.avatarFile.type
-        });
         formDataToSend.append("avatar", formData.avatarFile, formData.avatarFile.name);
-      } else {
-        console.log("No avatar file to append");
       }
       
       // Only append password if it's provided
       if (formData.password) {
         formDataToSend.append("password", formData.password);
         formDataToSend.append("password_confirmation", formData.password_confirmation);
-      }
-
-      // Debug: Log FormData contents
-      console.log("FormData entries:");
-      for (let pair of formDataToSend.entries()) {
-        console.log(pair[0], pair[1]);
       }
 
       const response = await updateProfile(formDataToSend);

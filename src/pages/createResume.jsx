@@ -53,7 +53,6 @@ export default function CreateResume() {
       const response = await saveNewResume(newResumeData);
       navigate(`/resume/edit/${response.data.data.id}`); 
     } catch (error) {
-      console.error("Error creating resume:", error);
       alert(t.createResume.creationError);
     } finally {
       setIsSubmitting(false);
@@ -70,7 +69,6 @@ export default function CreateResume() {
         setSelectedTemplate(loadedTemplates[0].id);
       }
     } catch (error) {
-      console.error("Error fetching templates:", error);
     } finally {
       setIsTemplatesLoading(false);
     }

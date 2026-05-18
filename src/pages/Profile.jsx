@@ -1,14 +1,21 @@
 import { useState, useEffect, useContext } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
-import { Camera, Save, User, Mail, Lock, Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { Camera, Save, User, Mail, Lock, Loader2, CheckCircle, Eye, EyeOff, Github } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { updateProfile, getProfile } from "../services/profileService";
+import {
+  getGitHubImportUrl,
+  disconnectGitHubImport,
+  prepareSpaRequest,
+  getMe,
+} from "../services/authService";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "sonner";
 
 export default function Profile() {
   const { t } = useLanguage();
   const profileStrings = t?.profile || {};
+  const githubImportStrings = profileStrings.githubImport || {};
   const notifications = profileStrings.notifications || {};
   const validationStrings = profileStrings.validation || {};
   const fieldStrings = profileStrings.fields || {};
@@ -31,6 +38,7 @@ export default function Profile() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
+  const [githubActionLoading, setGithubActionLoading] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -190,6 +198,44 @@ export default function Profile() {
     }
   };
 
+  const handleConnectGitHub = async () => {
+    setGithubActionLoading(true);
+    try {
+      await prepareSpaRequest(true);
+      const { data } = await getGitHubImportUrl({ params: { return_to: "/profile" } });
+      if (data?.status && data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+      toast.error(data?.message || githubImportStrings.notConfigured || "GitHub is not configured.");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          githubImportStrings.notConfigured ||
+          "Could not start GitHub connection."
+      );
+    } finally {
+      setGithubActionLoading(false);
+    }
+  };
+
+  const handleDisconnectGitHub = async () => {
+    setGithubActionLoading(true);
+    try {
+      await prepareSpaRequest(true);
+      const res = await disconnectGitHubImport();
+      toast.success(res.data?.message || githubImportStrings.disconnectSuccess || "GitHub disconnected.");
+      const me = await getMe();
+      if (me.data?.user) {
+        setUser(me.data.user);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to disconnect GitHub.");
+    } finally {
+      setGithubActionLoading(false);
+    }
+  };
+
   if (isLoadingProfile) {
     return (
       <AuthLayout>
@@ -253,6 +299,68 @@ export default function Profile() {
                     <Camera className="h-4 w-4 mr-1" />
                     {avatarStrings.changeCta || "Change Profile Picture"}
                   </label>
+                </div>
+              </div>
+            </div>
+
+            {/* GitHub import (resume projects) */}
+            <div className="px-6 py-6 border-b border-gray-200 bg-slate-50/90">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <Github className="h-5 w-5 text-gray-800" aria-hidden />
+                    {githubImportStrings.title || "GitHub (resume projects)"}
+                  </h3>
+                  <p className="text-sm text-gray-600 max-w-xl">
+                    {githubImportStrings.description ||
+                      "Connect GitHub to import from private repositories you can access."}
+                  </p>
+                  {user?.github_import_connected && user?.github_import_login && (
+                    <p className="text-sm text-gray-800">
+                      <span className="font-medium">
+                        {githubImportStrings.connectedAs || "Connected as"}
+                      </span>{" "}
+                      @{user.github_import_login}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-col sm:items-end gap-2 shrink-0">
+                  {user?.github_import_connected ? (
+                    <button
+                      type="button"
+                      onClick={handleDisconnectGitHub}
+                      disabled={githubActionLoading}
+                      className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {githubActionLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {githubImportStrings.disconnecting || "Disconnecting…"}
+                        </>
+                      ) : (
+                        githubImportStrings.disconnect || "Disconnect"
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleConnectGitHub}
+                      disabled={githubActionLoading}
+                      className="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {githubActionLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {githubImportStrings.connecting || "Redirecting…"}
+                        </>
+                      ) : (
+                        <>
+                          <Github className="h-4 w-4 mr-2" aria-hidden />
+                          {githubImportStrings.connect || "Connect GitHub"}
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,12 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Save,
   Loader2,
-  X
+  X,
+  Github,
 } from "lucide-react";
-import { storeProject, updateProject } from "../services/ProjectService";
+import { storeProject, updateProject, previewGitHubProject } from "../services/ProjectService";
+import { getGitHubImportUrl, prepareSpaRequest } from "../services/authService";
+import { AuthContext } from "../context/AuthContext";
 import { toast } from "sonner";
+import EnhanceTextareaButton from "./EnhanceTextareaButton";
 
 export default function NewProject({ project = {
     name: "",
@@ -18,8 +22,13 @@ export default function NewProject({ project = {
     experience_id: null,
 }, index = null, hide, resumeId, experiences = [], edit = false, onSave, onPreviewChange, onPreviewClear }) {
 const { t } = useLanguage();
+const { user } = useContext(AuthContext);
+const projectStrings = t.dashboard?.sections?.projects?.project || {};
 const [errors,setErrors]=useState({});
 const [isLoading, setIsLoading] = useState(false);
+const [githubRepoInput, setGithubRepoInput] = useState("");
+const [githubImportLoading, setGithubImportLoading] = useState(false);
+const [githubConnectLoading, setGithubConnectLoading] = useState(false);
 const [projectState,setProject] = useState(project);
 
 const buttonBase = "inline-flex items-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
@@ -40,6 +49,65 @@ const validateProject = (projectData) => {
 const hasValidationErrors = () => {
     const validationErrors = validateProject(projectState);
     return Object.keys(validationErrors).length > 0 || Object.keys(errors).length > 0;
+};
+
+const handleGithubImport = async () => {
+    const url = githubRepoInput.trim();
+    if (!url) {
+      toast.error(projectStrings.githubRepoRequired || "Enter a GitHub repository URL first.");
+      return;
+    }
+    setGithubImportLoading(true);
+    try {
+      const body = { repo_url: url };
+      if (projectState.experience_id) {
+        body.experience_id = Number(projectState.experience_id);
+      }
+      const response = await previewGitHubProject(resumeId, body);
+      const d = response.data?.data;
+      if (!d) {
+        throw new Error("empty");
+      }
+      setProject((prev) => ({
+        ...prev,
+        name: d.name ?? prev.name,
+        description: d.description ?? "",
+        technologies: d.technologies ?? "",
+        url: d.url ?? prev.url ?? "",
+        startDate: d.startDate ?? prev.startDate ?? null,
+        endDate: d.endDate ?? prev.endDate ?? null,
+        experience_id: d.experience_id != null ? d.experience_id : prev.experience_id,
+      }));
+      setErrors({});
+      toast.success(projectStrings.githubImportSuccess || "Updated from GitHub.");
+    } catch (error) {
+      const msg = error.response?.data?.message;
+      toast.error(msg || projectStrings.githubImportError || "GitHub import failed.");
+    } finally {
+      setGithubImportLoading(false);
+    }
+};
+
+const handleConnectGitHubForImport = async () => {
+    if (!resumeId) {
+      toast.error(projectStrings.githubImportError || "GitHub import failed.");
+      return;
+    }
+    setGithubConnectLoading(true);
+    try {
+      await prepareSpaRequest(true);
+      const returnTo = `/resume/edit/${resumeId}`;
+      const { data } = await getGitHubImportUrl({ params: { return_to: returnTo } });
+      if (data?.status && data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+      toast.error(data?.message || projectStrings.githubConnectUnavailable || "GitHub connection is not configured.");
+    } catch (error) {
+      toast.error(error.response?.data?.message || projectStrings.githubImportError || "GitHub import failed.");
+    } finally {
+      setGithubConnectLoading(false);
+    }
 };
 
 const handleStoreProject = async () => {
@@ -139,7 +207,7 @@ const handleUpdateProject = async () => {
                         {experiences && experiences.length > 0 && (
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            {t.dashboard.sections.projects?.project?.underExperience ?? "Under experience"}{" "}
+                            {projectStrings.underExperience ?? "Under experience"}{" "}
                             <span className="text-slate-400 font-normal text-xs">(optional)</span>
                           </label>
                           <select
@@ -157,11 +225,69 @@ const handleUpdateProject = async () => {
                         </div>
                         )}
 
+                        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 space-y-3">
+                          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                            <Github className="h-4 w-4 shrink-0 text-slate-700" aria-hidden />
+                            {projectStrings.githubRepoLabel || "Import from GitHub"}
+                          </div>
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            {projectStrings.githubRepoHint ||
+                              "Paste a GitHub repository URL to pre-fill name, URL, description, technologies, and start date."}
+                          </p>
+                          {!user?.github_import_connected && (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={handleConnectGitHubForImport}
+                                disabled={githubConnectLoading || !resumeId}
+                                className={`text-xs font-semibold text-blue-700 hover:text-blue-900 underline-offset-2 hover:underline disabled:opacity-50 disabled:no-underline`}
+                              >
+                                {githubConnectLoading
+                                  ? (t.common?.loading || "Loading")
+                                  : (projectStrings.githubConnectFromEditor || "Connect GitHub")}
+                              </button>
+                              <span className="text-xs text-slate-500">
+                                {projectStrings.githubConnectHintShort || "for private repos"}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <input
+                              type="text"
+                              value={githubRepoInput}
+                              onChange={(e) => setGithubRepoInput(e.target.value)}
+                              className="flex-1 min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50"
+                              placeholder={projectStrings.githubRepoPlaceholder || "https://github.com/owner/repo"}
+                              autoComplete="off"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleGithubImport}
+                              disabled={githubImportLoading || !resumeId}
+                              className={`${buttonVariants.primary} shrink-0 justify-center px-4 py-2.5 text-sm ${
+                                githubImportLoading || !resumeId ? disabledButtonClasses : ""
+                              }`}
+                            >
+                              {githubImportLoading ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                                  <span>{t.common?.loading || "Loading"}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Github className="h-4 w-4 shrink-0" />
+                                  <span>{projectStrings.githubImportButton || "Fill from GitHub"}</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            { t.dashboard.sections.projects.project.name }{" "}
+                            { projectStrings.name }{" "}
                             <span className="text-slate-400 font-normal text-xs">
-                              ({ t.dashboard.sections.projects.project.nameHint })
+                              ({ projectStrings.nameHint })
                             </span>
                           </label>
                           <div className="relative">
@@ -179,7 +305,7 @@ const handleUpdateProject = async () => {
                               className={`w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3 ${
                                 errors.name ? 'border-red-500 ring-red-200' : ''
                               }`}
-                              placeholder={ t.dashboard.sections.projects.project.namePlaceholder }
+                              placeholder={ projectStrings.namePlaceholder }
                             />
                             {errors.name && (
                                 <p className="mt-1.5 text-sm text-red-600">{Array.isArray(errors.name) ? errors.name[0] : errors.name}</p>
@@ -189,9 +315,9 @@ const handleUpdateProject = async () => {
 
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            { t.dashboard.sections.projects.project.url }{" "}
+                            { projectStrings.url }{" "}
                             <span className="text-slate-400 font-normal text-xs">
-                              ({ t.dashboard.sections.projects.project.urlHint })
+                              ({ projectStrings.urlHint })
                             </span>
                           </label>
                           <div className="relative">
@@ -209,7 +335,7 @@ const handleUpdateProject = async () => {
                               className={`w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3 ${
                                 errors.url ? 'border-red-500 ring-red-200' : ''
                               }`}
-                              placeholder={ t.dashboard.sections.projects.project.urlPlaceholder }
+                              placeholder={ projectStrings.urlPlaceholder }
                             />
                             {errors.url && (
                                 <p className="mt-1.5 text-sm text-red-600">{Array.isArray(errors.url) ? errors.url[0] : errors.url}</p>
@@ -219,9 +345,9 @@ const handleUpdateProject = async () => {
 
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            { t.dashboard.sections.projects.project.technologies }{" "}
+                            { projectStrings.technologies }{" "}
                             <span className="text-slate-400 font-normal text-xs">
-                              ({ t.dashboard.sections.projects.project.technologiesHint })
+                              ({ projectStrings.technologiesHint })
                             </span>
                           </label>
                           <div className="relative">
@@ -239,7 +365,7 @@ const handleUpdateProject = async () => {
                               className={`w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm px-4 py-3 ${
                                 errors.technologies ? 'border-red-500 ring-red-200' : ''
                               }`}
-                              placeholder={ t.dashboard.sections.projects.project.technologiesPlaceholder }
+                              placeholder={ projectStrings.technologiesPlaceholder }
                             />
                             {errors.technologies && (
                                 <p className="mt-1.5 text-sm text-red-600">{Array.isArray(errors.technologies) ? errors.technologies[0] : errors.technologies}</p>
@@ -250,9 +376,9 @@ const handleUpdateProject = async () => {
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">
-                              { t.dashboard.sections.projects.project.startDate }{" "}
+                              { projectStrings.startDate }{" "}
                               <span className="text-slate-400 font-normal text-xs">
-                                ({ t.dashboard.sections.projects.project.startDateHint })
+                                ({ projectStrings.startDateHint })
                               </span>
                             </label>
                             <input
@@ -269,9 +395,9 @@ const handleUpdateProject = async () => {
                           </div>
                           <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">
-                              { t.dashboard.sections.projects.project.endDate }{" "}
+                              { projectStrings.endDate }{" "}
                               <span className="text-slate-400 font-normal text-xs">
-                                ({ t.dashboard.sections.projects.project.endDateHint })
+                                ({ projectStrings.endDateHint })
                               </span>
                             </label>
                             <input
@@ -290,9 +416,9 @@ const handleUpdateProject = async () => {
 
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            { t.dashboard.sections.projects.project.description }{" "}
+                            { projectStrings.description }{" "}
                             <span className="text-slate-400 font-normal text-xs">
-                              ({ t.dashboard.sections.projects.project.descriptionHint })
+                              ({ projectStrings.descriptionHint })
                             </span>
                           </label>
                           <textarea
@@ -305,8 +431,17 @@ const handleUpdateProject = async () => {
                                 )
                               }
                             className="w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm p-4 resize-none"
-                            placeholder={ t.dashboard.sections.projects.project.descriptionPlaceholder }
+                            placeholder={ projectStrings.descriptionPlaceholder }
                           />
+                          <div className="mt-2 flex justify-end">
+                            <EnhanceTextareaButton
+                              value={projectState.description || ""}
+                              context="project description"
+                              onEnhanced={(enhanced) =>
+                                setProject({ ...projectState, description: enhanced })
+                              }
+                            />
+                          </div>
                         </div>
 
                         <div className="flex justify-end pt-2">

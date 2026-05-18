@@ -1,10 +1,11 @@
 import { useContext, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import GuestLayout from "../Layouts/GuestLayout";
-import { UserCheck, Lock, ArrowLeft, Chrome, Loader2 } from "lucide-react";
-import { login, getGoogleAuthUrl } from "../services/authService";
+import { UserCheck, Lock, ArrowLeft, Chrome, Loader2, Linkedin } from "lucide-react";
+import { login, getGoogleAuthUrl, getLinkedInAuthUrl } from "../services/authService";
 import { toast } from "sonner";
 import { AuthContext } from "../context/AuthContext";
+import { safePostAuthRedirect } from "../utils/authRedirect";
 
 export default function Login() {
     
@@ -15,6 +16,8 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isLinkedInLoading, setIsLinkedInLoading] = useState(false);
+  const isSocialBusy = isGoogleLoading || isLinkedInLoading;
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -23,6 +26,7 @@ export default function Login() {
     }));
   };
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, setUser } = useContext(AuthContext);
 
   const getHomePath = (currentUser) => {
@@ -34,7 +38,13 @@ export default function Login() {
     return "/resumes";
   };
 
-  if (user) return <Navigate to={getHomePath(user)} />;
+  if (user) {
+    const next = safePostAuthRedirect(searchParams.get("next"));
+    if (next) {
+      return <Navigate to={next} replace />;
+    }
+    return <Navigate to={getHomePath(user)} replace />;
+  }
   const handleSubmit = async (e) => {
    
     e.preventDefault();
@@ -61,6 +71,11 @@ export default function Login() {
       }
 
       toast.success("Login successful!");
+      const next = safePostAuthRedirect(searchParams.get("next"));
+      if (next) {
+        navigate(next, { replace: true });
+        return;
+      }
       const destination = getHomePath(loggedInUser);
       navigate(destination);
     } catch (error) {
@@ -72,6 +87,24 @@ export default function Login() {
       );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleLinkedInSignIn = async () => {
+    setIsLinkedInLoading(true);
+    try {
+      const response = await getLinkedInAuthUrl();
+      const redirectUrl = response.data?.url;
+      if (!redirectUrl) {
+        throw new Error("Missing redirect URL");
+      }
+      window.location.href = redirectUrl;
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "LinkedIn sign-in is temporarily unavailable."
+      );
+    } finally {
+      setIsLinkedInLoading(false);
     }
   };
 
@@ -223,9 +256,32 @@ export default function Login() {
 
           <button
             type="button"
-            onClick={handleGoogleSignIn}
-            disabled={isGoogleLoading}
+            onClick={handleLinkedInSignIn}
+            disabled={isSocialBusy}
             className="mt-4 w-full flex items-center gap-3 rounded-2xl border border-slate-200 bg-white py-3.5 px-4 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 disabled:opacity-60"
+          >
+            <span className="h-10 w-10 rounded-xl bg-[#0A66C2]/10 border border-[#0A66C2]/20 flex items-center justify-center">
+              {isLinkedInLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-[#0A66C2]" />
+              ) : (
+                <Linkedin className="h-5 w-5 text-[#0A66C2]" />
+              )}
+            </span>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-slate-900">
+                Continue with LinkedIn
+              </p>
+              <p className="text-xs text-slate-500">
+                Sign in with your LinkedIn profile
+              </p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={isSocialBusy}
+            className="mt-3 w-full flex items-center gap-3 rounded-2xl border border-slate-200 bg-white py-3.5 px-4 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 disabled:opacity-60"
           >
             <span className="h-10 w-10 rounded-xl bg-gradient-to-br from-white via-red-50 to-rose-100 border border-rose-100 flex items-center justify-center">
               {isGoogleLoading ? (

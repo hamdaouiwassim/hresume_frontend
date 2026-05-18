@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useContext } from "react";
+import { useState, useEffect, useCallback, useMemo, useContext, useRef, lazy, Suspense } from "react";
 import AuthLayout from "../Layouts/AuthLayout";
 import {
   Camera,
@@ -21,6 +21,7 @@ import {
   Sparkles,
   ShieldCheck,
   Eye,
+  ChevronLeft,
   ChevronRight,
   ChevronDown,
   Globe,
@@ -30,13 +31,22 @@ import {
   FolderGit,
   GripVertical,
   Settings,
+  BarChart3,
+  ListOrdered,
+  Linkedin,
 } from "lucide-react";
 import { generatePDF } from "../services/PDFService";
 import { useLanguage } from "../context/LanguageContext";
 import { storeBasicInfo, uploadResumeAvatar } from "../services/basicInfoService";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
-import { getByResumeId, update as updateResume, getTemplates } from "../services/resumeService";
+import {
+  getByResumeId,
+  update as updateResume,
+  getTemplates,
+  updatePublicProfile,
+  importLinkedInProfileToResume,
+} from "../services/resumeService";
 import { getActivePdfFonts } from "../services/adminService";
 import { generateShareableLink, getCurrentShareableLink, deactivateShareableLink } from "../services/ShareableLinkService";
 import { inviteCollaborator, getCollaborators, removeCollaborator } from "../services/CollaborationService";
@@ -57,9 +67,20 @@ import NewLanguage from "../components/NewLanguage";
 import ShowProject from "../components/ShowProject";
 import NewProject from "../components/NewProject";
 import { buildResumeTemplateData } from "../utils/resumeTemplateMapper";
-import ResumeTemplatePreview from "../components/ResumeTemplatePreview";
+import ResumePreviewSkeleton from "../components/ResumePreviewSkeleton";
+
+const ResumeTemplatePreview = lazy(() => import("../components/ResumeTemplatePreview"));
 import { deriveTemplateLayout, TEMPLATE_LAYOUTS } from "../utils/templateStyles";
 import SectionOrderManager from "../components/SectionOrderManager";
+import EnhanceTextareaButton from "../components/EnhanceTextareaButton";
+import UpgradeProModal from "../components/UpgradeProModal";
+import { getAtsScore, tailorResume } from "../services/aiService";
+import AiLoadingSkeleton from "../components/AiLoadingSkeleton";
+
+const CV_WIZARD_PHASES = ["profile", "experience-education", "ai-improve", "ats-review", "preview-export"];
+
+/** Set to true to show "Import from LinkedIn" on the resume editor (backend import stays available). */
+const LINKEDIN_RESUME_IMPORT_UI_ENABLED = false;
 
 const createPreviewDraftsState = () => ({
   experiences: { edits: {}, draft: null },
@@ -77,7 +98,7 @@ const toolbarLabelClass =
 export default function EditResume() {
     // 1. Destructure the 'id' parameter from the URL
   const { id } = useParams();
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   const [showNewExperience,setShowNewExperience]=useState(false);
   const [showNewEducation,setShowNewEducation]=useState(false);
@@ -86,13 +107,21 @@ export default function EditResume() {
   const [showNewCertificate,setShowNewCertificate]=useState(false);
   const [showNewLanguage,setShowNewLanguage]=useState(false);
   const [showNewProject,setShowNewProject]=useState(false);
+  const [isLinkedInImportLoading, setIsLinkedInImportLoading] = useState(false);
   const [isFullPagePreview, setIsFullPagePreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareableLink, setShareableLink] = useState(null);
+  const [resumeOwnerId, setResumeOwnerId] = useState(null);
+  const [publicProfileEnabled, setPublicProfileEnabled] = useState(false);
+  const [publicProfileSlug, setPublicProfileSlug] = useState("");
+  const [publicProfileMetaTitle, setPublicProfileMetaTitle] = useState("");
+  const [publicProfileMetaDescription, setPublicProfileMetaDescription] = useState("");
+  const [isSavingPublicProfile, setIsSavingPublicProfile] = useState(false);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [isLoadingLink, setIsLoadingLink] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState(7);
+  const [customWebsiteSlug, setCustomWebsiteSlug] = useState("");
   const [showCollaborationModal, setShowCollaborationModal] = useState(false);
   const [collaborators, setCollaborators] = useState([]);
   const [isLoadingCollaborators, setIsLoadingCollaborators] = useState(false);
@@ -105,6 +134,21 @@ export default function EditResume() {
   const [showCustomisePdfModal, setShowCustomisePdfModal] = useState(false);
   const [typography, setTypography] = useState({ font_family: "sans-serif", font_size: 14, font_id: null });
   const [isSavingTypography, setIsSavingTypography] = useState(false);
+  const [atsJobDescription, setAtsJobDescription] = useState("");
+  const [isAtsLoading, setIsAtsLoading] = useState(false);
+  const [atsResult, setAtsResult] = useState(null);
+  const [showAtsModal, setShowAtsModal] = useState(false);
+  const [showJobTargetModal, setShowJobTargetModal] = useState(false);
+  const [showUpgradeProModal, setShowUpgradeProModal] = useState(false);
+  const [upgradeProModalVariant, setUpgradeProModalVariant] = useState("default");
+  const [jobTargetDescription, setJobTargetDescription] = useState("");
+  const [jobTargetRole, setJobTargetRole] = useState("");
+  const [jobTargetSeniority, setJobTargetSeniority] = useState("");
+  const [isJobTargetLoading, setIsJobTargetLoading] = useState(false);
+  const [jobTargetResult, setJobTargetResult] = useState(null);
+  const cvPreviewPanelRef = useRef(null);
+  const [cvWizardPhase, setCvWizardPhase] = useState("profile");
+  const [previewPanelPulse, setPreviewPanelPulse] = useState(false);
 
   // Built-in fonts that Dompdf always supports
   const builtInFontOptions = [
@@ -165,6 +209,23 @@ export default function EditResume() {
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [draggedSectionIndex, setDraggedSectionIndex] = useState(null);
   const [dragOverSectionIndex, setDragOverSectionIndex] = useState(null);
+  const aiEntitlements = useMemo(() => {
+    const unlimited = Boolean(user?.is_admin || user?.is_pro);
+    const q = user?.ai_quota;
+    if (unlimited) {
+      return { unlimited: true, canEnhance: true, canTailor: true, canAts: true, quota: q };
+    }
+    if (!q || q.legacy) {
+      return { unlimited: false, canEnhance: false, canTailor: false, canAts: false, quota: q };
+    }
+    return {
+      unlimited: false,
+      canEnhance: (q.enhance?.remaining ?? 0) > 0,
+      canTailor: (q.tailor?.remaining ?? 0) > 0,
+      canAts: (q.ats?.remaining ?? 0) > 0,
+      quota: q,
+    };
+  }, [user]);
 
 
   const [formData, setFormData] = useState({
@@ -272,6 +333,11 @@ const fetchResumeData = useCallback(async () => {
 
         // Check if current user is owner or collaborator and get permissions
         const resumeOwnerId = resumeRecord.user_id;
+        setResumeOwnerId(resumeOwnerId ?? null);
+        setPublicProfileEnabled(Boolean(resumeRecord.public_profile_enabled));
+        setPublicProfileSlug(resumeRecord.public_profile_slug || "");
+        setPublicProfileMetaTitle(resumeRecord.public_profile_meta_title || "");
+        setPublicProfileMetaDescription(resumeRecord.public_profile_meta_description || "");
         const currentUserId = user?.id;
         
         if (currentUserId && resumeOwnerId === currentUserId) {
@@ -611,6 +677,19 @@ const fetchResumeData = useCallback(async () => {
     }
   };
 
+  const openSectionsAllowMultiple = (keys) => {
+    const set = new Set(keys);
+    setIsPersonalInfoOpen(set.has("personal"));
+    setIsSocialMediaOpen(set.has("socialMedia"));
+    setIsExperienceOpen(set.has("experience"));
+    setIsEducationOpen(set.has("education"));
+    setIsSkillsOpen(set.has("skills"));
+    setIsHobbiesOpen(set.has("hobbies"));
+    setIsCertificatesOpen(set.has("certificates"));
+    setIsLanguagesOpen(set.has("languages"));
+    setIsProjectsOpen(set.has("projects"));
+  };
+
   // Load existing shareable link
   const loadShareableLink = async () => {
     setIsLoadingLink(true);
@@ -618,6 +697,7 @@ const fetchResumeData = useCallback(async () => {
       const response = await getCurrentShareableLink(id);
       if (response.data.status && response.data.data) {
         setShareableLink(response.data.data);
+        setCustomWebsiteSlug(response.data.data.slug || "");
       } else {
         setShareableLink(null);
       }
@@ -632,9 +712,14 @@ const fetchResumeData = useCallback(async () => {
   const handleGenerateLink = async () => {
     setIsGeneratingLink(true);
     try {
-      const response = await generateShareableLink(id, expiresInDays);
+      const response = await generateShareableLink(
+        id,
+        expiresInDays,
+        customWebsiteSlug.trim() || null
+      );
       if (response.data.status) {
         setShareableLink(response.data.data);
+        setCustomWebsiteSlug(response.data.data.slug || "");
         toast.success(shareStrings.successGenerate || "Shareable link generated successfully!");
       }
     } catch (error) {
@@ -650,9 +735,14 @@ const fetchResumeData = useCallback(async () => {
   const handleRegenerateLink = async () => {
     setIsGeneratingLink(true);
     try {
-      const response = await generateShareableLink(id, expiresInDays);
+      const response = await generateShareableLink(
+        id,
+        expiresInDays,
+        customWebsiteSlug.trim() || null
+      );
       if (response.data.status) {
         setShareableLink(response.data.data);
+        setCustomWebsiteSlug(response.data.data.slug || "");
         toast.success(shareStrings.successGenerate || "Shareable link generated successfully!");
       }
     } catch (error) {
@@ -673,6 +763,46 @@ const fetchResumeData = useCallback(async () => {
       setTimeout(() => setLinkCopied(false), 2000);
     } catch (error) {
       toast.error(shareStrings.copyError || "Failed to copy link");
+    }
+  };
+
+  const getPersonalWebsiteUrl = () => {
+    if (publicProfileEnabled && publicProfileSlug) {
+      return `${window.location.origin}/u/${publicProfileSlug}`;
+    }
+    if (shareableLink?.website_url) return shareableLink.website_url;
+    if (!shareableLink?.token) return null;
+    const identifier = shareableLink.slug || shareableLink.token;
+    return `${window.location.origin}/website/${identifier}`;
+  };
+
+  const handleSavePublicProfile = async () => {
+    if (publicProfileEnabled && !publicProfileSlug.trim()) {
+      toast.error("Choose a public URL slug (letters, numbers, hyphens).");
+      return;
+    }
+    setIsSavingPublicProfile(true);
+    try {
+      const response = await updatePublicProfile(id, {
+        public_profile_enabled: publicProfileEnabled,
+        public_profile_slug: publicProfileSlug.trim() || null,
+        public_profile_meta_title: publicProfileMetaTitle.trim() || null,
+        public_profile_meta_description: publicProfileMetaDescription.trim() || null,
+      });
+      if (response.data?.status) {
+        toast.success("Public profile saved.");
+        fetchResumeData();
+      } else {
+        toast.error(response.data?.message || "Could not save public profile.");
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        error.response?.data?.errors?.public_profile_slug?.[0] ||
+        "Could not save public profile.";
+      toast.error(msg);
+    } finally {
+      setIsSavingPublicProfile(false);
     }
   };
 
@@ -771,6 +901,175 @@ const fetchResumeData = useCallback(async () => {
     // Check if section is in allowed list
     return Array.isArray(userPermissions) && userPermissions.includes(section);
   };
+
+  const handleLinkedInImport = async () => {
+    if (!user?.linkedin_id) {
+      toast.error(
+        "Sign in with LinkedIn on your account first (use LinkedIn on the login page with the same email to link your profile)."
+      );
+      return;
+    }
+    if (!canEditSection("basic_info") && !canEditSection("experiences")) {
+      toast.error("You don't have permission to import into this resume.");
+      return;
+    }
+    setIsLinkedInImportLoading(true);
+    try {
+      const res = await importLinkedInProfileToResume(id);
+      const notes = res.data?.import?.notes;
+      if (Array.isArray(notes) && notes.length > 0) {
+        toast.info(notes.join(" "));
+      }
+      toast.success(res.data?.message || "Imported from LinkedIn.");
+      setIsPersonalInfoOpen(true);
+      setIsExperienceOpen(true);
+      await fetchResumeData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Could not import from LinkedIn.");
+    } finally {
+      setIsLinkedInImportLoading(false);
+    }
+  };
+
+  const visibleEditorSteps = useMemo(
+    () =>
+      sectionOrder.filter((sectionKey) => {
+        if (sectionKey === "socialMedia" && !canEditSection("basic_info")) return false;
+        if (sectionKey === "experience" && !canEditSection("experiences")) return false;
+        if (sectionKey === "education" && !canEditSection("educations")) return false;
+        if (sectionKey === "skills" && !canEditSection("skills")) return false;
+        if (sectionKey === "hobbies" && !canEditSection("hobbies")) return false;
+        if (sectionKey === "certificates" && !canEditSection("certificates")) return false;
+        if (sectionKey === "languages" && !canEditSection("languages")) return false;
+        if (sectionKey === "projects" && !canEditSection("projects")) return false;
+        return true;
+      }),
+    [sectionOrder, userPermissions]
+  );
+
+  const activeEditorSection = useMemo(() => {
+    if (isPersonalInfoOpen) return "personal";
+    if (isSocialMediaOpen) return "socialMedia";
+    if (isExperienceOpen) return "experience";
+    if (isEducationOpen) return "education";
+    if (isSkillsOpen) return "skills";
+    if (isHobbiesOpen) return "hobbies";
+    if (isCertificatesOpen) return "certificates";
+    if (isLanguagesOpen) return "languages";
+    if (isProjectsOpen) return "projects";
+    return null;
+  }, [
+    isPersonalInfoOpen,
+    isSocialMediaOpen,
+    isExperienceOpen,
+    isEducationOpen,
+    isSkillsOpen,
+    isHobbiesOpen,
+    isCertificatesOpen,
+    isLanguagesOpen,
+    isProjectsOpen,
+  ]);
+
+  const handleEditorStepClick = (sectionKey) => {
+    if (isReorderMode) return;
+    openSection(sectionKey);
+    requestAnimationFrame(() => {
+      document
+        .getElementById(`edit-section-${sectionKey}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  };
+
+  const applyCvWizardPhase = (phaseId) => {
+    setCvWizardPhase(phaseId);
+    setPreviewPanelPulse(false);
+
+    const pulsePreview = () => {
+      requestAnimationFrame(() => {
+        cvPreviewPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        setPreviewPanelPulse(true);
+        window.setTimeout(() => setPreviewPanelPulse(false), 2600);
+      });
+    };
+
+    requestAnimationFrame(() => {
+      if (phaseId === "profile") {
+        if (canEditSection("basic_info")) {
+          openSectionsAllowMultiple(["personal", "socialMedia"]);
+          document.getElementById("edit-section-personal")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (visibleEditorSteps[0]) {
+          openSection(visibleEditorSteps[0]);
+          document
+            .getElementById(`edit-section-${visibleEditorSteps[0]}`)
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+
+      if (phaseId === "experience-education") {
+        const keys = [];
+        if (canEditSection("experiences")) keys.push("experience");
+        if (canEditSection("educations")) keys.push("education");
+        if (keys.length) openSectionsAllowMultiple(keys);
+        const scrollKey = canEditSection("experiences")
+          ? "experience"
+          : canEditSection("educations")
+            ? "education"
+            : visibleEditorSteps[0];
+        if (scrollKey) {
+          document.getElementById(`edit-section-${scrollKey}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+
+      if (phaseId === "ai-improve") {
+        if (canEditSection("experiences")) {
+          openSectionsAllowMultiple(["experience"]);
+          document.getElementById("edit-section-experience")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (canEditSection("basic_info")) {
+          openSectionsAllowMultiple(["personal"]);
+          document.getElementById("edit-section-personal")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (canEditSection("projects")) {
+          openSectionsAllowMultiple(["projects"]);
+          document.getElementById("edit-section-projects")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (visibleEditorSteps[0]) {
+          openSection(visibleEditorSteps[0]);
+          document
+            .getElementById(`edit-section-${visibleEditorSteps[0]}`)
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+
+      if (phaseId === "ats-review" || phaseId === "preview-export") {
+        openSectionsAllowMultiple([]);
+        pulsePreview();
+      }
+    });
+  };
+
+  const cvWizardPhaseIndex = CV_WIZARD_PHASES.indexOf(cvWizardPhase);
+  const goWizardPrev = () => {
+    if (cvWizardPhaseIndex > 0) {
+      applyCvWizardPhase(CV_WIZARD_PHASES[cvWizardPhaseIndex - 1]);
+    }
+  };
+  const goWizardNext = () => {
+    if (cvWizardPhaseIndex >= 0 && cvWizardPhaseIndex < CV_WIZARD_PHASES.length - 1) {
+      applyCvWizardPhase(CV_WIZARD_PHASES[cvWizardPhaseIndex + 1]);
+    }
+  };
+
+  const cvWizardHint = useMemo(() => {
+    const map = {
+      profile: t.preview?.wizardHintProfile,
+      "experience-education": t.preview?.wizardHintExperience,
+      "ai-improve": t.preview?.wizardHintAi,
+      "ats-review": t.preview?.wizardHintAts,
+      "preview-export": t.preview?.wizardHintExport,
+    };
+    return map[cvWizardPhase] || "";
+  }, [cvWizardPhase, t.preview]);
 
   const handleRemoveCollaborator = async (collaboratorId) => {
     if (!window.confirm("Are you sure you want to remove this collaborator?")) {
@@ -962,6 +1261,106 @@ const fetchResumeData = useCallback(async () => {
       toast.error(error.response?.data?.message || "Failed to upload avatar", { id: "avatar-upload" });
     }
     e.target.value = "";
+  };
+
+  const handleRunAtsScore = async () => {
+    setIsAtsLoading(true);
+    try {
+      const response = await getAtsScore({
+        resume_id: Number(id),
+        job_description: atsJobDescription.trim() || null,
+      });
+      if (response.data?.ai_quota) {
+        setUser((prev) => (prev ? { ...prev, ai_quota: response.data.ai_quota } : prev));
+      }
+      if (response.data?.status && response.data?.data) {
+        setAtsResult(response.data.data);
+        toast.success("ATS score updated.");
+      } else {
+        toast.error("Unable to calculate ATS score right now.");
+      }
+    } catch (error) {
+      const code = error.response?.data?.code;
+      if (code === "AI_QUOTA_EXCEEDED") {
+        if (error.response?.data?.ai_quota) {
+          setUser((prev) => (prev ? { ...prev, ai_quota: error.response.data.ai_quota } : prev));
+        }
+        setUpgradeProModalVariant("quota");
+        setShowUpgradeProModal(true);
+        toast.error(error.response?.data?.message || "Free ATS credits exhausted for this month.");
+      } else {
+        toast.error(error.response?.data?.message || "Unable to calculate ATS score right now.");
+      }
+    } finally {
+      setIsAtsLoading(false);
+    }
+  };
+
+  const handleOpenAtsModal = () => {
+    if (!aiEntitlements.canAts && !aiEntitlements.unlimited) {
+      setUpgradeProModalVariant("quota");
+      setShowUpgradeProModal(true);
+      return;
+    }
+    setCvWizardPhase("ats-review");
+    setShowAtsModal(true);
+    requestAnimationFrame(() => {
+      cvPreviewPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    if (!atsResult && !isAtsLoading) {
+      handleRunAtsScore();
+    }
+  };
+
+  const handleRunJobTargeting = async () => {
+    if (!jobTargetDescription.trim()) {
+      toast.error("Please paste a job description before running job targeting.");
+      return;
+    }
+
+    setIsJobTargetLoading(true);
+    try {
+      const response = await tailorResume({
+        resume_id: Number(id),
+        job_description: jobTargetDescription.trim(),
+        target_role: jobTargetRole.trim() || null,
+        seniority: jobTargetSeniority.trim() || null,
+      });
+
+      if (response.data?.ai_quota) {
+        setUser((prev) => (prev ? { ...prev, ai_quota: response.data.ai_quota } : prev));
+      }
+      if (response.data?.status && response.data?.data) {
+        setJobTargetResult(response.data.data);
+        toast.success("Job targeting suggestions generated.");
+      } else {
+        toast.error("Unable to generate targeting suggestions right now.");
+      }
+    } catch (error) {
+      const code = error.response?.data?.code;
+      if (code === "AI_QUOTA_EXCEEDED") {
+        if (error.response?.data?.ai_quota) {
+          setUser((prev) => (prev ? { ...prev, ai_quota: error.response.data.ai_quota } : prev));
+        }
+        setUpgradeProModalVariant("quota");
+        setShowUpgradeProModal(true);
+        toast.error(error.response?.data?.message || "Free job-targeting credits exhausted for this month.");
+      } else {
+        toast.error(error.response?.data?.message || "Unable to generate targeting suggestions right now.");
+      }
+    } finally {
+      setIsJobTargetLoading(false);
+    }
+  };
+
+  const handleOpenJobTargetModal = () => {
+    if (!aiEntitlements.canTailor && !aiEntitlements.unlimited) {
+      setUpgradeProModalVariant("quota");
+      setShowUpgradeProModal(true);
+      return;
+    }
+    setCvWizardPhase("ai-improve");
+    setShowJobTargetModal(true);
   };
 
   // Handlers to keep accordions open and refetch data after save
@@ -1254,15 +1653,15 @@ const fetchResumeData = useCallback(async () => {
   };
 
   const sectionLabels = {
-    personal: t.preview?.sectionLabelPersonal || "01 Personal Info",
-    socialMedia: t.preview?.sectionLabelSocialMedia || "02 Social Media",
-    experience: t.preview?.sectionLabelExperience || "03 Experience",
-    languages: t.preview?.sectionLabelLanguages || "08 Languages",
-    education: t.preview?.sectionLabelEducation || "04 Education",
-    skills: t.preview?.sectionLabelSkills || "05 Skills",
-    hobbies: t.preview?.sectionLabelHobbies || "06 Hobbies",
-    certificates: t.preview?.sectionLabelCertificates || "07 Certificates",
-    projects: t.preview?.sectionLabelProjects || "09 Projects",
+    personal: t.preview?.sectionLabelPersonal || "Personal Info",
+    socialMedia: t.preview?.sectionLabelSocialMedia || "Social Media",
+    experience: t.preview?.sectionLabelExperience || "Experience",
+    languages: t.preview?.sectionLabelLanguages || "Languages",
+    education: t.preview?.sectionLabelEducation || "Education",
+    skills: t.preview?.sectionLabelSkills || "Skills",
+    hobbies: t.preview?.sectionLabelHobbies || "Hobbies",
+    certificates: t.preview?.sectionLabelCertificates || "Certificates",
+    projects: t.preview?.sectionLabelProjects || "Projects",
   };
 
     // Helper function to render a section wrapper with drag handlers
@@ -1272,6 +1671,7 @@ const fetchResumeData = useCallback(async () => {
       return (
         <div
           key={sectionKey}
+          id={`edit-section-${sectionKey}`}
           draggable={isReorderMode && !isFixed}
           onDragStart={(e) => handleSectionDragStart(e, sectionKey)}
           onDragEnd={handleSectionDragEnd}
@@ -1373,6 +1773,74 @@ const fetchResumeData = useCallback(async () => {
             </div>
           )}
 
+          {!isReorderMode && (
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                    {t.preview?.wizardTitle || "CV builder flow"}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {CV_WIZARD_PHASES.map((phaseId) => {
+                      const active = cvWizardPhase === phaseId;
+                      const label =
+                        phaseId === "profile"
+                          ? t.preview?.wizardPhaseProfile
+                          : phaseId === "experience-education"
+                            ? t.preview?.wizardPhaseExperience
+                            : phaseId === "ai-improve"
+                              ? t.preview?.wizardPhaseAi
+                              : phaseId === "ats-review"
+                                ? t.preview?.wizardPhaseAts
+                                : t.preview?.wizardPhaseExport;
+                      return (
+                        <button
+                          key={phaseId}
+                          type="button"
+                          onClick={() => applyCvWizardPhase(phaseId)}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                            active
+                              ? "border-blue-600 bg-blue-600 text-white shadow-sm"
+                              : "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={goWizardPrev}
+                    disabled={cvWizardPhaseIndex <= 0}
+                    className={`${buttonVariants.outline} text-xs px-3 py-2 ${
+                      cvWizardPhaseIndex <= 0 ? disabledButtonClasses : ""
+                    }`}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t.preview?.wizardPrev || "Previous"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goWizardNext}
+                    disabled={cvWizardPhaseIndex >= CV_WIZARD_PHASES.length - 1}
+                    className={`${buttonVariants.primary} text-xs px-3 py-2 ${
+                      cvWizardPhaseIndex >= CV_WIZARD_PHASES.length - 1 ? disabledButtonClasses : ""
+                    }`}
+                  >
+                    <span className="hidden sm:inline">{t.preview?.wizardNext || "Next"}</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              {cvWizardHint ? (
+                <p className="mt-3 text-sm text-slate-600 border-t border-slate-100 pt-3">{cvWizardHint}</p>
+              ) : null}
+            </section>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left Panel - CV Form */}
           <div className="p-3 bg-white/90 backdrop-blur-sm border border-slate-100 shadow-xl rounded-3xl overflow-hidden self-start">
@@ -1394,11 +1862,53 @@ const fetchResumeData = useCallback(async () => {
                 </p>
               </div>
             )}
+            {!isReorderMode && visibleEditorSteps.length > 0 && (
+              <div className="mb-5 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-3 sm:px-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <ListOrdered className="h-4 w-4 text-slate-500 shrink-0" />
+                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                    {t.preview?.editorStepsTitle || "Build your CV"}
+                  </p>
+                </div>
+                <div
+                  className="flex flex-wrap gap-2"
+                  role="tablist"
+                  aria-label={t.preview?.editorStepsTitle || "CV builder steps"}
+                >
+                  {visibleEditorSteps.map((sectionKey, idx) => {
+                    const isActive = activeEditorSection === sectionKey;
+                    return (
+                      <button
+                        key={sectionKey}
+                        type="button"
+                        role="tab"
+                        aria-selected={isActive}
+                        onClick={() => handleEditorStepClick(sectionKey)}
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                          isActive
+                            ? "border-blue-600 bg-blue-600 text-white shadow-sm"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        <span className={isActive ? "text-blue-100" : "text-slate-400 tabular-nums"}>
+                          {idx + 1}
+                        </span>
+                        <span className="max-w-[10rem] truncate">{sectionLabels[sectionKey]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  {t.preview?.editorStepsHint}
+                </p>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="divide-y divide-gray-200">
               {sectionOrder.map((sectionKey) => {
                 // Skip sections that shouldn't be rendered
                 if (sectionKey === "socialMedia" && !canEditSection('basic_info')) return null;
                 if (sectionKey === "experience" && !canEditSection('experiences')) return null;
+                if (sectionKey === "education" && !canEditSection('educations')) return null;
                 if (sectionKey === "skills" && !canEditSection('skills')) return null;
                 if (sectionKey === "hobbies" && !canEditSection('hobbies')) return null;
                 if (sectionKey === "certificates" && !canEditSection('certificates')) return null;
@@ -1620,7 +2130,18 @@ const fetchResumeData = useCallback(async () => {
                           }`}
                           placeholder={t.dashboard.sections.personalInfo.summaryPlaceholder}
                         />
+                        <div className="mt-2 flex justify-end">
+                          <EnhanceTextareaButton
+                            value={formData.professional_summary}
+                            context="professional summary"
+                            disabled={!canEditSection('basic_info')}
+                            onEnhanced={(enhanced) =>
+                              setFormData((prev) => ({ ...prev, professional_summary: enhanced }))
+                            }
+                          />
+                        </div>
                       </div>
+
                     </div>
                     <div className="flex justify-end pt-4">
                       <button
@@ -1750,6 +2271,7 @@ const fetchResumeData = useCallback(async () => {
                           />
                         </div>
                       </div>
+
                     </div>
                     <div className="flex justify-end pt-4">
                 <button
@@ -1820,13 +2342,33 @@ const fetchResumeData = useCallback(async () => {
                       isExperienceOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
                     }`}
                   >
-                    <button
-                      type="button"
-                      onClick={addExperience}
-                      className={`mt-2 mb-4 ${buttonBase} border border-amber-200 bg-amber-50/80 text-amber-700 px-4 py-2 text-sm hover:bg-amber-100 focus:ring-amber-400 focus:ring-offset-white`}
-                    >
-                      {t.dashboard.sections.experiences.addExperience}
-                    </button>
+                    <div className="mt-2 mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                      <button
+                        type="button"
+                        onClick={addExperience}
+                        disabled={isReorderMode}
+                        className={`${buttonBase} border border-amber-200 bg-amber-50/80 text-amber-700 px-4 py-2 text-sm hover:bg-amber-100 focus:ring-amber-400 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {t.dashboard.sections.experiences.addExperience}
+                      </button>
+                      {LINKEDIN_RESUME_IMPORT_UI_ENABLED &&
+                        user?.linkedin_id &&
+                        (canEditSection("basic_info") || canEditSection("experiences")) && (
+                          <button
+                            type="button"
+                            onClick={handleLinkedInImport}
+                            disabled={isReorderMode || isLinkedInImportLoading}
+                            className={`${buttonBase} inline-flex items-center justify-center gap-2 border border-[#0A66C2]/30 bg-[#0A66C2]/5 text-[#0A66C2] px-4 py-2 text-sm hover:bg-[#0A66C2]/10 focus:ring-[#0A66C2] focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {isLinkedInImportLoading ? (
+                              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                            ) : (
+                              <Linkedin className="h-4 w-4 shrink-0" />
+                            )}
+                            Import from LinkedIn
+                          </button>
+                        )}
+                    </div>
 
                     {showNewExperience && (
                       <NewExperience
@@ -2406,12 +2948,18 @@ const fetchResumeData = useCallback(async () => {
           </div>
 
           {/* Right Panel - CV Preview */}
-          <div className="w-full xl:sticky top-8 space-y-6 self-start">
+          <div
+            ref={cvPreviewPanelRef}
+            id="cv-preview-panel"
+            className={`w-full xl:sticky top-8 space-y-6 self-start transition-shadow duration-300 ${
+              previewPanelPulse ? "ring-4 ring-emerald-400/70 ring-offset-2 rounded-3xl" : ""
+            }`}
+          >
             <div className="bg-white/90 backdrop-blur-sm border border-slate-100 shadow-xl rounded-3xl overflow-hidden">
             <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-start lg:justify-between">
                 
-                <div className="flex items-center space-x-1 sm:space-x-2">
+                <div className="flex flex-wrap items-center gap-1 sm:gap-2 lg:justify-end">
                   <button
                     onClick={() => setShowTemplateModal(true)}
                     className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 border-green-300 text-green-700 hover:bg-green-50 group flex items-center overflow-hidden transition-all duration-200`}
@@ -2459,6 +3007,22 @@ const fetchResumeData = useCallback(async () => {
                     <span className={toolbarLabelClass}>{t?.customisePdf?.button || "PDF Style"}</span>
                   </button>
                   <button
+                    onClick={handleOpenJobTargetModal}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 border-indigo-300 text-indigo-700 hover:bg-indigo-50 group flex items-center overflow-hidden transition-all duration-200`}
+                    title="Tailor for target role"
+                  >
+                    <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className={toolbarLabelClass}>Job Target</span>
+                  </button>
+                  <button
+                    onClick={handleOpenAtsModal}
+                    className={`${buttonVariants.outline} text-xs sm:text-sm px-2 sm:px-2 py-1.5 sm:py-2.5 border-emerald-300 text-emerald-700 hover:bg-emerald-50 group flex items-center overflow-hidden transition-all duration-200`}
+                    title="Run ATS analysis"
+                  >
+                    <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className={toolbarLabelClass}>ATS Analysis</span>
+                  </button>
+                  <button
                     onClick={handleDownload}
                     disabled={!downloadRequirementsMet}
                     title={
@@ -2473,10 +3037,12 @@ const fetchResumeData = useCallback(async () => {
                   </button>
                 </div>
               </div>
-            <ResumeTemplatePreview
-              resume={resumePreviewData}
-              templateKey={formData.template_layout}
-            />
+            <Suspense fallback={<ResumePreviewSkeleton />}>
+              <ResumeTemplatePreview
+                resume={resumePreviewData}
+                templateKey={formData.template_layout}
+              />
+            </Suspense>
             </div>
             </div>
           </div>
@@ -2532,16 +3098,296 @@ const fetchResumeData = useCallback(async () => {
                   className="bg-white rounded-lg mx-auto"
                   style={{ width: '210mm', minHeight: '297mm' }}
                 >
-                  <ResumeTemplatePreview
-                    resume={resumePreviewData}
-                    templateKey={formData.template_layout}
-                  />
+                  <Suspense fallback={<ResumePreviewSkeleton className="min-h-[297mm]" />}>
+                    <ResumeTemplatePreview
+                      resume={resumePreviewData}
+                      templateKey={formData.template_layout}
+                    />
+                  </Suspense>
                 </div>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Job Targeting Modal */}
+      {showJobTargetModal && (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-75"
+          onClick={() => setShowJobTargetModal(false)}
+        >
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <Sparkles className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900">Job Targeting Mode</h2>
+                </div>
+                <button
+                  onClick={() => setShowJobTargetModal(false)}
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+                  title="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={jobTargetRole}
+                    onChange={(e) => setJobTargetRole(e.target.value)}
+                    placeholder="Target role (e.g. Frontend Developer)"
+                    className="block w-full rounded-lg border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 sm:text-sm p-3"
+                  />
+                  <input
+                    type="text"
+                    value={jobTargetSeniority}
+                    onChange={(e) => setJobTargetSeniority(e.target.value)}
+                    placeholder="Seniority (e.g. Junior, Mid, Senior)"
+                    className="block w-full rounded-lg border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 sm:text-sm p-3"
+                  />
+                </div>
+                <textarea
+                  rows={6}
+                  value={jobTargetDescription}
+                  onChange={(e) => setJobTargetDescription(e.target.value)}
+                  className="block w-full rounded-lg border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 sm:text-sm p-3"
+                  placeholder="Paste the full job description to tailor your resume suggestions..."
+                />
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleRunJobTargeting}
+                    disabled={isJobTargetLoading}
+                    className={`${buttonVariants.secondary} ${isJobTargetLoading ? disabledButtonClasses : ""}`}
+                  >
+                    {isJobTargetLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        <span>Tailor for this role</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {isJobTargetLoading && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-indigo-800">{t.preview?.wizardAnalyzing || "Analyzing…"}</p>
+                    <AiLoadingSkeleton rows={8} />
+                  </div>
+                )}
+
+                {jobTargetResult && (
+                  <div className="space-y-3 border-t border-indigo-100 pt-3">
+                    <div className="rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Summary Suggestion</p>
+                      <p className="text-sm text-slate-700 whitespace-pre-wrap">
+                        {jobTargetResult.summary_suggestion?.text || "No summary suggestion available."}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Skills To Add</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(jobTargetResult.skills_to_add || []).slice(0, 12).map((skill, idx) => (
+                          <span key={`${skill}-${idx}`} className="px-2 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs">{skill}</span>
+                        ))}
+                        {(!jobTargetResult.skills_to_add || jobTargetResult.skills_to_add.length === 0) && (
+                          <span className="text-xs text-slate-500">No extra skills suggested.</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">ATS Keywords</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(jobTargetResult.ats_keywords || []).slice(0, 12).map((kw, idx) => (
+                          <span key={`${kw}-${idx}`} className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs">{kw}</span>
+                        ))}
+                        {(!jobTargetResult.ats_keywords || jobTargetResult.ats_keywords.length === 0) && (
+                          <span className="text-xs text-slate-500">No keywords suggested.</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Experience Suggestions</p>
+                      <ul className="space-y-2">
+                        {(jobTargetResult.experience_suggestions || []).slice(0, 5).map((item, idx) => (
+                          <li key={`${item.experience_id || idx}-${idx}`} className="text-sm text-slate-700">
+                            {item.improved_description || "No suggestion text"}
+                          </li>
+                        ))}
+                        {(!jobTargetResult.experience_suggestions || jobTargetResult.experience_suggestions.length === 0) && (
+                          <li className="text-xs text-slate-500">No experience suggestions available.</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ATS Analysis Modal */}
+      {showAtsModal && (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-75"
+          onClick={() => setShowAtsModal(false)}
+        >
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-emerald-100 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900">ATS Analysis</h2>
+                </div>
+                <button
+                  onClick={() => setShowAtsModal(false)}
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+                  title="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <p className="text-sm text-slate-600">
+                  Analyze keyword match, structure, and content strength for this resume.
+                </p>
+                <textarea
+                  rows={4}
+                  value={atsJobDescription}
+                  onChange={(e) => setAtsJobDescription(e.target.value)}
+                  className="block w-full rounded-lg border-gray-300 bg-white shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 sm:text-sm p-3"
+                  placeholder="Optional: paste target job description for keyword match scoring..."
+                />
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleRunAtsScore}
+                    disabled={isAtsLoading}
+                    className={`${buttonVariants.secondary} ${isAtsLoading ? disabledButtonClasses : ""}`}
+                  >
+                    {isAtsLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Scoring...</span>
+                      </>
+                    ) : (
+                      <>
+                        <BarChart3 className="h-4 w-4" />
+                        <span>Run ATS Analysis</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {isAtsLoading && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-emerald-800">{t.preview?.wizardAnalyzing || "Analyzing…"}</p>
+                    <AiLoadingSkeleton rows={8} />
+                  </div>
+                )}
+
+                {atsResult && (
+                  <div className="space-y-3 border-t border-emerald-100 pt-3">
+                    {atsResult.insights_tier === "lite" && (
+                      <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                        Preview ATS insights (free). Pro shows the full keyword gap list and extended recommendations.
+                      </p>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <div className="rounded-lg bg-white border border-slate-200 p-3">
+                        <p className="text-xs text-slate-500 uppercase tracking-wide">Overall</p>
+                        <p className="text-2xl font-bold text-slate-900">{atsResult.overall_score}/100</p>
+                      </div>
+                      <div className="rounded-lg bg-white border border-slate-200 p-3">
+                        <p className="text-xs text-slate-500 uppercase tracking-wide">Content</p>
+                        <p className="text-xl font-semibold text-slate-900">{atsResult.breakdown?.content_strength ?? 0}</p>
+                      </div>
+                      <div className="rounded-lg bg-white border border-slate-200 p-3">
+                        <p className="text-xs text-slate-500 uppercase tracking-wide">Format</p>
+                        <p className="text-xl font-semibold text-slate-900">{atsResult.breakdown?.formatting_quality ?? 0}</p>
+                      </div>
+                      <div className="rounded-lg bg-white border border-slate-200 p-3">
+                        <p className="text-xs text-slate-500 uppercase tracking-wide">Keywords</p>
+                        <p className="text-xl font-semibold text-slate-900">{atsResult.breakdown?.keyword_match ?? 0}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="rounded-lg border border-slate-200 bg-white p-3">
+                        <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Matched Keywords</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(atsResult.keyword_analysis?.matched || []).slice(0, 10).map((kw, idx) => (
+                            <span key={`${kw}-${idx}`} className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs">{kw}</span>
+                          ))}
+                          {(!atsResult.keyword_analysis?.matched || atsResult.keyword_analysis.matched.length === 0) && (
+                            <span className="text-xs text-slate-500">No matches yet.</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="rounded-lg border border-slate-200 bg-white p-3">
+                        <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Missing Keywords</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(atsResult.keyword_analysis?.missing || []).slice(0, 10).map((kw, idx) => (
+                            <span key={`${kw}-${idx}`} className="px-2 py-1 rounded-full bg-rose-100 text-rose-800 text-xs">{kw}</span>
+                          ))}
+                          {(!atsResult.keyword_analysis?.missing || atsResult.keyword_analysis.missing.length === 0) && (
+                            <span className="text-xs text-slate-500">No obvious gaps.</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Recommendations</p>
+                      <ul className="space-y-1">
+                        {(atsResult.recommendations || []).slice(0, 6).map((item, idx) => (
+                          <li key={idx} className="text-sm text-slate-700">- {item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <UpgradeProModal
+        isOpen={showUpgradeProModal}
+        onClose={() => {
+          setShowUpgradeProModal(false);
+          setUpgradeProModalVariant("default");
+        }}
+        upgradePath="/pricing"
+        variant={upgradeProModalVariant}
+      />
 
       {/* Share Modal */}
       {showShareModal && (
@@ -2575,6 +3421,79 @@ const fetchResumeData = useCallback(async () => {
 
               {/* Modal Content */}
               <div className="p-6">
+                {resumeOwnerId === user?.id ? (
+                  <div className="mb-6 pb-6 border-b border-gray-200 space-y-3">
+                    <h3 className="text-sm font-semibold text-gray-900">Public profile URL</h3>
+                    <p className="text-xs text-gray-600">
+                      Stable link (does not expire):{" "}
+                      <span className="font-mono text-gray-800">/u/your-name</span>. Turn off to hide from the web.
+                    </p>
+                    <label className="flex items-center gap-2 text-sm text-gray-800">
+                      <input
+                        type="checkbox"
+                        checked={publicProfileEnabled}
+                        onChange={(e) => setPublicProfileEnabled(e.target.checked)}
+                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                      />
+                      Publish public profile
+                    </label>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">URL slug</label>
+                      <input
+                        type="text"
+                        value={publicProfileSlug}
+                        onChange={(e) =>
+                          setPublicProfileSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
+                        }
+                        placeholder="e.g. jane-doe-pm"
+                        disabled={!publicProfileEnabled}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">SEO title (optional)</label>
+                      <input
+                        type="text"
+                        value={publicProfileMetaTitle}
+                        onChange={(e) => setPublicProfileMetaTitle(e.target.value)}
+                        disabled={!publicProfileEnabled}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">SEO description (optional)</label>
+                      <textarea
+                        rows={2}
+                        value={publicProfileMetaDescription}
+                        onChange={(e) => setPublicProfileMetaDescription(e.target.value)}
+                        disabled={!publicProfileEnabled}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
+                      />
+                    </div>
+                    {publicProfileEnabled && publicProfileSlug ? (
+                      <p className="text-xs text-purple-800 break-all">
+                        Live URL: {`${window.location.origin}/u/${publicProfileSlug}`}
+                      </p>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={handleSavePublicProfile}
+                      disabled={isSavingPublicProfile}
+                      className={`${buttonVariants.primary} w-full justify-center ${
+                        isSavingPublicProfile ? disabledButtonClasses : ""
+                      }`}
+                    >
+                      {isSavingPublicProfile ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Saving…
+                        </>
+                      ) : (
+                        "Save public profile"
+                      )}
+                    </button>
+                  </div>
+                ) : null}
                 {isLoadingLink ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
@@ -2600,6 +3519,21 @@ const fetchResumeData = useCallback(async () => {
                           <option value={90}>{shareStrings.days?.["90"] || "90 days"}</option>
                           <option value={365}>{shareStrings.days?.["365"] || "1 year"}</option>
                         </select>
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Personal website slug (optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={customWebsiteSlug}
+                        onChange={(e) => setCustomWebsiteSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                        placeholder="e.g. john-doe-product-manager"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Use lowercase letters, numbers, and hyphens only.
+                      </p>
                     </div>
                     <button
                       onClick={handleGenerateLink}
@@ -2633,6 +3567,11 @@ const fetchResumeData = useCallback(async () => {
                           {new Date(shareableLink.expires_at).toLocaleDateString()}
                         </span>
                       </div>
+                      {getPersonalWebsiteUrl() ? (
+                        <div className="mb-2 text-xs text-purple-700 break-all">
+                          Website: {getPersonalWebsiteUrl()}
+                        </div>
+                      ) : null}
                       <div className="flex items-center space-x-2">
                         <input
                           type="text"
@@ -2664,6 +3603,22 @@ const fetchResumeData = useCallback(async () => {
                         <ExternalLink className="h-4 w-4" />
                         {shareStrings.open || "Open Link"}
                       </button>
+                      <button
+                        onClick={() => {
+                          const websiteUrl = getPersonalWebsiteUrl();
+                          if (!websiteUrl) {
+                            toast.error("Generate a share link first to open the website.");
+                            return;
+                          }
+                          window.open(websiteUrl, "_blank");
+                        }}
+                        className={`${buttonVariants.outline} flex-1 justify-center border-indigo-300 text-indigo-700 hover:bg-indigo-50`}
+                      >
+                        <Globe className="h-4 w-4" />
+                        Personal Website
+                      </button>
+                    </div>
+                    <div className="flex items-center space-x-2">
                       <button
                         onClick={handleDeactivateLink}
                         disabled={isGeneratingLink}

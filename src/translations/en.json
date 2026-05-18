@@ -66,7 +66,10 @@
         "noResumesDesc": "Create your first resume using our professional templates",
         "createFirst": "Create Your First Resume",
         "template": "Template",
-        "lastModified": "Last Modified"
+        "lastModified": "Last Modified",
+        "freeLimitReached": "Free plan includes one resume. Upgrade to Pro to create more.",
+        "upgradeToCreate": "Upgrade to Pro",
+        "usageLabel": "{{count}} of {{limit}} resume used"
     },
     "templates": {
         "title": "Choose a Template",
@@ -129,17 +132,62 @@
         }
     },
     "welcome": {
-        "title": "Create Your Professional Resume Today",
-        "subtitle": "Stand out from the crowd with a beautifully designed resume. Easy to create, customize, and share.",
+        "title": "A CV recruiters actually read — in one sitting",
+        "subtitle": "ATS-friendly CVs, cover letters, and employment certificates—templates, live preview, and PDF export. Free to start in under a minute.",
+        "heroTitleCompact": "Interview-ready CV, fast",
+        "heroSubtitleCompact": "CV, cover letter, work certificate — free to start.",
         "heroBadge": "Professional CV Builder",
         "getStarted": "Create your CV now — it's free",
+        "guestStartCta": "Start without an account",
         "login": "Login",
         "register": "Register",
         "freeDescription": "Totally free service — no subscriptions, no hidden fees, no credit card required.",
+        "outcomePromise": "Get interview-ready CV in 60s",
+        "walkthrough": {
+            "badge": "Product walkthrough",
+            "title": "See how your CV improves in minutes",
+            "subtitle": "Watch the exact flow: choose a template, tailor with AI, check ATS feedback, and export with one click.",
+            "cta": "Try the flow now",
+            "videoTitle": "HResume walkthrough",
+            "videoPlaceholder": "Walkthrough video coming soon. Set VITE_WALKTHROUGH_VIDEO_URL to a YouTube watch or embed URL to show it here."
+        },
+        "transformation": {
+            "badge": "Real transformations",
+            "title": "Before and after examples",
+            "subtitle": "Users keep control while AI sharpens impact and ATS coverage.",
+            "enhanceWithAi": "Enhance with AI",
+            "enhanceHint": "Click the button to simulate AI rewriting this line of text.",
+            "originalLabel": "Original text",
+            "enhancingLabel": "Enhancing with AI…",
+            "enhancedLabel": "Enhanced text",
+            "beforeLabel": "Before",
+            "afterLabel": "After",
+            "examples": [
+                {
+                    "role": "Frontend developer",
+                    "before": "Built dashboard and fixed bugs.",
+                    "after": "Built a React dashboard used by 40+ sales reps, cut reporting time by 35%, and resolved 120+ production bugs with automated regression checks."
+                },
+                {
+                    "role": "Operations analyst",
+                    "before": "Handled inventory reports and team coordination.",
+                    "after": "Automated weekly inventory reporting across 5 warehouses, reduced stockout incidents by 22%, and coordinated cross-team planning for peak seasons."
+                }
+            ]
+        },
         "trust": {
             "free": "Free to use",
             "noCard": "No credit card",
             "instant": "Instant download"
+        },
+        "trustProof": {
+            "testimonialsTitle": "Testimonials",
+            "testimonialsText": "Rated highly by candidates and recruiters for speed, clarity, and ease of use.",
+            "pricingTitle": "Transparent pricing",
+            "pricingText": "Free to start, optional Pro when you want unlimited AI and full ATS insights.",
+            "privacyTitle": "Privacy first",
+            "privacyText": "You control what is public. Private resumes stay private unless you choose to share.",
+            "pricingLink": "See plans"
         },
         "templates": {
             "title": "Professional Templates",
@@ -151,19 +199,55 @@
             "candidates": "Candidates",
             "resumes": "Resumes Created"
         },
+        "suite": {
+            "badge": "Complete your application",
+            "title": "More than a resume",
+            "subtitle": "Build your CV, cover letter, and employment certificate in one place—free to start with a single account.",
+            "heroLine": "Also create professional cover letters and work certificates in the same app.",
+            "resume": {
+                "shortTitle": "Resume",
+                "title": "Professional resume",
+                "description": "ATS-friendly templates, live preview, AI polish, and one-click PDF export.",
+                "cta": "Start your CV",
+                "note": "No account required to try"
+            },
+            "coverLetter": {
+                "shortTitle": "Cover letters",
+                "title": "Cover letter builder",
+                "description": "Write tailored letters that match your CV—edit, save, and export when you're ready.",
+                "cta": "Explore cover letters",
+                "note": "Free account required"
+            },
+            "workCertificate": {
+                "shortTitle": "Work certificates",
+                "title": "Employment certificate",
+                "description": "Generate attestation-style work certificates for HR files or job applications, then download PDF.",
+                "cta": "Explore work certificates",
+                "note": "Free account required"
+            }
+        },
         "features": {
             "title": "Features",
-            "subtitle": "Everything you need to create a professional resume that stands out",
+            "subtitle": "Solid editing tools plus AI that helps you sharpen bullets, target roles, and pass ATS screening.",
+            "aiBadge": "AI-assisted",
             "easy": "Easy to Use",
             "easyDesc": "Simple and intuitive interface for creating professional CVs.",
+            "easyAi": "Get wording suggestions while you edit your experience.",
             "professional": "Professional Templates",
             "professionalDesc": "Choose from a variety of professionally designed templates.",
+            "professionalAi": "Match tone and structure hints to the role you're applying for.",
             "ats": "ATS Friendly",
             "atsDesc": "Optimized for Applicant Tracking Systems to improve your chances.",
+            "atsAi": "AI highlights keyword gaps against typical ATS scans.",
             "export": "Export to PDF",
             "exportDesc": "Download your CV in PDF format, ready to be shared.",
+            "exportAi": "Polish final copy before you download a print-ready PDF.",
             "multilingual": "Multiple Languages",
-            "multilingualDesc": "Create your CV in different languages to reach a global audience."
+            "multilingualDesc": "Create your CV in different languages to reach a global audience.",
+            "multilingualAi": "Translate and adapt sections with context-aware help.",
+            "smartAiTitle": "Smart AI writing",
+            "smartAiDesc": "Enhance descriptions, tailor bullets to job posts, and run ATS checks—all in the editor, within your plan limits.",
+            "smartAiHint": "Free accounts get monthly AI credits; Pro unlocks unlimited AI and full ATS insights."
         },
         "reviews": {
             "title": "What Our Users Say",
@@ -236,6 +320,7 @@
         "download": "Download PDF",
         "myResumes": "My Resumes",
         "myCoverLetters": "Cover Letters",
+        "workCertification": "Work certification",
         "templates": "Templates",
         "profile": "Profile",
         "review": "Leave a Review",
@@ -269,7 +354,24 @@
         "graduated": "Graduated",
         "fullPageView": "Full Page View",
         "professionalTitle": "Professional Title",
-        "yourName": "Your Name"
+        "yourName": "Your Name",
+        "editorStepsTitle": "Build your CV",
+        "editorStepsHint": "Use the steps to jump to a section. The preview updates as you edit.",
+        "livePreviewBadge": "Live preview",
+        "wizardTitle": "CV builder flow",
+        "wizardPhaseProfile": "Profile",
+        "wizardPhaseExperience": "Experience & education",
+        "wizardPhaseAi": "AI improve",
+        "wizardPhaseAts": "ATS review",
+        "wizardPhaseExport": "Preview & export",
+        "wizardHintProfile": "Fill in your details, social links, and professional summary.",
+        "wizardHintExperience": "Add work history and education. Use “Enhance with IA” on longer text (Pro).",
+        "wizardHintAi": "Polish text with Enhance with IA under text areas, and use Job Target for tailored ideas (Pro).",
+        "wizardHintAts": "Use ATS Analysis in the preview toolbar for scores and keyword tips (Pro).",
+        "wizardHintExport": "Use the preview toolbar to download PDF, share, or open your public website.",
+        "wizardPrev": "Previous",
+        "wizardNext": "Next",
+        "wizardAnalyzing": "Analyzing…"
     },
     "personal": {
         "title": "Basic Information",
@@ -506,16 +608,43 @@
                     "startDate": "Start Date",
                     "startDateHint": "When you started the project",
                     "endDate": "End Date",
-                    "endDateHint": "When the project was completed (leave empty if ongoing)"
+                    "endDateHint": "When the project was completed (leave empty if ongoing)",
+                    "githubRepoLabel": "Import from GitHub",
+                    "githubRepoHint": "Paste a repository URL or owner/repo to pre-fill this project. Public repos work without login; private repos need GitHub connected (Profile) or a server GITHUB_TOKEN.",
+                    "githubRepoPlaceholder": "https://github.com/owner/repo or owner/repo",
+                    "githubImportButton": "Fill from GitHub",
+                    "githubImportSuccess": "Project fields updated from GitHub. Review and save.",
+                    "githubImportError": "Could not load this repository from GitHub.",
+                    "githubConnectFromEditor": "Connect GitHub",
+                    "githubConnectHintShort": "for private repositories",
+                    "githubConnectUnavailable": "GitHub connection is not configured on this server.",
+                    "githubRepoRequired": "Enter a GitHub repository URL first."
                 }
             }
         }
     },
     "createResume": {
-        "title": "Create Your Resume",
+        "title": "Create your resume",
+        "pageBadge": "New resume",
+        "pageSubtitle": "Pick a name and template to get started.",
+        "nameSectionTitle": "Resume name",
         "nameLabel": "Resume Name",
-        "namePlaceholder": "e.g., John_Doe_Resume",
-        "templateLabel": "Resume Template",
+        "namePlaceholder": "e.g., Product Designer 2026",
+        "templateLabel": "Choose your look",
+        "templatesBadge": "Templates",
+        "templateHint": "Each template is optimized for ATS scanners and recruiter readability.",
+        "searchPlaceholder": "Search template name or style",
+        "selectedTemplateLabel": "Selected template",
+        "heroHint": "This label appears on your dashboard only — not on the PDF.",
+        "suggestionsLabel": "Quick names",
+        "suggestionsHint": "Tap to use a suggestion:",
+        "suggestionsEmpty": "Select a template below for ideas",
+        "noTemplatesTitle": "No templates match your filters",
+        "noTemplatesSubtitle": "Try clearing the filters or searching for another keyword.",
+        "atsFriendly": "ATS-Ready",
+        "pickTemplateHint": "Select a template to continue",
+        "enterNameHint": "Enter a resume name to continue",
+        "readyHint": "Ready to open the editor",
         "subtitle": "Fill in the details to build your professional resume",
         "personalInfo": "Personal Information",
         "socialMedia": "Social Media",
@@ -525,7 +654,15 @@
         "hobbies": "Hobbies & Interests",
         "certificates": "Certificates",
         "saveButton": "Save Resume",
-        "previewButton": "Preview Resume"
+        "previewButton": "Preview Resume",
+        "validationError": "Please choose a template and enter a resume name.",
+        "creationError": "Something went wrong. Please try again.",
+        "limitReached": "Free plan includes one resume. Upgrade to Pro to create more.",
+        "guestBanner": "Pick a template and name your resume without signing in. When you continue, we will save your choices and create the resume after you register or log in.",
+        "guestFinalButton": "Continue to sign up",
+        "guestDraftSavedToast": "Your choices are saved. Create an account to open your resume.",
+        "guestHasAccount": "Already have an account?",
+        "guestLoginLink": "Log in"
     },
     "profile": {
         "title": "Profile Settings",
@@ -573,6 +710,19 @@
             "emailInvalid": "Please enter a valid email address",
             "passwordLength": "Password must be at least 8 characters",
             "passwordMismatch": "Passwords do not match"
+        },
+        "githubImport": {
+            "title": "GitHub (resume projects)",
+            "description": "Connect GitHub to import project details from private repositories you can access. Uses the broad \"repo\" scope — you can disconnect anytime.",
+            "connectedAs": "Connected as",
+            "connect": "Connect GitHub",
+            "disconnect": "Disconnect",
+            "connecting": "Redirecting…",
+            "disconnecting": "Disconnecting…",
+            "disconnectSuccess": "GitHub disconnected.",
+            "connectSuccess": "GitHub connected. You can import repositories you have access to.",
+            "connectError": "GitHub connection failed.",
+            "notConfigured": "GitHub connection is not available on this server."
         }
     },
     "privacy": {
@@ -743,26 +893,60 @@
     },
     "pricing": {
         "title": "Transparent Pricing",
-        "subtitle": "All our services are 100% free right now. Build unlimited resumes, export polished PDFs, and share them without paying a cent.",
-        "badge": "Free For Now",
+        "subtitle": "Choose the plan that matches your goals. Upgrade to Pro to unlock AI enhancement features.",
+        "badge": "Simple Plans",
         "heroCta": "Create Free Account",
-        "plan": {
+        "freePlan": {
             "name": "HResume Free",
             "price": "$0",
             "per": "per month",
-            "description": "Access every feature while we remain in public beta. No credit card or hidden fees.",
+            "description": "Build resumes and export PDFs with essential tools.",
             "features": [
-                "Unlimited resumes & templates",
-                "One-click PDF export",
-                "Live preview with translations",
-                "Shareable public links",
-                "Recruiter-friendly layouts"
+                "1 resume (create another after upgrading to Pro)",
+                "All standard templates",
+                "5 AI text enhancements / month",
+                "1 job-targeting (tailor) run / month",
+                "3 ATS checks / month (lite insights)",
+                "Cover letters & work certificates",
+                "PDF export, share links & public profile",
+                "Collaboration (verified email required to invite)"
             ],
             "button": "Start for Free"
         },
+        "regionNoteTunisia": "Prices shown in Tunisian dinars (TND) for visitors in Tunisia.",
+        "regionNoteInternational": "Prices shown in US dollars for international visitors.",
+        "proPlan": {
+            "name": "HResume Pro",
+            "price": "$5",
+            "per": "per month",
+            "description": "Unlock AI-powered writing tools and premium productivity features.",
+            "features": [
+                "Unlimited resumes",
+                "Unlimited AI enhance, job targeting & ATS",
+                "Full ATS keyword gaps & recommendations",
+                "Cover letters & work certificates (same as Free)",
+                "GitHub project import (when enabled)",
+                "Priority AI processing",
+                "Email support"
+            ],
+            "button": "Upgrade to Pro",
+            "buttonLoading": "Redirecting to checkout…",
+            "loginToUpgrade": "Sign in to upgrade",
+            "alreadyPro": "You are on Pro",
+            "checkoutError": "Could not start checkout. Try again or contact support.",
+            "billingUnavailable": "Online checkout is not configured yet. Contact support to upgrade."
+        },
+        "success": {
+            "title": "Welcome to Pro!",
+            "subtitle": "Your subscription is active. Unlimited resumes and AI are now unlocked.",
+            "pending": "We are confirming your payment…",
+            "error": "We could not confirm your payment. If you were charged, contact support with your receipt.",
+            "goToResumes": "Go to my resumes",
+            "goToPricing": "Back to pricing"
+        },
         "note": {
-            "title": "Future pricing?",
-            "description": "We may introduce premium add-ons for teams and recruiters later, but the core resume builder will stay free while we grow. You'll receive plenty of notice before anything changes."
+            "title": "Why Pro?",
+            "description": "Free is built for one strong CV and a monthly taste of AI. Pro is for active job searches: unlimited resumes, unlimited AI, and full ATS insights. Cancel anytime from your Stripe customer portal (when billing is enabled)."
         }
     },
     "review": {
@@ -848,6 +1032,15 @@
             "save": "Save",
             "saving": "Saving...",
             "editPost": "Edit Post",
+            "backToList": "Back to blog posts",
+            "createSubtitle": "Write and publish a new article.",
+            "editSubtitle": "Update your blog post and save changes.",
+            "titleColumn": "Title",
+            "importMarkdown": "Import Markdown (.md)",
+            "importMarkdownHint": "Supports GitHub-flavored Markdown. Optional YAML frontmatter (title, excerpt) at the top.",
+            "importMarkdownSuccess": "Imported {name}",
+            "importMarkdownError": "Failed to import Markdown file",
+            "importMarkdownReplaceConfirm": "Importing will replace the current editor content. Continue?",
             "deleteConfirmTitle": "Delete Blog Post",
             "deleteConfirmMessage": "Are you sure you want to delete this blog post? This action cannot be undone.",
             "delete": "Delete",
@@ -863,6 +1056,58 @@
                 "titleRequired": "Title is required",
                 "contentRequired": "Content is required"
             }
+        }
+    },
+    "productLanding": {
+        "common": {
+            "primaryCta": "Create free account",
+            "secondaryCta": "Log in",
+            "alsoTry": "Also available on HResume:",
+            "backHome": "Back to homepage"
+        },
+        "coverLetter": {
+            "shortTitle": "Cover letter builder",
+            "metaTitle": "Free Cover Letter Builder | HResume",
+            "metaDescription": "Create professional cover letters online with HResume. Match your resume, edit with templates, and export PDF. Free account to get started.",
+            "badge": "Cover letters",
+            "title": "Cover letter builder that matches your resume",
+            "subtitle": "Draft, edit, and save cover letters alongside your CV—then export a polished PDF when you're ready to apply.",
+            "accountNote": "A free HResume account is required to create and save cover letters.",
+            "primaryCta": "Start writing cover letters",
+            "featuresTitle": "Why use HResume for cover letters",
+            "bullets": [
+                "Dedicated cover letter editor linked to your account",
+                "Professional templates and structured sections",
+                "Save multiple letters for different roles",
+                "Export to PDF for applications",
+                "Same login as your resume and work certificates"
+            ],
+            "bodyParagraphs": [
+                "Recruiters often read your cover letter right after your CV. HResume keeps both documents in one workspace so your tone and details stay consistent.",
+                "Whether you're applying in English or French, you can manage letters from your dashboard and update them as often as you need."
+            ]
+        },
+        "workCertificate": {
+            "shortTitle": "Work certificate generator",
+            "metaTitle": "Work Certificate Generator (Employment Attestation) | HResume",
+            "metaDescription": "Generate employment work certificates (attestation de travail) online. Fill in employer details, preview, and download PDF with HResume. Free account required.",
+            "badge": "Work certificates",
+            "title": "Employment certificate generator",
+            "subtitle": "Create official-style work certificates (employment attestations) for HR records, visa files, or job applications—preview and download PDF.",
+            "accountNote": "A free HResume account is required to create and save work certificates.",
+            "primaryCta": "Create a work certificate",
+            "featuresTitle": "What you can do",
+            "bullets": [
+                "Structured form for employer, employee, and dates",
+                "Bilingual-friendly layout (EN / FR UI)",
+                "Preview before download",
+                "PDF export ready to print or email",
+                "Stored in your account next to resumes and cover letters"
+            ],
+            "bodyParagraphs": [
+                "A work certificate (certificate of employment / attestation de travail) confirms your role, dates, and employer. HResume helps you produce a clear document without starting from a blank Word file.",
+                "This tool is for employment attestations—not course certificates listed on your CV. For diplomas and training, use the Certificates section inside the resume editor."
+            ]
         }
     },
     "coverLetter": {
@@ -916,6 +1161,46 @@
             "saveError": "Failed to save cover letter",
             "deleteSuccess": "Cover letter deleted successfully",
             "deleteError": "Failed to delete cover letter"
+        }
+    },
+    "workCertificate": {
+        "title": "Work certification",
+        "subtitle": "Create employment certificates to download as PDF",
+        "createNew": "New certificate",
+        "noItems": "No certificates yet",
+        "noItemsDesc": "Generate a certificate of employment for your records or job applications.",
+        "createFirst": "Create your first certificate",
+        "countOne": "certificate",
+        "countOther": "certificates",
+        "lastModified": "Last updated",
+        "preview": {
+            "panelTitle": "Preview",
+            "liveHint": "Live preview — matches the PDF layout"
+        },
+        "editorSectionTitle": "Certificate details",
+        "form": {
+            "documentTitle": "Document title",
+            "employeeName": "Employee full name",
+            "jobTitle": "Job title",
+            "companyName": "Company name",
+            "companyAddress": "Company address",
+            "employmentStart": "Employment start",
+            "employmentEnd": "Employment end",
+            "currentJob": "I currently work here",
+            "duties": "Main duties (optional)",
+            "letterPlace": "Place (e.g. city for letter header)",
+            "letterDate": "Letter date",
+            "signer": "Signer name & title (optional)",
+            "languagePdf": "PDF language"
+        },
+        "messages": {
+            "loadError": "Failed to load certificates",
+            "saveSuccess": "Certificate saved",
+            "saveError": "Failed to save certificate",
+            "deleteSuccess": "Certificate deleted",
+            "deleteError": "Failed to delete certificate",
+            "deleteConfirmMessage": "Are you sure you want to delete this certificate? This cannot be undone.",
+            "pdfError": "Failed to download PDF"
         }
     }
 }

@@ -8,10 +8,19 @@ export default defineConfig({
     // Optimize build output
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Separate vendor chunks for better caching
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['lucide-react', 'sonner'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (/[/\\](react|react-dom|scheduler|react-router|react-router-dom)[/\\]/.test(id)) {
+              return 'react-vendor';
+            }
+            if (/[/\\](lucide-react|sonner)[/\\]/.test(id)) {
+              return 'ui-vendor';
+            }
+          }
+          if (id.includes('ResumeTemplatePreview')) {
+            return 'resume-preview';
+          }
+          return undefined;
         },
       },
     },

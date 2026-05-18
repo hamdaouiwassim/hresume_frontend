@@ -6,6 +6,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { submitReview, getUserReview } from '../services/reviewService';
 import { toast } from 'sonner';
+import EnhanceTextareaButton from '../components/EnhanceTextareaButton';
 
 export default function Review() {
   const { t } = useLanguage();
@@ -325,6 +326,15 @@ export default function Review() {
                       }`}
                       placeholder={review.commentPlaceholder || "Tell us about your experience with HResume. What did you like? What could be improved?"}
                     />
+                    <div className="mt-2 flex justify-end">
+                      <EnhanceTextareaButton
+                        value={formData.comment}
+                        context="user review"
+                        onEnhanced={(enhanced) =>
+                          setFormData((prev) => ({ ...prev, comment: enhanced }))
+                        }
+                      />
+                    </div>
                     {errors.comment && (
                       <p className="mt-1 text-sm text-red-600">{errors.comment}</p>
                     )}

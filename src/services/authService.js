@@ -17,6 +17,15 @@ export const login = async (payload) => {
 };
 
 export const getGoogleAuthUrl = () => axiosInstance.get("/auth/google/url");
+export const getLinkedInAuthUrl = () => axiosInstance.get("/auth/linkedin/url");
+
+export const getGitHubImportUrl = (config) =>
+  axiosInstance.get("/auth/github/import/url", config);
+
+export const disconnectGitHubImport = async () => {
+  await prepareSpaRequest(true);
+  return axiosInstance.post("/auth/github/import/disconnect");
+};
 export const exchangeSocialAuthCode = (code) =>
   axiosInstance.post("/auth/social/exchange", { code });
 

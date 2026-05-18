@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { getAdminUser, sendAdminUserMessage } from '../../services/adminService';
+import { getAdminUser, sendAdminUserMessage, updateAdminUser } from '../../services/adminService';
 import { toast } from 'sonner';
+import EnhanceTextareaButton from '../../components/EnhanceTextareaButton';
 import { 
     Loader2, 
     ArrowLeft, 
@@ -18,7 +19,8 @@ import {
     Globe,
     Phone,
     Linkedin,
-    Clock
+    Clock,
+    Crown
 } from 'lucide-react';
 
 export default function UserDetails() {
@@ -51,6 +53,26 @@ export default function UserDetails() {
             navigate('/admin/users');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const canGrantPro = user?.email_verified_at;
+
+    const togglePro = async () => {
+        if (!user) return;
+        const nextPro = !user.is_pro;
+        if (nextPro && !canGrantPro) {
+            toast.error('Only verified users can be granted Pro access');
+            return;
+        }
+        try {
+            const response = await updateAdminUser(user.id, { is_pro: nextPro });
+            if (response.data.status) {
+                setUser(response.data.data);
+                toast.success(nextPro ? 'User upgraded to Pro' : 'Pro access removed');
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to update Pro status');
         }
     };
 
@@ -148,6 +170,12 @@ export default function UserDetails() {
                                         <div className="flex items-center justify-between mb-2">
                                             <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
                                             <div className="flex items-center gap-2">
+                                                {user.is_pro && (
+                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                                        <Crown className="h-3 w-3 mr-1" />
+                                                        Pro
+                                                    </span>
+                                                )}
                                                 {user.email_verified_at ? (
                                                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
                                                         <CheckCircle className="h-3 w-3 mr-1" />
@@ -184,7 +212,7 @@ export default function UserDetails() {
                             {/* Roles & Status Card */}
                             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                                 <h3 className="text-xl font-bold text-gray-900 mb-4">Roles & Status</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="p-4 bg-gray-50 rounded-lg">
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="text-sm font-medium text-gray-600">Admin</span>
@@ -221,6 +249,40 @@ export default function UserDetails() {
                                                 </span>
                                             </div>
                                         )}
+                                    </div>
+                                    <div className="p-4 bg-gray-50 rounded-lg flex flex-col">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm font-medium text-gray-600">Pro</span>
+                                            {user.is_pro ? (
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                                    <Crown className="h-3 w-3 mr-1" />
+                                                    Active
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-gray-400">Free</span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-gray-500 mb-3 flex-1">
+                                            Unlimited AI enhance, tailor, and ATS on resumes.
+                                            {!canGrantPro && !user.is_pro && (
+                                                <span className="block mt-1 text-amber-700">
+                                                    Verify this user&apos;s email before granting Pro.
+                                                </span>
+                                            )}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={togglePro}
+                                            disabled={!user.is_pro && !canGrantPro}
+                                            className={`inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                                                user.is_pro
+                                                    ? 'bg-amber-100 text-amber-900 hover:bg-amber-200'
+                                                    : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600'
+                                            }`}
+                                        >
+                                            <Crown className="h-4 w-4" />
+                                            {user.is_pro ? 'Remove Pro' : 'Grant Pro'}
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -445,6 +507,15 @@ export default function UserDetails() {
                                             placeholder="Write your message..."
                                             required
                                         />
+                                        <div className="mt-2 flex justify-end">
+                                            <EnhanceTextareaButton
+                                                value={emailForm.message}
+                                                context="admin user email"
+                                                onEnhanced={(enhanced) =>
+                                                    setEmailForm((prev) => ({ ...prev, message: enhanced }))
+                                                }
+                                            />
+                                        </div>
                                     </div>
                                     <button
                                         type="submit"

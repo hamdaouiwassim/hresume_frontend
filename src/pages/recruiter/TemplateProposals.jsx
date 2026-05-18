@@ -3,6 +3,7 @@ import RecruiterLayout from "../../Layouts/RecruiterLayout";
 import { createTemplateProposal, getTemplateProposals } from "../../services/recruiterService";
 import { toast } from "sonner";
 import { FilePlus2, Loader2, CheckCircle2, AlertTriangle, Palette } from "lucide-react";
+import EnhanceTextareaButton from "../../components/EnhanceTextareaButton";
 
 const categories = ["Corporate", "Creative", "Simple"];
 
@@ -160,6 +161,13 @@ export default function TemplateProposals() {
                 } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="Describe what makes this template special..."
               />
+              <div className="mt-2 flex justify-end">
+                <EnhanceTextareaButton
+                  value={form.description}
+                  context="template proposal description"
+                  onEnhanced={(enhanced) => handleChange("description", enhanced)}
+                />
+              </div>
               {errors.description && (
                 <p className="text-sm text-rose-500 mt-1">{errors.description[0]}</p>
               )}

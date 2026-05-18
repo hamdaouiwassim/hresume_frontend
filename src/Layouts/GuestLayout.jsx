@@ -1,16 +1,19 @@
 
 import { useContext, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, FileText, Mail, MapPin, Phone, ArrowRight, Linkedin, Twitter, Github, Loader2, Check } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, Mail, MapPin, Phone, ArrowRight, Linkedin, Twitter, Github, Loader2, Check, LogIn, UserPlus, LayoutDashboard } from 'lucide-react';
 import LanguageToggle from '../components/LanguageToggle';
 import { AuthContext } from '../context/AuthContext';
 import { getStats } from '../services/statsService';
 import { subscribe } from '../services/subscriberService';
 import { toast } from 'sonner';
 
-export default function GuestLayout({ children }) {
+export default function GuestLayout({ children, navVariant = 'default' }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [heroNavScrolled, setHeroNavScrolled] = useState(false);
     const { user , setUser } = useContext(AuthContext);
+    const location = useLocation();
+    const isHeroNav = navVariant === 'hero' && !heroNavScrolled;
     const [resumeCount, setResumeCount] = useState(null);
     const [subscriptionEmail, setSubscriptionEmail] = useState('');
     const [isSubscribing, setIsSubscribing] = useState(false);
@@ -29,6 +32,21 @@ export default function GuestLayout({ children }) {
 
         fetchStats();
     }, []);
+
+    useEffect(() => {
+        if (navVariant !== 'hero') {
+            setHeroNavScrolled(false);
+            return;
+        }
+
+        const onScroll = () => {
+            setHeroNavScrolled(window.scrollY > 480);
+        };
+
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, [navVariant, location.pathname]);
 
     const handleSubscribe = async (e) => {
         e.preventDefault();
@@ -60,7 +78,13 @@ export default function GuestLayout({ children }) {
 
     return (
         <div className="min-h-screen w-full">
-            <nav className="bg-white/95 backdrop-blur-md fixed w-full z-50 shadow-lg border-b border-gray-200/50">
+            <nav
+                className={`fixed z-50 w-full transition-all duration-300 ${
+                    isHeroNav
+                        ? 'guest-nav-hero border-b border-white/10 shadow-lg shadow-black/25'
+                        : 'border-b border-gray-200/50 bg-white/95 shadow-lg backdrop-blur-md'
+                }`}
+            >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
@@ -70,7 +94,13 @@ export default function GuestLayout({ children }) {
                                     alt="HResume Logo" 
                                     className="h-10 w-auto group-hover:scale-110 transition-transform duration-300"
                                 />
-                                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                                <span
+                                    className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${
+                                        isHeroNav
+                                            ? 'from-blue-200 via-purple-200 to-violet-200'
+                                            : 'from-blue-600 via-purple-600 to-blue-800'
+                                    }`}
+                                >
                                     HResume
                                 </span>
                             </Link>
@@ -78,27 +108,34 @@ export default function GuestLayout({ children }) {
 
                         {/* Desktop Navigation */}
                         <div className="hidden md:flex md:items-center md:space-x-4">
-                            <LanguageToggle />
+                            <LanguageToggle tone={isHeroNav ? 'dark' : 'light'} />
                            { !user ? (
                             <>
                             <Link 
                                 to="/login"
-                                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition-all duration-200"
+                                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                    isHeroNav
+                                        ? 'text-slate-200 hover:bg-white/10 hover:text-white'
+                                        : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+                                }`}
                             >
+                                <LogIn className="h-4 w-4 shrink-0" aria-hidden />
                                 Login
                             </Link>
                             <Link
                                 to="/register"
-                                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-200 transform hover:-translate-y-0.5"
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-200 transform hover:-translate-y-0.5"
                             >
+                                <UserPlus className="h-4 w-4 shrink-0" aria-hidden />
                                 Get Started
                             </Link>
                             </>
                             ) : (
                                  <Link
                                 to="/resumes"
-                                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-200 transform hover:-translate-y-0.5"
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-200 transform hover:-translate-y-0.5"
                             >
+                                <LayoutDashboard className="h-4 w-4 shrink-0" aria-hidden />
                                 Dashboard
                             </Link>
                             )}
@@ -106,11 +143,15 @@ export default function GuestLayout({ children }) {
                         </div>
 
                         {/* Mobile menu button */}
-                        <div className="flex items-center md:hidden space-x-2">
-                            <LanguageToggle />
+                        <div className="flex items-center space-x-2 md:hidden">
+                            <LanguageToggle tone={isHeroNav ? 'dark' : 'light'} />
                             <button
                                 onClick={() => setIsOpen(!isOpen)}
-                                className="inline-flex items-center justify-center p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-200"
+                                className={`inline-flex items-center justify-center rounded-lg p-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-inset ${
+                                    isHeroNav
+                                        ? 'text-slate-200 hover:bg-white/10 hover:text-white focus:ring-violet-400/40'
+                                        : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600 focus:ring-blue-500'
+                                }`}
                             >
                                 <span className="sr-only">Open main menu</span>
                                 {isOpen ? (
@@ -127,21 +168,46 @@ export default function GuestLayout({ children }) {
                 <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
                     isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
                 }`}>
-                    <div className="px-4 pt-2 pb-4 space-y-2 bg-white/95 backdrop-blur-md border-t border-gray-200">
-                        <Link
-                            to="/login"
-                            onClick={() => setIsOpen(false)}
-                            className="block px-4 py-3 rounded-xl text-base font-semibold text-gray-600 hover:bg-gray-100 hover:text-blue-600 transition-all duration-200"
-                        >
-                            Login
-                        </Link>
-                        <Link
-                            to="/register"
-                            onClick={() => setIsOpen(false)}
-                            className="block px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg text-center transition-all duration-200"
-                        >
-                            Get Started
-                        </Link>
+                    <div
+                        className={`space-y-2 border-t px-4 pt-2 pb-4 backdrop-blur-md ${
+                            isHeroNav
+                                ? 'border-white/10 bg-slate-950/90'
+                                : 'border-gray-200 bg-white/95'
+                        }`}
+                    >
+                        {!user ? (
+                            <>
+                                <Link
+                                    to="/login"
+                                    onClick={() => setIsOpen(false)}
+                                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-base font-semibold transition-all duration-200 ${
+                                        isHeroNav
+                                            ? 'text-slate-200 hover:bg-white/10 hover:text-white'
+                                            : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
+                                    }`}
+                                >
+                                    <LogIn className={`h-5 w-5 shrink-0 ${isHeroNav ? 'text-violet-300' : 'text-blue-500'}`} aria-hidden />
+                                    Login
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg text-center transition-all duration-200"
+                                >
+                                    <UserPlus className="h-5 w-5 shrink-0" aria-hidden />
+                                    Get Started
+                                </Link>
+                            </>
+                        ) : (
+                            <Link
+                                to="/resumes"
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg text-center transition-all duration-200"
+                            >
+                                <LayoutDashboard className="h-5 w-5 shrink-0" aria-hidden />
+                                Dashboard
+                            </Link>
+                        )}
                     </div>
                 </div>
             </nav>
@@ -238,7 +304,8 @@ export default function GuestLayout({ children }) {
                                 <h3 className="text-sm font-semibold text-white uppercase tracking-[0.2em]">Product</h3>
                                 <ul className="mt-4 space-y-4 text-sm text-gray-400">
                                     <li><Link to="/templates/public" className="hover:text-white transition">Resume Templates</Link></li>
-                                    <li><Link to="/templates" className="hover:text-white transition">Template Builder</Link></li>
+                                    <li><Link to="/cover-letter-builder" className="hover:text-white transition">Cover Letter Builder</Link></li>
+                                    <li><Link to="/work-certificate" className="hover:text-white transition">Work Certificate</Link></li>
                                     <li><Link to="/pricing" className="hover:text-white transition">Pricing</Link></li>
                                     <li><Link to="/blog" className="hover:text-white transition">Blog</Link></li>
                                 </ul>

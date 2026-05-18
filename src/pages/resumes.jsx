@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import AuthLayout from "../Layouts/AuthLayout";
-import { Plus, FileText, Download, Edit2, Trash2, Loader2, Calendar, Sparkles, Users } from 'lucide-react';
+import { Plus, FileText, Download, Edit2, Trash2, Loader2, Calendar, Sparkles, Users, Crown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useEffect, useState } from 'react';
 import { getMyResumes, remove } from '../services/resumeService';
 import { toast } from 'sonner';
 import ConfirmDialog from '../components/ConfirmDialog';
+import UpgradeProModal from '../components/UpgradeProModal';
 
 export default function Resumes() {
   const { t, language } = useLanguage();
@@ -14,6 +15,9 @@ export default function Resumes() {
   const [isLoading, setIsLoading] = useState(true);
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, resume: null });
   const [isDeleting, setIsDeleting] = useState(false);
+  const [canCreateResume, setCanCreateResume] = useState(true);
+  const [resumeLimits, setResumeLimits] = useState(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   useEffect(() => {
     getResumes();
@@ -31,6 +35,14 @@ export default function Resumes() {
         } else {
           setOwnedResumes(response.data.data.owned || []);
           setSharedResumes(response.data.data.shared || []);
+        }
+        const limits = response.data.limits;
+        if (limits) {
+          setResumeLimits(limits);
+          setCanCreateResume(Boolean(limits.can_create));
+        } else {
+          setCanCreateResume(true);
+          setResumeLimits(null);
         }
       } else {
         toast.error('Failed to load resumes');
@@ -53,8 +65,18 @@ export default function Resumes() {
     try {
       await remove(deleteDialog.resume.id);
       toast.success('Resume deleted successfully');
-      setOwnedResumes(ownedResumes.filter(r => r.id !== deleteDialog.resume.id));
+      const nextOwned = ownedResumes.filter(r => r.id !== deleteDialog.resume.id);
+      setOwnedResumes(nextOwned);
       setSharedResumes(sharedResumes.filter(r => r.id !== deleteDialog.resume.id));
+      if (resumeLimits?.owned_limit != null) {
+        const canCreate = nextOwned.length < resumeLimits.owned_limit;
+        setCanCreateResume(canCreate);
+        setResumeLimits({
+          ...resumeLimits,
+          owned_count: nextOwned.length,
+          can_create: canCreate,
+        });
+      }
       setDeleteDialog({ isOpen: false, resume: null });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete resume');
@@ -125,14 +147,32 @@ export default function Resumes() {
               <p className="text-gray-600 text-lg">
                 {ownedResumes.length + sharedResumes.length} {ownedResumes.length + sharedResumes.length === 1 ? 'resume' : 'resumes'}
               </p>
+              {resumeLimits?.owned_limit != null && (
+                <p className="text-sm text-amber-700 mt-1">
+                  {(t.resumes.usageLabel || '{{count}} of {{limit}} resume used')
+                    .replace('{{count}}', String(resumeLimits.owned_count ?? ownedResumes.length))
+                    .replace('{{limit}}', String(resumeLimits.owned_limit))}
+                </p>
+              )}
             </div>
-            <Link
-              to="/resume/create"
-              className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              {t.resumes.createNew}
-            </Link>
+            {canCreateResume ? (
+              <Link
+                to="/resume/create"
+                className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                {t.resumes.createNew}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <Crown className="h-5 w-5 mr-2" />
+                {t.resumes.upgradeToCreate}
+              </button>
+            )}
           </div>
 
           {ownedResumes.length === 0 && sharedResumes.length === 0 ? (
@@ -224,6 +264,11 @@ export default function Resumes() {
         itemName={deleteDialog.resume?.name}
         confirmText="Yes, Delete"
         cancelText="Cancel"
+      />
+      <UpgradeProModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        variant="resume_limit"
       />
     </AuthLayout>
   );

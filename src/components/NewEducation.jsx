@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { storeEducation, updateEducation } from "../services/EducationService";
 import { toast } from "sonner";
+import EnhanceTextareaButton from "./EnhanceTextareaButton";
 
 export default function NewEducation({edu = {
         institution : "",
@@ -276,6 +277,15 @@ const handleUpdateEducation = async () => {
                             className="w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm p-4 resize-none"
                             placeholder={ t.dashboard.sections.educations.education.descriptionPlaceholder }
                           />
+                          <div className="mt-2 flex justify-end">
+                            <EnhanceTextareaButton
+                              value={education.description || ""}
+                              context="education description"
+                              onEnhanced={(enhanced) =>
+                                setEducation({ ...education, description: enhanced })
+                              }
+                            />
+                          </div>
                         </div>
 
                         <div className="flex justify-end pt-2">

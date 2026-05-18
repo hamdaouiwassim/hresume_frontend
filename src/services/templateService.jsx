@@ -1,6 +1,4 @@
-import axiosInstance from "../api/axiosInstance";
-
-// Get all available templates
-export const getTemplates = () => {
-  return axiosInstance.get("/templates");
-};
+/**
+ * Public template list uses the same endpoint and cache as resumeService.getTemplates.
+ */
+export { getTemplates, invalidateTemplatesListCache } from "./resumeService";

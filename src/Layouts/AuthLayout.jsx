@@ -1,9 +1,10 @@
-import { useContext, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FileText, User, Settings, LogOut, ChevronDown, Menu, X, Shield, Briefcase, Heart, Users } from 'lucide-react';
+import { useContext, useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { FileText, User, Settings, LogOut, ChevronDown, Menu, X, Shield, Briefcase, Heart, Users, ScrollText } from 'lucide-react';
 import LanguageToggle from '../components/LanguageToggle';
 import CollaborationNotifications from '../components/CollaborationNotifications';
-import { logout } from '../services/authService';
+import { logout, getMe } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -16,6 +17,53 @@ export default function AuthLayout({ children }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const lastGithubImportHandled = useRef('');
+
+    useEffect(() => {
+        const status = searchParams.get('github_import');
+        if (!status) {
+            lastGithubImportHandled.current = '';
+            return;
+        }
+
+        const key = `${status}:${searchParams.get('message') || ''}`;
+        if (lastGithubImportHandled.current === key) {
+            return;
+        }
+        lastGithubImportHandled.current = key;
+
+        const rawMessage = searchParams.get('message');
+        const message = rawMessage
+            ? decodeURIComponent(rawMessage.replace(/\+/g, ' '))
+            : '';
+
+        if (status === 'success') {
+            toast.success(
+                t?.profile?.githubImport?.connectSuccess ||
+                    'GitHub connected. You can import repositories you have access to.'
+            );
+        } else if (status === 'error') {
+            toast.error(
+                message ||
+                    t?.profile?.githubImport?.connectError ||
+                    'GitHub connection failed.'
+            );
+        }
+
+        const next = new URLSearchParams(searchParams);
+        next.delete('github_import');
+        next.delete('message');
+        setSearchParams(next, { replace: true });
+
+        getMe()
+            .then((res) => {
+                if (res.data?.user) {
+                    setUser(res.data.user);
+                }
+            })
+            .catch(() => {});
+    }, [searchParams, setSearchParams, setUser, t]);
 
     const signout = async () => {
         try {
@@ -75,6 +123,16 @@ export default function AuthLayout({ children }) {
                                 >
                                     <FileText className="h-4 w-4 mr-1.5" />
                                     {navStrings.myCoverLetters || 'Cover Letters'}
+                                </Link>
+                                <Link
+                                    to="/work-certificates"
+                                    className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${location.pathname === '/work-certificates' || location.pathname.startsWith('/work-certificate/')
+                                            ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white shadow-lg shadow-indigo-500/50'
+                                            : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-100'
+                                        }`}
+                                >
+                                    <ScrollText className="h-4 w-4 mr-1.5" />
+                                    {navStrings.workCertification || 'Work certification'}
                                 </Link>
                                 <Link
                                     to="/shared-with-me"
@@ -235,6 +293,17 @@ export default function AuthLayout({ children }) {
                         >
                             <FileText className="h-4 w-4 mr-2" />
                             {navStrings.myCoverLetters || 'Cover Letters'}
+                        </Link>
+                        <Link
+                            to="/work-certificates"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center px-3 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${location.pathname === '/work-certificates' || location.pathname.startsWith('/work-certificate/')
+                                    ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white shadow-lg'
+                                    : 'text-gray-600 hover:bg-gray-100 hover:text-indigo-600'
+                                }`}
+                        >
+                            <ScrollText className="h-4 w-4 mr-2" />
+                            {navStrings.workCertification || 'Work certification'}
                         </Link>
                         <Link
                             to="/shared-with-me"

@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Home guest nav — same image + tint as hero (GuestLayout navVariant="hero") */
+.guest-nav-hero {
+  background-color: rgba(15, 23, 42, 0.88);
+  background-image: linear-gradient(
+    125deg,
+    rgba(15, 23, 42, 0.95) 0%,
+    rgba(30, 27, 75, 0.9) 50%,
+    rgba(59, 7, 100, 0.88) 100%
+  );
+  backdrop-filter: blur(10px);
+}
+
 /* Animations */
 @keyframes slideInUp {
   from {
@@ -52,4 +64,109 @@
 .accordion-inner {
   min-height: 0;
   overflow: hidden;
+}
+
+/* Public blog post body (matches TipTap / BlogHtmlSanitizer output) */
+.blog-post-content {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: rgb(55 65 81);
+}
+
+.blog-post-content > * + * {
+  margin-top: 1.25em;
+}
+
+.blog-post-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgb(17 24 39);
+  line-height: 1.25;
+}
+
+.blog-post-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(17 24 39);
+}
+
+.blog-post-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+}
+
+.blog-post-content h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(31 41 55);
+}
+
+.blog-post-content ul,
+.blog-post-content ol {
+  padding-left: 1.5rem;
+}
+
+.blog-post-content ul {
+  list-style-type: disc;
+}
+
+.blog-post-content ol {
+  list-style-type: decimal;
+}
+
+.blog-post-content a {
+  color: rgb(124 58 237);
+  text-decoration: underline;
+}
+
+.blog-post-content blockquote {
+  border-left: 4px solid rgb(192 132 252);
+  padding-left: 1rem;
+  color: rgb(75 85 99);
+  font-style: italic;
+}
+
+.blog-post-content pre {
+  background: rgb(243 244 246);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+}
+
+.blog-post-content code {
+  background: rgb(243 244 246);
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.35rem;
+  font-size: 0.9em;
+}
+
+.blog-post-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.blog-post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.blog-post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.blog-post-content th,
+.blog-post-content td {
+  border: 1px solid rgb(209 213 219);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.blog-post-content th {
+  background: rgb(249 250 251);
+  font-weight: 600;
 }

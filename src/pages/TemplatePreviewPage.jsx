@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import GuestLayout from "../Layouts/GuestLayout";
-import ResumeTemplatePreview from "../components/ResumeTemplatePreview";
+import ResumePreviewSkeleton from "../components/ResumePreviewSkeleton";
 import { getTemplates } from "../services/resumeService";
+
+const ResumeTemplatePreview = lazy(() => import("../components/ResumeTemplatePreview"));
 import { deriveTemplateLayout, TEMPLATE_LAYOUTS } from "../utils/templateStyles";
 
 const SAMPLE_RESUME = {
@@ -150,7 +152,9 @@ export default function TemplatePreviewPage() {
                 <p className="text-gray-600 mt-2">{template.description || "Preview with sample data."}</p>
               </div>
               <div className="bg-white rounded-xl p-4 md:p-8 shadow-sm border border-gray-100">
-                <ResumeTemplatePreview resume={previewResume} templateKey={templateLayout} />
+                <Suspense fallback={<ResumePreviewSkeleton />}>
+                  <ResumeTemplatePreview resume={previewResume} templateKey={templateLayout} />
+                </Suspense>
               </div>
             </>
           )}

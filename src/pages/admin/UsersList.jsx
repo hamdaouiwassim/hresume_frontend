@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { Users, Search, Trash2, Loader2, Shield, Calendar, Mail, FileText, Briefcase, Building2, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Users, Search, Trash2, Loader2, Shield, Calendar, Mail, FileText, Briefcase, Building2, CheckCircle, XCircle, Eye, Crown } from 'lucide-react';
 import { getAdminUsers, deleteAdminUser, updateAdminUser } from '../../services/adminService';
 import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -123,6 +123,23 @@ export default function UsersList() {
         }
     };
 
+    const canGrantPro = (user) => Boolean(user.email_verified_at);
+
+    const togglePro = async (user) => {
+        const nextPro = !user.is_pro;
+        if (nextPro && !canGrantPro(user)) {
+            toast.error('Only verified users can be granted Pro access');
+            return;
+        }
+        try {
+            await updateAdminUser(user.id, { is_pro: nextPro });
+            toast.success(nextPro ? 'User upgraded to Pro' : 'Pro access removed');
+            fetchUsers(pagination.current_page);
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to update user');
+        }
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return 'Never';
         try {
@@ -218,6 +235,7 @@ export default function UsersList() {
                                     <option value="candidate">Candidate</option>
                                     <option value="recruiter">Recruiter</option>
                                     <option value="admin">Admin</option>
+                                    <option value="pro">Pro</option>
                                 </select>
                             </div>
 
@@ -330,7 +348,13 @@ export default function UsersList() {
                                                             Recruiter
                                                         </span>
                                                     )}
-                                                    {!user.is_admin && !user.is_recruiter && (
+                                                    {user.is_pro && (
+                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                                            <Crown className="h-3 w-3 mr-1" />
+                                                            Pro
+                                                        </span>
+                                                    )}
+                                                    {!user.is_admin && !user.is_recruiter && !user.is_pro && (
                                                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                                                             User
                                                         </span>
@@ -413,6 +437,24 @@ export default function UsersList() {
                                                         }
                                                     >
                                                         <Briefcase className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => togglePro(user)}
+                                                        disabled={!user.is_pro && !canGrantPro(user)}
+                                                        className={`p-2 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                                                            user.is_pro
+                                                                ? 'text-amber-600 hover:bg-amber-50'
+                                                                : 'text-gray-600 hover:bg-gray-100'
+                                                        }`}
+                                                        title={
+                                                            user.is_pro
+                                                                ? 'Remove Pro'
+                                                                : canGrantPro(user)
+                                                                    ? 'Grant Pro'
+                                                                    : 'Verify email before granting Pro'
+                                                        }
+                                                    >
+                                                        <Crown className="h-4 w-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(user)}

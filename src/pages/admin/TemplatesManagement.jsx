@@ -5,6 +5,7 @@ import { getAdminTemplates, createAdminTemplate, updateAdminTemplate, deleteAdmi
 import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { useLanguage } from '../../context/LanguageContext';
+import EnhanceTextareaButton from '../../components/EnhanceTextareaButton';
 
 export default function TemplatesManagement() {
     const { t, language } = useLanguage();
@@ -346,6 +347,13 @@ export default function TemplatesManagement() {
                                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                         placeholder="Describe the template..."
                                     />
+                                    <div className="mt-2 flex justify-end">
+                                        <EnhanceTextareaButton
+                                            value={formData.description}
+                                            context="template description"
+                                            onEnhanced={(enhanced) => setFormData({ ...formData, description: enhanced })}
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>

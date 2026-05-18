@@ -5,6 +5,7 @@ import { getAdminCoverLetterTemplates, createAdminCoverLetterTemplate, updateAdm
 import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { useLanguage } from '../../context/LanguageContext';
+import EnhanceTextareaButton from '../../components/EnhanceTextareaButton';
 
 export default function CoverLetterTemplatesManagement() {
     const { t, language } = useLanguage();
@@ -352,6 +353,13 @@ export default function CoverLetterTemplatesManagement() {
                                     placeholder="Enter the template body text here..."
                                     required
                                 />
+                                <div className="mt-2 flex justify-end">
+                                    <EnhanceTextareaButton
+                                        value={formData.content}
+                                        context="cover letter template content"
+                                        onEnhanced={(enhanced) => setFormData({ ...formData, content: enhanced })}
+                                    />
+                                </div>
                                 {errors.content && <p className="mt-1 text-xs text-red-500">{errors.content[0]}</p>}
                                 <p className="mt-2 text-xs text-slate-400">Use placeholders like [Position], [Company Name], [Your Name], etc.</p>
                             </div>

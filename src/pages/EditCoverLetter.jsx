@@ -14,6 +14,7 @@ import {
     Layout as LayoutIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
+import EnhanceTextareaButton from '../components/EnhanceTextareaButton';
 
 export default function EditCoverLetter() {
     const { id } = useParams();
@@ -346,9 +347,7 @@ export default function EditCoverLetter() {
                                         />
                                     </div>
                                     <div>
-                                        <div className="flex justify-between items-center mb-1.5">
-                                            <label className="block text-sm font-semibold text-slate-700">{strings.form?.content}</label>
-                                        </div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">{strings.form?.content}</label>
                                         <textarea
                                             name="content"
                                             value={formData.content}
@@ -357,6 +356,15 @@ export default function EditCoverLetter() {
                                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all resize-none font-serif text-lg leading-relaxed"
                                             placeholder="Write your cover letter here..."
                                         />
+                                        <div className="mt-2 flex justify-end">
+                                            <EnhanceTextareaButton
+                                                value={formData.content}
+                                                context="cover letter content"
+                                                onEnhanced={(enhanced) =>
+                                                    setFormData((prev) => ({ ...prev, content: enhanced }))
+                                                }
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>

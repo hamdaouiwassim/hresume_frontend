@@ -1,10 +1,11 @@
 import { useContext, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import GuestLayout from "../Layouts/GuestLayout";
-import { UserCheck, Lock, Mail, ArrowLeft, Loader2, Chrome } from 'lucide-react';
-import { register, getGoogleAuthUrl } from '../services/authService';
+import { UserCheck, Lock, Mail, ArrowLeft, Loader2, Chrome, Linkedin } from 'lucide-react';
+import { register, getGoogleAuthUrl, getLinkedInAuthUrl } from '../services/authService';
 import { toast } from 'sonner';
 import { AuthContext } from '../context/AuthContext';
+import { safePostAuthRedirect } from '../utils/authRedirect';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -17,8 +18,11 @@ export default function Register() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isLinkedInLoading, setIsLinkedInLoading] = useState(false);
+  const isSocialBusy = isGoogleLoading || isLinkedInLoading;
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -28,7 +32,10 @@ export default function Register() {
   };
 const { user, setUser } = useContext(AuthContext);
 
-  if (user) return <Navigate to="/resumes" replace />;
+  if (user) {
+    const next = safePostAuthRedirect(searchParams.get("next"));
+    return <Navigate to={next || "/resumes"} replace />;
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -47,6 +54,11 @@ const { user, setUser } = useContext(AuthContext);
 
       toast.success("Account created! Please verify your email to continue.");
 
+      const next = safePostAuthRedirect(searchParams.get('next'));
+      if (next) {
+        navigate(next, { replace: true });
+        return;
+      }
       navigate('/resumes', { replace: true });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.errors) {
@@ -55,6 +67,24 @@ const { user, setUser } = useContext(AuthContext);
       toast.error(error.response?.data?.message || "❌ Can't create your account");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleLinkedInSignUp = async () => {
+    setIsLinkedInLoading(true);
+    try {
+      const response = await getLinkedInAuthUrl();
+      const redirectUrl = response.data?.url;
+      if (!redirectUrl) {
+        throw new Error("Missing redirect URL");
+      }
+      window.location.href = redirectUrl;
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "LinkedIn sign-up is temporarily unavailable."
+      );
+    } finally {
+      setIsLinkedInLoading(false);
     }
   };
 
@@ -92,7 +122,14 @@ const { user, setUser } = useContext(AuthContext);
             </h2>
             <p className="mt-2 text-center text-sm text-slate-600">
               Already have an account?{' '}
-              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link
+                to={
+                  searchParams.get("next")
+                    ? `/login?next=${encodeURIComponent(searchParams.get("next"))}`
+                    : "/login"
+                }
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
                 Sign in
               </Link>
             </p>
@@ -214,12 +251,29 @@ const { user, setUser } = useContext(AuthContext);
             </div>
           </div>
 
-          {/* Google Sign Up Button */}
-          <div className="mt-6">
+          <div className="mt-6 space-y-3">
+            <button
+              type="button"
+              onClick={handleLinkedInSignUp}
+              disabled={isSocialBusy}
+              className="w-full flex items-center gap-3 rounded-2xl border border-gray-200 bg-white py-3.5 px-4 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 disabled:opacity-60"
+            >
+              <span className="h-10 w-10 rounded-xl bg-[#0A66C2]/10 border border-[#0A66C2]/20 flex items-center justify-center">
+                {isLinkedInLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-[#0A66C2]" />
+                ) : (
+                  <Linkedin className="h-5 w-5 text-[#0A66C2]" />
+                )}
+              </span>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-slate-900">Sign up with LinkedIn</p>
+                <p className="text-xs text-slate-500">Use your LinkedIn identity in one tap</p>
+              </div>
+            </button>
             <button
               type="button"
               onClick={handleGoogleSignUp}
-              disabled={isGoogleLoading}
+              disabled={isSocialBusy}
               className="w-full flex items-center gap-3 rounded-2xl border border-gray-200 bg-white py-3.5 px-4 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 disabled:opacity-60"
             >
               <span className="h-10 w-10 rounded-xl bg-gradient-to-br from-white via-red-50 to-rose-100 border border-rose-100 flex items-center justify-center">

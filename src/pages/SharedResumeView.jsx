@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FileText, Loader2, Download, ArrowLeft } from "lucide-react";
 import { viewSharedResume } from "../services/ShareableLinkService";
@@ -6,8 +6,10 @@ import { generatePDF } from "../services/PDFService";
 import { toast } from "sonner";
 import { useLanguage } from "../context/LanguageContext";
 import { buildResumeTemplateData } from "../utils/resumeTemplateMapper";
-import ResumeTemplatePreview from "../components/ResumeTemplatePreview";
+import ResumePreviewSkeleton from "../components/ResumePreviewSkeleton";
 import { deriveTemplateLayout } from "../utils/templateStyles";
+
+const ResumeTemplatePreview = lazy(() => import("../components/ResumeTemplatePreview"));
 
 export default function SharedResumeView() {
   const { token } = useParams();
@@ -174,10 +176,12 @@ export default function SharedResumeView() {
 
         {/* CV Preview */}
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <ResumeTemplatePreview
-            resume={previewData}
-            templateKey={formData.template_layout}
-          />
+          <Suspense fallback={<ResumePreviewSkeleton />}>
+            <ResumeTemplatePreview
+              resume={previewData}
+              templateKey={formData.template_layout}
+            />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -4,10 +4,11 @@ import { useLanguage } from "../context/LanguageContext";
 import {
   Save,
   Loader2,
-  X
+  X,
 } from "lucide-react";
 import { storeExperience, updateExperience } from "../services/ExperienceService";
 import { toast } from "sonner";
+import EnhanceTextareaButton from "./EnhanceTextareaButton";
 
 export default function NewExperience({exp = {
         company : "",
@@ -279,6 +280,15 @@ let data = {...experience }
                             className="w-full rounded-xl border-slate-300 bg-white shadow-sm transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 text-sm p-4 resize-none"
                             placeholder={ t.dashboard.sections.experiences.experience.descriptionPlaceholder }
                           />
+                          <div className="mt-2 flex justify-end">
+                            <EnhanceTextareaButton
+                              value={experience.description || ""}
+                              context="resume experience achievement bullet points"
+                              onEnhanced={(enhanced) =>
+                                setExperience({ ...experience, description: enhanced })
+                              }
+                            />
+                          </div>
                         </div>
 
                         <div className="flex justify-end pt-2">

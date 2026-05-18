@@ -12,6 +12,26 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://hresume.pro/?lang=fr" />
   </url>
   
+  <!-- Cover Letter Builder -->
+  <url>
+    <loc>https://hresume.pro/cover-letter-builder</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hresume.pro/cover-letter-builder" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://hresume.pro/cover-letter-builder?lang=fr" />
+  </url>
+
+  <!-- Work Certificate Generator -->
+  <url>
+    <loc>https://hresume.pro/work-certificate</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hresume.pro/work-certificate" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://hresume.pro/work-certificate?lang=fr" />
+  </url>
+
   <!-- Pricing Page -->
   <url>
     <loc>https://hresume.pro/pricing</loc>

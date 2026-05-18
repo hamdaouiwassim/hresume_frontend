@@ -2,6 +2,7 @@ import { useState } from 'react';
 import GuestLayout from "../Layouts/GuestLayout";
 import { Mail, Send, MapPin, Phone, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import EnhanceTextareaButton from '../components/EnhanceTextareaButton';
 
 export default function ContactUs() {
   const { t } = useLanguage();
@@ -279,6 +280,15 @@ export default function ContactUs() {
                       }`}
                       placeholder={contact.form?.messagePlaceholder || "Tell us how we can help you..."}
                     />
+                    <div className="mt-2 flex justify-end">
+                      <EnhanceTextareaButton
+                        value={formData.message}
+                        context="contact message"
+                        onEnhanced={(enhanced) =>
+                          setFormData((prev) => ({ ...prev, message: enhanced }))
+                        }
+                      />
+                    </div>
                     {errors.message && (
                       <p className="mt-1 text-sm text-red-600">{errors.message}</p>
                     )}

@@ -66,7 +66,10 @@
         "noResumesDesc": "Créez votre premier CV en utilisant nos modèles professionnels",
         "createFirst": "Créer votre premier CV",
         "template": "Modèle",
-        "lastModified": "Dernière modification"
+        "lastModified": "Dernière modification",
+        "freeLimitReached": "L'offre gratuite inclut un seul CV. Passez a Pro pour en creer davantage.",
+        "upgradeToCreate": "Passer a Pro",
+        "usageLabel": "{{count}} sur {{limit}} CV utilise"
     },
     "templates": {
         "title": "Choisir un modèle",
@@ -129,17 +132,62 @@
         }
     },
     "welcome": {
-        "title": "Créez Votre CV Professionnel Aujourd'hui",
-        "subtitle": "Démarquez-vous avec un CV magnifiquement conçu. Facile à créer, personnaliser et partager.",
+        "title": "Un CV que les recruteurs lisent — sans y passer la journée",
+        "subtitle": "CV compatibles ATS, lettres de motivation et attestations de travail—modèles, aperçu en direct et export PDF. Gratuit pour commencer en une minute.",
+        "heroTitleCompact": "CV prêt pour l'entretien, vite",
+        "heroSubtitleCompact": "CV, lettre de motivation, attestation — gratuit pour débuter.",
         "heroBadge": "Créateur de CV Professionnel",
         "getStarted": "Créez votre CV gratuitement",
+        "guestStartCta": "Commencer sans compte",
         "login": "Se connecter",
         "register": "S'inscrire",
         "freeDescription": "Service entièrement gratuit — sans abonnement, sans frais cachés et sans carte bancaire.",
+        "outcomePromise": "Obtenez un CV prêt pour les entretiens en 60s",
+        "walkthrough": {
+            "badge": "Parcours produit",
+            "title": "Voyez comment votre CV s'améliore en quelques minutes",
+            "subtitle": "Regardez le flux complet : choisir un modèle, adapter avec l'IA, vérifier l'ATS, puis exporter en un clic.",
+            "cta": "Tester le parcours",
+            "videoTitle": "Démo HResume",
+            "videoPlaceholder": "Vidéo de démonstration bientôt disponible. Définissez VITE_WALKTHROUGH_VIDEO_URL (URL YouTube ou embed) pour l'afficher ici."
+        },
+        "transformation": {
+            "badge": "Transformations réelles",
+            "title": "Exemples avant / après",
+            "subtitle": "L'utilisateur garde le contrôle pendant que l'IA renforce l'impact et la couverture ATS.",
+            "enhanceWithAi": "Améliorer avec l'IA",
+            "enhanceHint": "Cliquez sur le bouton pour simuler la réécriture de cette phrase par l'IA.",
+            "originalLabel": "Texte d'origine",
+            "enhancingLabel": "Amélioration par l'IA…",
+            "enhancedLabel": "Texte amélioré",
+            "beforeLabel": "Avant",
+            "afterLabel": "Après",
+            "examples": [
+                {
+                    "role": "Développeur frontend",
+                    "before": "Créé un dashboard et corrigé des bugs.",
+                    "after": "Créé un dashboard React utilisé par plus de 40 commerciaux, réduit le temps de reporting de 35 %, et corrigé plus de 120 bugs production avec des tests de régression."
+                },
+                {
+                    "role": "Analyste opérations",
+                    "before": "Géré des rapports de stock et la coordination d'équipe.",
+                    "after": "Automatisé les rapports hebdomadaires sur 5 entrepôts, réduit les ruptures de stock de 22 %, et coordonné la planification inter-équipes en période de pic."
+                }
+            ]
+        },
         "trust": {
             "free": "Gratuit à utiliser",
             "noCard": "Pas de carte bancaire",
             "instant": "Téléchargement instantané"
+        },
+        "trustProof": {
+            "testimonialsTitle": "Témoignages",
+            "testimonialsText": "Très bien noté par les candidats et les recruteurs pour la vitesse, la clarté et la simplicité.",
+            "pricingTitle": "Tarification transparente",
+            "pricingText": "Commencez gratuitement, puis passez en Pro si vous voulez l'IA illimitée et tous les insights ATS.",
+            "privacyTitle": "Confidentialité d'abord",
+            "privacyText": "Vous choisissez ce qui est public. Vos CV restent privés tant que vous ne les partagez pas.",
+            "pricingLink": "Voir les offres"
         },
         "templates": {
             "title": "Modèles Professionnels",
@@ -151,19 +199,55 @@
             "candidates": "Candidats",
             "resumes": "CV Créés"
         },
+        "suite": {
+            "badge": "Complétez votre dossier",
+            "title": "Plus qu'un CV",
+            "subtitle": "Créez votre CV, votre lettre de motivation et votre attestation de travail au même endroit—gratuit pour commencer avec un seul compte.",
+            "heroLine": "Créez aussi des lettres de motivation et des attestations de travail dans la même application.",
+            "resume": {
+                "shortTitle": "CV",
+                "title": "CV professionnel",
+                "description": "Modèles compatibles ATS, aperçu en direct, aide IA et export PDF en un clic.",
+                "cta": "Commencer votre CV",
+                "note": "Essai possible sans compte"
+            },
+            "coverLetter": {
+                "shortTitle": "Lettres de motivation",
+                "title": "Lettre de motivation",
+                "description": "Rédigez des lettres alignées sur votre CV—modifiez, enregistrez et exportez quand vous êtes prêt.",
+                "cta": "Découvrir les lettres",
+                "note": "Compte gratuit requis"
+            },
+            "workCertificate": {
+                "shortTitle": "Attestations de travail",
+                "title": "Attestation de travail",
+                "description": "Générez des attestations pour les dossiers RH ou les candidatures, puis téléchargez en PDF.",
+                "cta": "Découvrir les attestations",
+                "note": "Compte gratuit requis"
+            }
+        },
         "features": {
             "title": "Fonctionnalités",
-            "subtitle": "Tout ce dont vous avez besoin pour créer un CV professionnel remarquable",
+            "subtitle": "Des outils d'édition solides et une IA qui vous aide à affiner vos points, cibler les postes et passer les filtres ATS.",
+            "aiBadge": "Assisté par l'IA",
             "easy": "Facile à Utiliser",
             "easyDesc": "Interface simple et intuitive pour créer des CV professionnels.",
+            "easyAi": "Recevez des suggestions de formulation pendant que vous rédigez.",
             "professional": "Modèles Professionnels",
             "professionalDesc": "Choisissez parmi une variété de modèles conçus professionnellement.",
+            "professionalAi": "Adaptez le ton et la structure aux postes visés.",
             "ats": "Compatible ATS",
             "atsDesc": "Optimisé pour les systèmes de suivi des candidatures pour améliorer vos chances.",
+            "atsAi": "L'IA signale les écarts de mots-clés par rapport aux analyses ATS courantes.",
             "export": "Export en PDF",
             "exportDesc": "Téléchargez votre CV au format PDF, prêt à être partagé.",
+            "exportAi": "Peaufinez le texte avant d'exporter un PDF prêt à l'emploi.",
             "multilingual": "Multilingue",
-            "multilingualDesc": "Créez votre CV en différentes langues pour atteindre une audience mondiale."
+            "multilingualDesc": "Créez votre CV en différentes langues pour atteindre une audience mondiale.",
+            "multilingualAi": "Traduisez et adaptez les sections avec une aide contextuelle.",
+            "smartAiTitle": "Rédaction IA intelligente",
+            "smartAiDesc": "Améliorez les descriptions, adaptez les points aux offres et lancez des contrôles ATS—dans l'éditeur, selon votre formule.",
+            "smartAiHint": "Les comptes gratuits ont des crédits IA mensuels ; Pro débloque l'IA illimitée et les analyses ATS complètes."
         },
         "reviews": {
             "title": "Ce Que Disent Nos Utilisateurs",
@@ -236,6 +320,7 @@
         "download": "Télécharger PDF",
         "myResumes": "Mes CV",
         "myCoverLetters": "Lettres de Motivation",
+        "workCertification": "Attestation de travail",
         "templates": "Modèles",
         "profile": "Profil",
         "review": "Laisser un Avis",
@@ -269,7 +354,24 @@
         "graduated": "Diplômé",
         "fullPageView": "Vue Plein Écran",
         "professionalTitle": "Titre Professionnel",
-        "yourName": "Votre Nom"
+        "yourName": "Votre Nom",
+        "editorStepsTitle": "Étapes du CV",
+        "editorStepsHint": "Utilisez les étapes pour accéder à une section. L'aperçu se met à jour en direct.",
+        "livePreviewBadge": "Aperçu en direct",
+        "wizardTitle": "Parcours CV",
+        "wizardPhaseProfile": "Profil",
+        "wizardPhaseExperience": "Expérience & formation",
+        "wizardPhaseAi": "Amélioration IA",
+        "wizardPhaseAts": "Analyse ATS",
+        "wizardPhaseExport": "Aperçu & export",
+        "wizardHintProfile": "Renseignez vos coordonnées, réseaux et résumé professionnel.",
+        "wizardHintExperience": "Ajoutez expériences et formations. Utilisez « Améliorer avec IA » sur les textes longs (Pro).",
+        "wizardHintAi": "Affinez avec « Améliorer avec IA » sous les zones de texte, et « Job Target » pour des idées ciblées (Pro).",
+        "wizardHintAts": "Utilisez « ATS Analysis » dans la barre d’aperçu pour le score et les mots-clés (Pro).",
+        "wizardHintExport": "Téléchargez le PDF, partagez un lien ou ouvrez votre site public depuis l’aperçu.",
+        "wizardPrev": "Précédent",
+        "wizardNext": "Suivant",
+        "wizardAnalyzing": "Analyse en cours…"
     },
     "personal": {
         "title": "Informations de Base",
@@ -513,19 +615,54 @@
                     "startDate": "Date de Début",
                     "startDateHint": "Quand vous avez commencé le projet",
                     "endDate": "Date de Fin",
-                    "endDateHint": "Quand le projet a été terminé (laisser vide si en cours)"
+                    "endDateHint": "Quand le projet a été terminé (laisser vide si en cours)",
+                    "githubRepoLabel": "Importer depuis GitHub",
+                    "githubRepoHint": "Collez l’URL du dépôt ou owner/repo pour préremplir ce projet. Les dépôts publics fonctionnent sans connexion ; les dépôts privés nécessitent GitHub connecté (Profil) ou un jeton GITHUB_TOKEN côté serveur.",
+                    "githubRepoPlaceholder": "https://github.com/owner/repo ou owner/repo",
+                    "githubImportButton": "Remplir depuis GitHub",
+                    "githubImportSuccess": "Champs mis à jour depuis GitHub. Vérifiez puis enregistrez.",
+                    "githubImportError": "Impossible de charger ce dépôt depuis GitHub.",
+                    "githubConnectFromEditor": "Connecter GitHub",
+                    "githubConnectHintShort": "pour les dépôts privés",
+                    "githubConnectUnavailable": "La connexion GitHub n'est pas configurée sur ce serveur.",
+                    "githubRepoRequired": "Saisissez d’abord l’URL du dépôt GitHub."
                 }
             }
         }
     },
     "createResume": {
-        "title": "Créer un Nouveau CV",
+        "title": "Créer votre CV",
+        "pageBadge": "Nouveau CV",
+        "pageSubtitle": "Choisissez un nom et un modèle pour commencer.",
+        "nameSectionTitle": "Nom du CV",
         "nameLabel": "Nom du CV",
-        "namePlaceholder": "ex: Mon CV Professionnel",
-        "templateLabel": "Modèle de CV",
+        "namePlaceholder": "ex. Designer produit 2026",
+        "templateLabel": "Choisissez votre style",
+        "templatesBadge": "Modèles",
+        "templateHint": "Chaque modèle est optimisé pour les ATS et la lecture par les recruteurs.",
+        "searchPlaceholder": "Rechercher un modèle ou un style",
+        "selectedTemplateLabel": "Modèle sélectionné",
+        "heroHint": "Ce libellé n'apparaît que sur votre tableau de bord — pas sur le PDF.",
+        "suggestionsLabel": "Noms rapides",
+        "suggestionsHint": "Cliquez pour utiliser une suggestion :",
+        "suggestionsEmpty": "Sélectionnez un modèle ci-dessous pour des idées",
+        "noTemplatesTitle": "Aucun modèle ne correspond à vos filtres",
+        "noTemplatesSubtitle": "Essayez d'effacer les filtres ou un autre mot-clé.",
+        "atsFriendly": "Compatible ATS",
+        "pickTemplateHint": "Sélectionnez un modèle pour continuer",
+        "enterNameHint": "Saisissez un nom de CV pour continuer",
+        "readyHint": "Prêt à ouvrir l'éditeur",
         "selectTemplate": "Sélectionner un Modèle",
         "chooseTemplate": "Choisissez un modèle pour commencer à créer votre CV.",
-        "proceed": "Procéder à la Création"
+        "proceed": "Procéder à la Création",
+        "validationError": "Veuillez choisir un modèle et saisir un nom de CV.",
+        "creationError": "Une erreur s'est produite. Veuillez réessayer.",
+        "limitReached": "L'offre gratuite inclut un seul CV. Passez a Pro pour en creer davantage.",
+        "guestBanner": "Choisissez un modèle et nommez votre CV sans vous connecter. Ensuite, nous enregistrerons vos choix et créerons le CV après inscription ou connexion.",
+        "guestFinalButton": "Continuer vers l'inscription",
+        "guestDraftSavedToast": "Vos choix sont enregistrés. Créez un compte pour ouvrir votre CV.",
+        "guestHasAccount": "Vous avez déjà un compte ?",
+        "guestLoginLink": "Se connecter"
     },
     "profile": {
         "title": "Paramètres du profil",
@@ -573,6 +710,19 @@
             "emailInvalid": "Veuillez saisir une adresse email valide",
             "passwordLength": "Le mot de passe doit comporter au moins 8 caractères",
             "passwordMismatch": "Les mots de passe ne correspondent pas"
+        },
+        "githubImport": {
+            "title": "GitHub (projets du CV)",
+            "description": "Connectez GitHub pour importer des projets depuis des dépôts privés auxquels vous avez accès. Utilise la portée large « repo » — vous pouvez vous déconnecter à tout moment.",
+            "connectedAs": "Connecté en tant que",
+            "connect": "Connecter GitHub",
+            "disconnect": "Déconnecter",
+            "connecting": "Redirection…",
+            "disconnecting": "Déconnexion…",
+            "disconnectSuccess": "GitHub déconnecté.",
+            "connectSuccess": "GitHub connecté. Vous pouvez importer les dépôts auxquels vous avez accès.",
+            "connectError": "Échec de la connexion GitHub.",
+            "notConfigured": "La connexion GitHub n'est pas disponible sur ce serveur."
         }
     },
     "privacy": {
@@ -743,26 +893,60 @@
     },
     "pricing": {
         "title": "Tarification Transparente",
-        "subtitle": "Tous nos services sont 100 % gratuits pour le moment. Créez des CV illimités, exportez des PDF soignés et partagez-les sans rien payer.",
-        "badge": "Gratuit pour le moment",
+        "subtitle": "Choisissez l'offre qui correspond a vos objectifs. Passez en Pro pour debloquer les fonctionnalites d'amelioration IA.",
+        "badge": "Offres Simples",
         "heroCta": "Créer un compte gratuit",
-        "plan": {
+        "freePlan": {
             "name": "HResume Gratuit",
-            "price": "0 €",
+            "price": "0 DT",
             "per": "par mois",
-            "description": "Accédez à toutes les fonctionnalités tant que nous restons en bêta publique. Aucune carte bancaire requise.",
+            "description": "Creez vos CV et exportez en PDF avec les outils essentiels.",
             "features": [
-                "CV et modèles illimités",
-                "Export PDF en un clic",
-                "Aperçu en direct avec traductions",
-                "Liens de partage sécurisés",
-                "Mises en page adaptées aux recruteurs"
+                "1 CV (un autre apres passage en Pro)",
+                "Tous les modeles standards",
+                "5 ameliorations de texte IA / mois",
+                "1 ciblage emploi (tailor) / mois",
+                "3 analyses ATS / mois (insights lite)",
+                "Lettres de motivation et attestations de travail",
+                "Export PDF, liens de partage et profil public",
+                "Collaboration (e-mail verifie requis pour inviter)"
             ],
             "button": "Commencer gratuitement"
         },
+        "regionNoteTunisia": "Tarifs affichés en dinars tunisiens (TND) pour les visiteurs en Tunisie.",
+        "regionNoteInternational": "Tarifs affichés en dollars américains (USD) pour les visiteurs internationaux.",
+        "proPlan": {
+            "name": "HResume Pro",
+            "price": "5 $",
+            "per": "par mois",
+            "description": "Debloquez les outils d'ecriture IA et des fonctionnalites premium de productivite.",
+            "features": [
+                "CV illimites",
+                "IA illimitee : amelioration, ciblage et ATS",
+                "Ecarts de mots-cles ATS et recommandations completes",
+                "Lettres de motivation et attestations (comme Gratuit)",
+                "Import de projets GitHub (quand active)",
+                "Traitement IA prioritaire",
+                "Support par e-mail"
+            ],
+            "button": "Passer a Pro",
+            "buttonLoading": "Redirection vers le paiement…",
+            "loginToUpgrade": "Connectez-vous pour passer a Pro",
+            "alreadyPro": "Vous etes deja Pro",
+            "checkoutError": "Impossible de demarrer le paiement. Reessayez ou contactez le support.",
+            "billingUnavailable": "Le paiement en ligne n'est pas encore configure. Contactez le support."
+        },
+        "success": {
+            "title": "Bienvenue en Pro !",
+            "subtitle": "Votre abonnement est actif. CV et IA illimites sont debloques.",
+            "pending": "Confirmation de votre paiement…",
+            "error": "Impossible de confirmer le paiement. Si vous avez ete debite, contactez le support.",
+            "goToResumes": "Voir mes CV",
+            "goToPricing": "Retour aux tarifs"
+        },
         "note": {
-            "title": "Tarifs futurs ?",
-            "description": "Nous pourrions proposer plus tard des options premium pour les équipes et recruteurs, mais le créateur de CV principal restera gratuit pendant notre croissance. Vous serez prévenu bien à l'avance avant tout changement."
+            "title": "Pourquoi Pro ?",
+            "description": "Gratuit sert a un CV solide et un essai mensuel de l'IA. Pro convient aux recherches actives : CV illimites, IA illimitee et ATS complet. Resiliation via le portail Stripe (quand la facturation est activee)."
         }
     },
     "review": {
@@ -848,6 +1032,15 @@
             "save": "Enregistrer",
             "saving": "Enregistrement...",
             "editPost": "Modifier l'Article",
+            "backToList": "Retour aux articles",
+            "createSubtitle": "Rédigez et publiez un nouvel article.",
+            "editSubtitle": "Mettez à jour votre article et enregistrez les modifications.",
+            "titleColumn": "Titre",
+            "importMarkdown": "Importer Markdown (.md)",
+            "importMarkdownHint": "Markdown GitHub pris en charge. Frontmatter YAML optionnel (titre, résumé) en tête de fichier.",
+            "importMarkdownSuccess": "Importé : {name}",
+            "importMarkdownError": "Échec de l'import Markdown",
+            "importMarkdownReplaceConfirm": "L'import remplacera le contenu actuel de l'éditeur. Continuer ?",
             "deleteConfirmTitle": "Supprimer l'Article de Blog",
             "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cet article de blog ? Cette action ne peut pas être annulée.",
             "delete": "Supprimer",
@@ -863,6 +1056,58 @@
                 "titleRequired": "Le titre est obligatoire",
                 "contentRequired": "Le contenu est obligatoire"
             }
+        }
+    },
+    "productLanding": {
+        "common": {
+            "primaryCta": "Créer un compte gratuit",
+            "secondaryCta": "Se connecter",
+            "alsoTry": "Également sur HResume :",
+            "backHome": "Retour à l'accueil"
+        },
+        "coverLetter": {
+            "shortTitle": "Lettre de motivation",
+            "metaTitle": "Créateur de lettre de motivation gratuit | HResume",
+            "metaDescription": "Créez des lettres de motivation professionnelles en ligne avec HResume. Alignez votre CV, modifiez avec des modèles et exportez en PDF. Compte gratuit pour commencer.",
+            "badge": "Lettres de motivation",
+            "title": "Lettre de motivation alignée sur votre CV",
+            "subtitle": "Rédigez, modifiez et enregistrez vos lettres à côté de votre CV—puis exportez un PDF soigné pour vos candidatures.",
+            "accountNote": "Un compte HResume gratuit est nécessaire pour créer et enregistrer des lettres de motivation.",
+            "primaryCta": "Commencer une lettre",
+            "featuresTitle": "Pourquoi HResume pour vos lettres",
+            "bullets": [
+                "Éditeur dédié lié à votre compte",
+                "Modèles et sections structurées",
+                "Plusieurs lettres selon les postes",
+                "Export PDF pour les candidatures",
+                "Même connexion que pour le CV et les attestations"
+            ],
+            "bodyParagraphs": [
+                "Les recruteurs lisent souvent la lettre juste après le CV. HResume garde les deux documents dans le même espace pour rester cohérent.",
+                "En français ou en anglais, gérez vos lettres depuis le tableau de bord et mettez-les à jour quand vous voulez."
+            ]
+        },
+        "workCertificate": {
+            "shortTitle": "Attestation de travail",
+            "metaTitle": "Générateur d'attestation de travail | HResume",
+            "metaDescription": "Générez des attestations de travail en ligne. Renseignez employeur et dates, prévisualisez et téléchargez en PDF avec HResume. Compte gratuit requis.",
+            "badge": "Attestations de travail",
+            "title": "Générateur d'attestation de travail",
+            "subtitle": "Créez des attestations de travail pour les dossiers RH, visas ou candidatures—prévisualisez et téléchargez en PDF.",
+            "accountNote": "Un compte HResume gratuit est nécessaire pour créer et enregistrer des attestations.",
+            "primaryCta": "Créer une attestation",
+            "featuresTitle": "Ce que vous pouvez faire",
+            "bullets": [
+                "Formulaire structuré employeur, salarié et dates",
+                "Interface bilingue (FR / EN)",
+                "Aperçu avant téléchargement",
+                "Export PDF prêt à imprimer ou envoyer",
+                "Stocké avec vos CV et lettres de motivation"
+            ],
+            "bodyParagraphs": [
+                "Une attestation de travail confirme votre poste, vos dates et votre employeur. HResume vous aide à produire un document clair sans repartir d'une page Word vide.",
+                "Cet outil sert aux attestations d'emploi—pas aux certificats de formation listés sur le CV. Pour les diplômes, utilisez la section Certificats dans l'éditeur de CV."
+            ]
         }
     },
     "coverLetter": {
@@ -916,6 +1161,46 @@
             "saveError": "Échec de l'enregistrement de la lettre",
             "deleteSuccess": "Lettre de motivation supprimée avec succès",
             "deleteError": "Échec de la suppression de la lettre"
+        }
+    },
+    "workCertificate": {
+        "title": "Attestation de travail",
+        "subtitle": "Créez des attestations de travail à télécharger en PDF",
+        "createNew": "Nouvelle attestation",
+        "noItems": "Aucune attestation",
+        "noItemsDesc": "Générez une attestation de travail pour vos dossiers ou candidatures.",
+        "createFirst": "Créer votre première attestation",
+        "countOne": "attestation",
+        "countOther": "attestations",
+        "lastModified": "Dernière mise à jour",
+        "preview": {
+            "panelTitle": "Aperçu",
+            "liveHint": "Aperçu en direct — même mise en page que le PDF"
+        },
+        "editorSectionTitle": "Détails de l'attestation",
+        "form": {
+            "documentTitle": "Titre du document",
+            "employeeName": "Nom complet du salarié",
+            "jobTitle": "Intitulé du poste",
+            "companyName": "Nom de l'entreprise",
+            "companyAddress": "Adresse de l'entreprise",
+            "employmentStart": "Date de début",
+            "employmentEnd": "Date de fin",
+            "currentJob": "J'occupe toujours ce poste",
+            "duties": "Principales missions (facultatif)",
+            "letterPlace": "Lieu (ex. ville en en-tête)",
+            "letterDate": "Date du courrier",
+            "signer": "Nom et fonction du signataire (facultatif)",
+            "languagePdf": "Langue du PDF"
+        },
+        "messages": {
+            "loadError": "Échec du chargement des attestations",
+            "saveSuccess": "Attestation enregistrée",
+            "saveError": "Échec de l'enregistrement",
+            "deleteSuccess": "Attestation supprimée",
+            "deleteError": "Échec de la suppression",
+            "deleteConfirmMessage": "Supprimer définitivement cette attestation ?",
+            "pdfError": "Échec du téléchargement du PDF"
         }
     }
 }

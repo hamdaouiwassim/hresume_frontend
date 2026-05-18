@@ -2,9 +2,10 @@ import axiosInstance from "../api/axiosInstance";
 import axios from 'axios';
 import config from "../config";
 
-export const generateShareableLink = (resumeId, expiresInDays = 7) => {
+export const generateShareableLink = (resumeId, expiresInDays = 7, slug = null) => {
     return axiosInstance.post(`/resumes/${resumeId}/shareable-link/generate`, {
-        expires_in_days: expiresInDays
+        expires_in_days: expiresInDays,
+        slug,
     });
 };
 
@@ -23,6 +24,25 @@ export const viewSharedResume = (token) => {
             "Content-Type": "application/json",
             Accept: "application/json",
         }
+    });
+};
+
+export const viewPublicWebsiteResume = (slugOrToken) => {
+    return axios.get(`${config.API_URL}website/${slugOrToken}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        }
+    });
+};
+
+export const downloadPublicProfilePdf = (slug, locale = "en") => {
+    return axios.get(`${config.API_URL}public/profile/${encodeURIComponent(slug)}/pdf`, {
+        params: { locale },
+        responseType: "blob",
+        headers: {
+            Accept: "application/pdf",
+        },
     });
 };
 

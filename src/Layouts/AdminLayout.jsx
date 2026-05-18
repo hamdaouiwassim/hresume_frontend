@@ -16,7 +16,8 @@ import {
     ChevronRight,
     Search,
     Bell,
-    MessageSquare
+    MessageSquare,
+    ScrollText
 } from 'lucide-react';
 import LanguageToggle from '../components/LanguageToggle';
 import { logout } from '../services/authService';
@@ -70,6 +71,7 @@ export default function AdminLayout({ children }) {
         { path: '/admin/blog', icon: FileText, label: 'Blog' },
         { path: '/admin/cvs', icon: FileText, label: 'Generated CVs' },
         { path: '/admin/cover-letters', icon: Mail, label: 'Generated CLs' },
+        { path: '/admin/work-certificates', icon: ScrollText, label: 'Work certs' },
         { path: '/admin/reviews', icon: MessageSquare, label: 'Reviews' },
         { path: '/admin/fonts', icon: Type, label: 'Fonts' },
     ];

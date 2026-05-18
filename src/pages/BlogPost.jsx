@@ -139,8 +139,8 @@ export default function BlogPostDetail() {
               )}
 
               {/* Content */}
-              <div 
-                className="prose prose-lg max-w-none"
+              <div
+                className="blog-post-content max-w-none"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
             </div>

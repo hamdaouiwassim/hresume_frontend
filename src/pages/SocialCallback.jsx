@@ -78,7 +78,13 @@ export default function SocialCallback() {
         if (!profile.email_verified_at) {
           toast.info("Please verify your email to continue.");
         } else {
-          toast.success("Signed in with Google");
+          const providerLabel =
+            provider === "linkedin"
+              ? "LinkedIn"
+              : provider === "google"
+                ? "Google"
+                : provider;
+          toast.success(`Signed in with ${providerLabel}`);
         }
         navigate(getHomePath(profile), { replace: true });
       } catch (error) {

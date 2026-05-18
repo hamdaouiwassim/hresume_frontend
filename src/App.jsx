@@ -18,10 +18,14 @@ const Resumes = lazy(() => import('./pages/resumes'));
 const SharedWithMe = lazy(() => import('./pages/SharedWithMe'));
 const Templates = lazy(() => import('./pages/templates'));
 const CreateResume = lazy(() => import('./pages/createResume'));
+const ClaimGuestResume = lazy(() => import('./pages/ClaimGuestResume'));
 const EditResume = lazy(() => import('./pages/EditResume'));
 const CoverLetters = lazy(() => import('./pages/CoverLetters'));
 const EditCoverLetter = lazy(() => import('./pages/EditCoverLetter'));
+const WorkCertificates = lazy(() => import('./pages/WorkCertificates'));
+const EditWorkCertificate = lazy(() => import('./pages/EditWorkCertificate'));
 const SharedResumeView = lazy(() => import('./pages/SharedResumeView'));
+const PersonalWebsiteView = lazy(() => import('./pages/PersonalWebsiteView'));
 const AcceptCollaboration = lazy(() => import('./pages/AcceptCollaboration'));
 const Profile = lazy(() => import('./pages/Profile'));
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -42,14 +46,19 @@ const ContactUs = lazy(() => import('./pages/ContactUs'));
 const ResumeTemplates = lazy(() => import('./pages/ResumeTemplates'));
 const TemplatePreviewPage = lazy(() => import('./pages/TemplatePreviewPage'));
 const Pricing = lazy(() => import('./pages/Pricing'));
+const PricingSuccess = lazy(() => import('./pages/PricingSuccess'));
+const CoverLetterBuilderLanding = lazy(() => import('./pages/CoverLetterBuilderLanding'));
+const WorkCertificateLanding = lazy(() => import('./pages/WorkCertificateLanding'));
 const Review = lazy(() => import('./pages/Review'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AdminBlog = lazy(() => import('./pages/admin/Blog'));
+const AdminBlogPostEditor = lazy(() => import('./pages/admin/AdminBlogPostEditor'));
 const AdminUserDetails = lazy(() => import('./pages/admin/UserDetails'));
 const AdminUserCVs = lazy(() => import('./pages/admin/UserCVs'));
 const AdminGeneratedCV = lazy(() => import('./pages/admin/GeneratedCV'));
 const AdminCoverLettersManagement = lazy(() => import('./pages/admin/CoverLettersManagement'));
+const AdminWorkCertificatesManagement = lazy(() => import('./pages/admin/WorkCertificatesManagement'));
 const AdminFontManagement = lazy(() => import('./pages/admin/FontManagement'));
 const AdminReviewsManagement = lazy(() => import('./pages/admin/ReviewsManagement'));
 
@@ -74,6 +83,8 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/register/recruiter" element={<RecruiterRegister />} />
             <Route path="/share/:token" element={<SharedResumeView />} />
+            <Route path="/website/:token" element={<PersonalWebsiteView />} />
+            <Route path="/u/:slug" element={<PersonalWebsiteView />} />
             <Route path="/collaborate/accept/:token" element={<AcceptCollaboration />} />
             <Route path="/auth/social-callback" element={<SocialCallback />} />
             <Route path="/track-request" element={<TrackRequest />} />
@@ -82,7 +93,11 @@ function App() {
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/templates/public" element={<ResumeTemplates />} />
             <Route path="/templates/public/preview/:id" element={<TemplatePreviewPage />} />
+            <Route path="/resume/start" element={<CreateResume />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/pricing/success" element={<PrivateRoute><PricingSuccess /></PrivateRoute>} />
+            <Route path="/cover-letter-builder" element={<CoverLetterBuilderLanding />} />
+            <Route path="/work-certificate" element={<WorkCertificateLanding />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
 
@@ -94,6 +109,7 @@ function App() {
             <Route path="/templates/preview/:id" element={<PrivateRoute><TemplatePreviewPage /></PrivateRoute>} />
             {/* New path for creating a resume */}
             <Route path="/resume/create" element={<PrivateRoute><CreateResume /></PrivateRoute>} />
+            <Route path="/resume/claim-draft" element={<PrivateRoute><ClaimGuestResume /></PrivateRoute>} />
             {/* Profile page */}
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             {/* Review page */}
@@ -104,6 +120,10 @@ function App() {
             <Route path="/cover-letter/create" element={<PrivateRoute><EditCoverLetter /></PrivateRoute>} />
             <Route path="/cover-letter/edit/:id" element={<PrivateRoute><EditCoverLetter /></PrivateRoute>} />
 
+            <Route path="/work-certificates" element={<PrivateRoute><WorkCertificates /></PrivateRoute>} />
+            <Route path="/work-certificate/create" element={<PrivateRoute><EditWorkCertificate /></PrivateRoute>} />
+            <Route path="/work-certificate/edit/:id" element={<PrivateRoute><EditWorkCertificate /></PrivateRoute>} />
+
             {/* Admin routes */}
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><AdminUsersList /></AdminRoute>} />
@@ -111,9 +131,12 @@ function App() {
             <Route path="/admin/users/:id/cvs" element={<AdminRoute><AdminUserCVs /></AdminRoute>} />
             <Route path="/admin/cvs" element={<AdminRoute><AdminGeneratedCV /></AdminRoute>} />
             <Route path="/admin/cover-letters" element={<AdminRoute><AdminCoverLettersManagement /></AdminRoute>} />
+            <Route path="/admin/work-certificates" element={<AdminRoute><AdminWorkCertificatesManagement /></AdminRoute>} />
             <Route path="/admin/templates" element={<AdminRoute><AdminTemplatesManagement /></AdminRoute>} />
             <Route path="/admin/cover-letter-templates" element={<AdminRoute><AdminCoverLetterTemplatesManagement /></AdminRoute>} />
             <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
+            <Route path="/admin/blog/new" element={<AdminRoute><AdminBlogPostEditor /></AdminRoute>} />
+            <Route path="/admin/blog/edit/:id" element={<AdminRoute><AdminBlogPostEditor /></AdminRoute>} />
             <Route path="/admin/fonts" element={<AdminRoute><AdminFontManagement /></AdminRoute>} />
             <Route path="/admin/reviews" element={<AdminRoute><AdminReviewsManagement /></AdminRoute>} />
             <Route path="/admin/profile" element={<AdminRoute><AdminProfile /></AdminRoute>} />

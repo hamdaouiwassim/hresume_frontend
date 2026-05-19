@@ -41,6 +41,8 @@ const Forbidden = lazy(() => import('./pages/errors/Forbidden'));
 const TrackRequest = lazy(() => import('./pages/TrackRequest'));
 const SocialCallback = lazy(() => import('./pages/SocialCallback'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
 const ResumeTemplates = lazy(() => import('./pages/ResumeTemplates'));
@@ -89,6 +91,8 @@ function App() {
             <Route path="/auth/social-callback" element={<SocialCallback />} />
             <Route path="/track-request" element={<TrackRequest />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/templates/public" element={<ResumeTemplates />} />

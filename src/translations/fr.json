@@ -794,6 +794,136 @@
             "content": "Nous pouvons mettre à jour cette Politique de Confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle Politique de Confidentialité sur cette page et en mettant à jour la date de 'Dernière mise à jour'. Il vous est conseillé de consulter périodiquement cette Politique de Confidentialité pour tout changement."
         }
     },
+    "terms": {
+        "title": "Conditions générales d'utilisation",
+        "lastUpdated": "Dernière mise à jour :",
+        "lastUpdatedDate": "mai 2026",
+        "introduction": {
+            "title": "Accord",
+            "content": "En accédant ou en utilisant HResume (hresume.pro), vous acceptez les présentes conditions. Si vous n'acceptez pas ces conditions, n'utilisez pas le service. Elles s'appliquent aux candidats, aux recruteurs (le cas échéant) et aux visiteurs."
+        },
+        "service": {
+            "title": "Le service",
+            "content": "HResume propose des outils pour créer et gérer CV, lettres de motivation, attestations de travail et documents associés, y compris des fonctions IA optionnelles et des abonnements Pro. Nous pouvons modifier, suspendre ou interrompre des fonctionnalités avec un préavis raisonnable lorsque c'est possible."
+        },
+        "accounts": {
+            "title": "Comptes",
+            "points": [
+                "Vous devez fournir des informations exactes et protéger vos identifiants.",
+                "Vous êtes responsable de l'activité effectuée via votre compte.",
+                "Vous devez avoir au moins 16 ans (ou l'âge minimum requis dans votre pays).",
+                "Nous pouvons suspendre ou résilier les comptes qui violent ces conditions ou présentent un risque de sécurité."
+            ]
+        },
+        "acceptableUse": {
+            "title": "Usage acceptable",
+            "intro": "Vous vous engagez à ne pas :",
+            "points": [
+                "Utiliser le service à des fins illégales, frauduleuses ou nuisibles.",
+                "Publier du contenu qui viole les droits d'autrui ou contient des logiciels malveillants.",
+                "Contourner la sécurité, les quotas ou les contrôles d'accès (y compris les limites Pro).",
+                "Extraire des données, rétroconcevoir ou surcharger nos systèmes sans autorisation.",
+                "Partager l'accès au compte d'une manière incompatible avec votre offre ou ces conditions."
+            ]
+        },
+        "content": {
+            "title": "Votre contenu",
+            "content": "Vous conservez la propriété du contenu que vous créez. Vous nous accordez une licence limitée pour héberger, traiter et afficher ce contenu uniquement pour exploiter le service (sauvegardes, export PDF, partage que vous activez). Vous êtes responsable de l'exactitude et de la légalité de ce que vous publiez via les liens de partage ou profils publics."
+        },
+        "ai": {
+            "title": "Fonctionnalités IA",
+            "content": "Les suggestions IA (amélioration, ciblage emploi, score ATS) sont fournies à titre d'aide uniquement. Elles peuvent être inexactes ou incomplètes. Vous devez relire tout résultat avant utilisation. Les offres Pro et gratuites sont soumises aux limites décrites sur la page Tarifs."
+        },
+        "payments": {
+            "title": "Offres payantes",
+            "content": "Les abonnements Pro et tarifs sont décrits sur notre page Tarifs. Les paiements internationaux peuvent être traités par Paddle en tant que merchant of record. La Tunisie et d'autres régions peuvent utiliser d'autres voies de mise à niveau indiquées dans le produit. Les remboursements sont régis par notre politique de remboursement."
+        },
+        "privacy": {
+            "title": "Confidentialité",
+            "content": "La collecte et l'utilisation des données personnelles sont décrites dans notre politique de confidentialité. En utilisant HResume, vous acceptez également cette politique."
+        },
+        "disclaimer": {
+            "title": "Avertissement",
+            "content": "Le service est fourni « en l'état » et « selon disponibilité », sans garantie d'aucune sorte dans la mesure permise par la loi. Nous ne garantissons pas l'obtention d'un emploi, la réussite en entretien ou l'acceptation ATS par un employeur."
+        },
+        "liability": {
+            "title": "Limitation de responsabilité",
+            "content": "Dans la mesure maximale permise par la loi, HResume et ses opérateurs ne sont pas responsables des dommages indirects, accessoires ou consécutifs, ni des pertes de profits, de données ou d'opportunités liées à votre utilisation du service. Notre responsabilité totale pour toute réclamation ne dépassera pas le montant payé au cours des douze (12) mois précédant la réclamation, ou cinquante dollars US (50 USD) si vous n'avez utilisé que l'offre gratuite."
+        },
+        "termination": {
+            "title": "Résiliation",
+            "content": "Vous pouvez cesser d'utiliser le service à tout moment et demander la suppression du compte via contact@hresume.pro. Nous pouvons résilier ou restreindre l'accès en cas de violation. Les clauses qui doivent survivre (limitation de responsabilité, droit applicable, licences sur contenu existant) survivent à la résiliation."
+        },
+        "law": {
+            "title": "Droit applicable",
+            "content": "Ces conditions sont régies par le droit tunisien, sans égard aux règles de conflit de lois, sauf si les lois impératives de protection des consommateurs de votre pays en disposent autrement. Les litiges doivent d'abord être signalés par contact ; les tribunaux tunisiens peuvent être compétents lorsque la loi le permet."
+        },
+        "contact": {
+            "title": "Contact",
+            "content": "Questions sur ces conditions :",
+            "formLink": "Formulaire de contact",
+            "privacyLink": "Politique de confidentialité",
+            "refundLink": "Politique de remboursement"
+        },
+        "changes": {
+            "title": "Modifications",
+            "content": "Nous pouvons mettre à jour ces conditions. Les changements importants seront publiés sur cette page avec une date mise à jour. L'utilisation continue vaut acceptation des conditions révisées."
+        }
+    },
+    "refund": {
+        "title": "Politique de remboursement",
+        "lastUpdated": "Dernière mise à jour :",
+        "lastUpdatedDate": "mai 2026",
+        "introduction": {
+            "title": "Introduction",
+            "content": "Cette politique explique comment fonctionnent les remboursements pour HResume Pro et les services payants associés. L'offre gratuite HResume ne donne lieu à aucun paiement et n'est pas remboursable."
+        },
+        "eligibility": {
+            "title": "Éligibilité au remboursement",
+            "intro": "Nous souhaitons que vous soyez satisfait de HResume Pro. Des remboursements peuvent être accordés dans les conditions ci-dessous.",
+            "points": [
+                "Premier abonnement Pro : remboursement intégral possible dans les 14 jours suivant le premier paiement si vous n'avez pas utilisé de manière substantielle les fonctionnalités Pro (ex. IA illimitée au-delà d'un essai raisonnable).",
+                "Erreurs de facturation ou doubles prélèvements : contactez-nous sous 30 jours ; nous corrigerons ou rembourserons le montant.",
+                "Renouvellements : les renouvellements d'abonnement ne sont en principe pas remboursables, sauf obligation légale ou cas exceptionnel à notre discrétion."
+            ]
+        },
+        "howToRequest": {
+            "title": "Comment demander un remboursement",
+            "content": "Pour demander un remboursement, envoyez-nous un e-mail depuis l'adresse liée à votre compte HResume.",
+            "steps": [
+                "Envoyez un e-mail à contact@hresume.pro avec l'objet « Demande de remboursement ».",
+                "Indiquez l'e-mail du compte, la date de paiement et le motif de la demande.",
+                "Nous examinerons votre demande et répondrons sous 5 à 10 jours ouvrables."
+            ]
+        },
+        "nonRefundable": {
+            "title": "Cas non remboursables",
+            "points": [
+                "Utilisation de l'offre gratuite (aucun paiement effectué).",
+                "Accès Pro accordé manuellement par notre équipe sans facturation.",
+                "Demandes formulées plus de 14 jours après le premier paiement Pro (sauf erreurs de facturation).",
+                "Résiliation du compte pour violation de nos conditions ou abus du service."
+            ]
+        },
+        "cancellations": {
+            "title": "Annulations",
+            "content": "Vous pouvez annuler Pro à tout moment. L'annulation stoppe les renouvellements futurs ; vous conservez Pro jusqu'à la fin de la période en cours. L'annulation n'entraîne pas automatiquement un remboursement de la période en cours, sauf si vous êtes éligible selon cette politique."
+        },
+        "paddle": {
+            "title": "Paiements internationaux (Paddle)",
+            "content": "Les abonnements Pro internationaux sont traités par Paddle en tant que merchant of record. Les remboursements éligibles sont effectués via Paddle sur votre moyen de paiement d'origine. Les délais dépendent de votre banque ou émetteur de carte (généralement 5 à 14 jours ouvrables après approbation)."
+        },
+        "contact": {
+            "title": "Nous contacter",
+            "content": "Des questions sur les remboursements ou la facturation ? Nous sommes là pour vous aider.",
+            "formLink": "Formulaire de contact",
+            "pricingLink": "Tarifs"
+        },
+        "changes": {
+            "title": "Modifications de cette politique",
+            "content": "Nous pouvons mettre à jour cette politique de remboursement. Les modifications prennent effet lors de leur publication sur cette page avec une date mise à jour."
+        }
+    },
     "faq": {
         "title": "Questions Fréquemment Posées",
         "subtitle": "Trouvez des réponses aux questions courantes sur notre service de création de CV",
@@ -934,7 +1064,9 @@
             "loginToUpgrade": "Connectez-vous pour passer a Pro",
             "alreadyPro": "Vous etes deja Pro",
             "checkoutError": "Impossible de demarrer le paiement. Reessayez ou contactez le support.",
-            "billingUnavailable": "Le paiement en ligne n'est pas encore configure. Contactez le support."
+            "billingUnavailable": "Le paiement en ligne n'est pas encore configure. Contactez le support.",
+            "tunisiaUpgradeNote": "Le paiement Pro en ligne est reserve aux clients internationaux. En Tunisie, contactez-nous pour passer a Pro.",
+            "tunisiaContactCta": "Nous contacter pour Pro"
         },
         "success": {
             "title": "Bienvenue en Pro !",
@@ -946,7 +1078,8 @@
         },
         "note": {
             "title": "Pourquoi Pro ?",
-            "description": "Gratuit sert a un CV solide et un essai mensuel de l'IA. Pro convient aux recherches actives : CV illimites, IA illimitee et ATS complet. Resiliation via le portail Stripe (quand la facturation est activee)."
+            "description": "Gratuit sert a un CV solide et un essai mensuel de l'IA. Pro convient aux recherches actives : CV illimites, IA illimitee et ATS complet. Resiliation via votre compte Paddle (quand la facturation est activee).",
+            "refundLink": "Politique de remboursement"
         }
     },
     "review": {

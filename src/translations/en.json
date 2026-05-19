@@ -794,6 +794,136 @@
             "content": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the 'Last updated' date. You are advised to review this Privacy Policy periodically for any changes."
         }
     },
+    "terms": {
+        "title": "Terms and Conditions",
+        "lastUpdated": "Last updated:",
+        "lastUpdatedDate": "May 2026",
+        "introduction": {
+            "title": "Agreement",
+            "content": "By accessing or using HResume (hresume.pro), you agree to these Terms and Conditions. If you do not agree, do not use the service. These terms apply to candidates, recruiters (where applicable), and visitors."
+        },
+        "service": {
+            "title": "The service",
+            "content": "HResume provides tools to create and manage resumes, cover letters, work certificates, and related career documents, including optional AI-assisted features and Pro subscriptions. We may update, suspend, or discontinue features with reasonable notice when possible."
+        },
+        "accounts": {
+            "title": "Accounts",
+            "points": [
+                "You must provide accurate registration information and keep your credentials secure.",
+                "You are responsible for activity under your account.",
+                "You must be at least 16 years old (or the minimum age required in your country) to use the service.",
+                "We may suspend or terminate accounts that violate these terms or pose a security risk."
+            ]
+        },
+        "acceptableUse": {
+            "title": "Acceptable use",
+            "intro": "You agree not to:",
+            "points": [
+                "Use the service for unlawful, fraudulent, or harmful purposes.",
+                "Upload content that infringes others' rights or contains malware.",
+                "Attempt to bypass security, quotas, or access controls (including Pro limits).",
+                "Scrape, reverse engineer, or overload our systems without permission.",
+                "Share account access in a way that violates your plan or these terms."
+            ]
+        },
+        "content": {
+            "title": "Your content",
+            "content": "You retain ownership of content you create (CV data, cover letters, etc.). You grant us a limited license to host, process, and display your content solely to operate the service (including backups, PDF export, and sharing features you enable). You are responsible for the accuracy and legality of what you publish via share links or public profiles."
+        },
+        "ai": {
+            "title": "AI features",
+            "content": "AI suggestions (enhance, job targeting, ATS scoring) are provided as-is for assistance only. They may be inaccurate or incomplete. You must review all output before use. Pro and free tiers are subject to usage limits described on our Pricing page."
+        },
+        "payments": {
+            "title": "Paid plans",
+            "content": "Pro subscriptions and pricing are described on our Pricing page. International payments may be processed by Paddle as merchant of record. Tunisia and other regions may use alternate upgrade paths as shown in the product. Refunds are governed by our Refund Policy."
+        },
+        "privacy": {
+            "title": "Privacy",
+            "content": "Our collection and use of personal data is described in our Privacy Policy. By using HResume, you also agree to that policy."
+        },
+        "disclaimer": {
+            "title": "Disclaimer",
+            "content": "The service is provided \"as is\" and \"as available\" without warranties of any kind, to the fullest extent permitted by law. We do not guarantee employment outcomes, interview success, or ATS acceptance by any employer."
+        },
+        "liability": {
+            "title": "Limitation of liability",
+            "content": "To the maximum extent permitted by law, HResume and its operators shall not be liable for indirect, incidental, special, or consequential damages, or for loss of profits, data, or opportunities arising from your use of the service. Our total liability for any claim related to the service shall not exceed the amount you paid us in the twelve (12) months before the claim, or fifty US dollars (USD 50) if you used only the free plan."
+        },
+        "termination": {
+            "title": "Termination",
+            "content": "You may stop using the service at any time and may request account deletion via contact@hresume.pro. We may terminate or restrict access for breach of these terms. Provisions that by nature should survive (liability limits, governing law, your content licenses for existing backups) survive termination."
+        },
+        "law": {
+            "title": "Governing law",
+            "content": "These terms are governed by the laws of Tunisia, without regard to conflict-of-law rules, except where mandatory consumer protection laws in your country require otherwise. Disputes should first be addressed by contacting us; courts in Tunisia may have jurisdiction where permitted by law."
+        },
+        "contact": {
+            "title": "Contact",
+            "content": "Questions about these terms:",
+            "formLink": "Contact form",
+            "privacyLink": "Privacy Policy",
+            "refundLink": "Refund Policy"
+        },
+        "changes": {
+            "title": "Changes",
+            "content": "We may update these Terms and Conditions. Material changes will be posted on this page with an updated date. Continued use after changes constitutes acceptance of the revised terms."
+        }
+    },
+    "refund": {
+        "title": "Refund Policy",
+        "lastUpdated": "Last updated:",
+        "lastUpdatedDate": "May 2026",
+        "introduction": {
+            "title": "Introduction",
+            "content": "This Refund Policy explains how refunds work for HResume Pro and related paid services. The HResume Free plan does not involve charges and is not eligible for refunds."
+        },
+        "eligibility": {
+            "title": "Refund eligibility",
+            "intro": "We want you to be satisfied with HResume Pro. Refunds may be available under the conditions below.",
+            "points": [
+                "First-time Pro subscription: you may request a full refund within 14 days of your initial payment if you have not substantially used Pro features (e.g. unlimited AI beyond a reasonable trial).",
+                "Billing errors or duplicate charges: contact us within 30 days and we will correct or refund the charge.",
+                "Renewals: subscription renewals are generally non-refundable except where required by law or at our discretion for exceptional cases."
+            ]
+        },
+        "howToRequest": {
+            "title": "How to request a refund",
+            "content": "To request a refund, email us from the address linked to your HResume account.",
+            "steps": [
+                "Send an email to contact@hresume.pro with the subject \"Refund request\".",
+                "Include your account email, payment date, and reason for the request.",
+                "We will review your request and respond within 5–10 business days."
+            ]
+        },
+        "nonRefundable": {
+            "title": "Non-refundable situations",
+            "points": [
+                "Free plan usage (no payment was made).",
+                "Pro access granted manually by our team without a charge.",
+                "Requests made more than 14 days after the initial Pro payment (except billing errors).",
+                "Account termination due to violation of our terms or abuse of the service."
+            ]
+        },
+        "cancellations": {
+            "title": "Cancellations",
+            "content": "You may cancel Pro at any time. Cancellation stops future renewals; you keep Pro until the end of the current billing period. Canceling does not automatically issue a refund for the current period unless eligible under this policy."
+        },
+        "paddle": {
+            "title": "International payments (Paddle)",
+            "content": "International Pro subscriptions are processed by Paddle as merchant of record. Refunds for eligible requests are issued through Paddle to your original payment method. Processing times depend on your bank or card issuer (typically 5–14 business days after approval)."
+        },
+        "contact": {
+            "title": "Contact us",
+            "content": "Questions about refunds or billing? We are happy to help.",
+            "formLink": "Contact form",
+            "pricingLink": "Pricing"
+        },
+        "changes": {
+            "title": "Changes to this policy",
+            "content": "We may update this Refund Policy from time to time. Changes are effective when posted on this page with an updated date."
+        }
+    },
     "faq": {
         "title": "Frequently Asked Questions",
         "subtitle": "Find answers to common questions about our resume builder service",
@@ -934,7 +1064,9 @@
             "loginToUpgrade": "Sign in to upgrade",
             "alreadyPro": "You are on Pro",
             "checkoutError": "Could not start checkout. Try again or contact support.",
-            "billingUnavailable": "Online checkout is not configured yet. Contact support to upgrade."
+            "billingUnavailable": "Online checkout is not configured yet. Contact support to upgrade.",
+            "tunisiaUpgradeNote": "Online Pro checkout is for international customers. In Tunisia, contact us to upgrade.",
+            "tunisiaContactCta": "Contact us for Pro"
         },
         "success": {
             "title": "Welcome to Pro!",
@@ -946,7 +1078,8 @@
         },
         "note": {
             "title": "Why Pro?",
-            "description": "Free is built for one strong CV and a monthly taste of AI. Pro is for active job searches: unlimited resumes, unlimited AI, and full ATS insights. Cancel anytime from your Stripe customer portal (when billing is enabled)."
+            "description": "Free is built for one strong CV and a monthly taste of AI. Pro is for active job searches: unlimited resumes, unlimited AI, and full ATS insights. Cancel anytime from your Paddle account (when billing is enabled).",
+            "refundLink": "Refund policy"
         }
     },
     "review": {

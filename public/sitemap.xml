@@ -81,6 +81,26 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://hresume.pro/privacy" />
     <xhtml:link rel="alternate" hreflang="fr" href="https://hresume.pro/privacy?lang=fr" />
   </url>
+
+  <!-- Terms and Conditions Page -->
+  <url>
+    <loc>https://hresume.pro/terms</loc>
+    <lastmod>2026-05-19</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hresume.pro/terms" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://hresume.pro/terms?lang=fr" />
+  </url>
+
+  <!-- Refund Policy Page -->
+  <url>
+    <loc>https://hresume.pro/refund</loc>
+    <lastmod>2026-05-19</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://hresume.pro/refund" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://hresume.pro/refund?lang=fr" />
+  </url>
   
   <!-- Login Page -->
   <url>

@@ -315,7 +315,9 @@ export default function GuestLayout({ children, navVariant = 'default' }) {
                                 <ul className="mt-4 space-y-4 text-sm text-gray-400">
                                     <li><Link to="/contact" className="hover:text-white transition">Contact</Link></li>
                                     <li><Link to="/faq" className="hover:text-white transition">FAQ</Link></li>
+                                    <li><Link to="/terms" className="hover:text-white transition">Terms</Link></li>
                                     <li><Link to="/privacy" className="hover:text-white transition">Privacy</Link></li>
+                                    <li><Link to="/refund" className="hover:text-white transition">Refunds</Link></li>
                                     <li><Link to="/review" className="hover:text-white transition">Reviews</Link></li>
                                 </ul>
                             </div>
@@ -357,6 +359,7 @@ export default function GuestLayout({ children, navVariant = 'default' }) {
                         <div className="flex items-center gap-6">
                             <Link to="/terms" className="hover:text-white transition">Terms</Link>
                             <Link to="/privacy" className="hover:text-white transition">Privacy</Link>
+                            <Link to="/refund" className="hover:text-white transition">Refunds</Link>
                             <span className="text-gray-600">SOC2-ready infrastructure</span>
                         </div>
                     </div>

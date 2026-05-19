@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { AuthContext } from '../context/AuthContext';
 import { usePricingRegion } from '../hooks/usePricingRegion';
 import { createCheckoutSession } from '../services/billingService';
-import { BadgeDollarSign, CheckCircle2, Shield, Loader2, Crown } from 'lucide-react';
+import { BadgeDollarSign, CheckCircle2, Shield, Loader2, Crown, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Pricing() {
@@ -34,6 +34,14 @@ export default function Pricing() {
       return;
     }
 
+    if (isTunisia || region === 'tunisia') {
+      toast.info(
+        proPlan.tunisiaUpgradeNote ||
+          'Online checkout is for international customers. Contact us for Pro in Tunisia.'
+      );
+      return;
+    }
+
     setCheckoutLoading(true);
     try {
       const response = await createCheckoutSession(region);
@@ -46,12 +54,14 @@ export default function Pricing() {
     } catch (err) {
       const code = err.response?.data?.code;
       const message = err.response?.data?.message;
-      if (code === 'billing_not_configured') {
+      if (code === 'tunisia_checkout_unavailable') {
+        toast.info(proPlan.tunisiaUpgradeNote || message);
+      } else if (code === 'billing_not_configured') {
         toast.error(proPlan.billingUnavailable || message);
       } else if (code === 'already_pro') {
         toast.info(proPlan.alreadyPro || message);
       } else {
-        toast.error(proPlan.checkoutError || message || 'Checkout failed.');
+        toast.error(message || proPlan.checkoutError || 'Checkout failed.');
       }
     } finally {
       setCheckoutLoading(false);
@@ -75,6 +85,18 @@ export default function Pricing() {
           className="inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-indigo-700 bg-white hover:bg-slate-100 transition"
         >
           {proPlan.loginToUpgrade || 'Sign in to upgrade'}
+        </Link>
+      );
+    }
+
+    if (isTunisia) {
+      return (
+        <Link
+          to="/contact"
+          className="inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-indigo-700 bg-white hover:bg-slate-100 transition"
+        >
+          <Mail className="h-4 w-4 mr-2" />
+          {proPlan.tunisiaContactCta || 'Contact us for Pro'}
         </Link>
       );
     }
@@ -112,6 +134,12 @@ export default function Pricing() {
             </p>
             {regionNote && !loading && (
               <p className="text-sm text-slate-500 max-w-xl mx-auto">{regionNote}</p>
+            )}
+            {isTunisia && !loading && (
+              <p className="text-sm text-amber-700 max-w-xl mx-auto">
+                {proPlan.tunisiaUpgradeNote ||
+                  'Pro checkout online is for international customers. Tunisia: contact support.'}
+              </p>
             )}
             {!user && (
               <Link
@@ -219,6 +247,11 @@ export default function Pricing() {
               <p className="text-slate-700">
                 {pricing.note?.description ||
                   'Free is built for one strong CV and a monthly taste of AI. Pro is for active job searches.'}
+              </p>
+              <p className="text-sm text-slate-600 mt-3">
+                <Link to="/refund" className="text-blue-600 font-semibold hover:underline">
+                  {pricing.note?.refundLink || 'Refund policy'}
+                </Link>
               </p>
             </div>
           </div>

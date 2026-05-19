@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import GuestLayout from '../Layouts/GuestLayout';
 import { useLanguage } from '../context/LanguageContext';
 import { AuthContext } from '../context/AuthContext';
-import { confirmCheckoutSession } from '../services/billingService';
+import { confirmCheckout } from '../services/billingService';
 import axiosInstance from '../api/axiosInstance';
 import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 
@@ -21,7 +21,10 @@ export default function PricingSuccess() {
     }
 
     const sessionId = searchParams.get('session_id');
-    if (!sessionId) {
+    const transactionId =
+      searchParams.get('transaction_id') || searchParams.get('_ptxn');
+
+    if (!sessionId && !transactionId) {
       setStatus('missing_session');
       return;
     }
@@ -30,7 +33,7 @@ export default function PricingSuccess() {
 
     (async () => {
       try {
-        await confirmCheckoutSession(sessionId);
+        await confirmCheckout({ sessionId, transactionId });
         const me = await axiosInstance.get('/me');
         if (!cancelled) {
           setUser(me.data.user);

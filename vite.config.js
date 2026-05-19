@@ -4,6 +4,14 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(),tailwindcss()],
+  server: {
+    proxy: {
+      '/sitemap.xml': {
+        target: process.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     // Optimize build output
     rollupOptions: {

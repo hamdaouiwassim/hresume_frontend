@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import GuestLayout from '../Layouts/GuestLayout';
 import { Calendar, User, ArrowLeft, Eye, Loader2, FileText } from 'lucide-react';
 import { getBlogPost } from '../services/blogService';
 import { useLanguage } from '../context/LanguageContext';
+import { usePageSeo } from '../hooks/usePageSeo';
+import { excerptFromHtml } from '../utils/seo';
 
 export default function BlogPostDetail() {
   const { slug } = useParams();
@@ -33,6 +35,27 @@ export default function BlogPostDetail() {
       setIsLoading(false);
     }
   };
+
+  const seoDescription = useMemo(() => {
+    if (!post) {
+      return '';
+    }
+    const excerpt = (post.excerpt || '').trim();
+    if (excerpt) {
+      return excerpt;
+    }
+    return excerptFromHtml(post.content);
+  }, [post]);
+
+  usePageSeo({
+    title: post ? `${post.title} | HResume Blog` : 'HResume Blog',
+    description: seoDescription,
+    canonicalPath: post ? `/blog/${post.slug}` : undefined,
+    image: post?.featured_image || undefined,
+    imageAlt: post?.title,
+    ogType: 'article',
+    enabled: Boolean(post),
+  });
 
   const formatDate = (dateString) => {
     if (!dateString) return '';

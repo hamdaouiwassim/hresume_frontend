@@ -1,16 +1,25 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+
+const apiOrigin = (process.env.VITE_API_URL || 'http://127.0.0.1:8000/api')
+  .replace(/\/api\/?$/, '')
+
+const sitemapProxy = {
+  '/sitemap.xml': {
+    target: apiOrigin,
+    changeOrigin: true,
+  },
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(),tailwindcss()],
   server: {
-    proxy: {
-      '/sitemap.xml': {
-        target: process.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://127.0.0.1:8000',
-        changeOrigin: true,
-      },
-    },
+    proxy: sitemapProxy,
+  },
+  preview: {
+    proxy: sitemapProxy,
   },
   build: {
     // Optimize build output

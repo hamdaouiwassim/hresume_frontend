@@ -54,6 +54,7 @@ const WorkCertificateLanding = lazy(() => import('./pages/WorkCertificateLanding
 const Review = lazy(() => import('./pages/Review'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
+const AdminAiUsage = lazy(() => import('./pages/admin/AdminAiUsage'));
 const AdminBlog = lazy(() => import('./pages/admin/Blog'));
 const AdminBlogPostEditor = lazy(() => import('./pages/admin/AdminBlogPostEditor'));
 const AdminUserDetails = lazy(() => import('./pages/admin/UserDetails'));
@@ -138,6 +139,7 @@ function App() {
             <Route path="/admin/work-certificates" element={<AdminRoute><AdminWorkCertificatesManagement /></AdminRoute>} />
             <Route path="/admin/templates" element={<AdminRoute><AdminTemplatesManagement /></AdminRoute>} />
             <Route path="/admin/cover-letter-templates" element={<AdminRoute><AdminCoverLetterTemplatesManagement /></AdminRoute>} />
+            <Route path="/admin/ai-usage" element={<AdminRoute><AdminAiUsage /></AdminRoute>} />
             <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
             <Route path="/admin/blog/new" element={<AdminRoute><AdminBlogPostEditor /></AdminRoute>} />
             <Route path="/admin/blog/edit/:id" element={<AdminRoute><AdminBlogPostEditor /></AdminRoute>} />

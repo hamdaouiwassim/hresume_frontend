@@ -275,6 +275,20 @@ export default function AdminDashboard() {
             iconColor: 'text-violet-600',
         },
         {
+            label: 'AI usage (30d)',
+            value: stats?.ai_usage_30d?.calls ?? 0,
+            subtext:
+                stats?.ai_usage_30d?.total_tokens != null
+                    ? `${Number(stats.ai_usage_30d.total_tokens).toLocaleString()} tokens`
+                    : undefined,
+            href: '/admin/ai-usage',
+            linkLabel: 'Usage & logs',
+            icon: Sparkles,
+            gradient: 'bg-fuchsia-400',
+            iconBg: 'bg-fuchsia-50',
+            iconColor: 'text-fuchsia-600',
+        },
+        {
             label: 'Templates',
             value: stats?.total_templates,
             href: '/admin/templates',
@@ -439,6 +453,13 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-1">
+                            <QuickActionCard
+                                to="/admin/ai-usage"
+                                icon={Sparkles}
+                                title="AI usage & tokens"
+                                description="Per-user LLM calls and token totals"
+                                variant="soft"
+                            />
                             <QuickActionCard
                                 to="/admin/users"
                                 icon={Users}

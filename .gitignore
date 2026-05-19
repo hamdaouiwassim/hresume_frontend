@@ -5,6 +5,9 @@ node_modules/
 dist/
 build/
 
+# Sitemap is served from the API route (proxied in dev/production), not a static file
+public/sitemap.xml
+
 # Environment files (keep .env.example if you use one)
 .env
 .env.local

@@ -114,13 +114,25 @@
   animation: slideInUp 0.8s ease-out;
 }
 
-/* Animated background shapes */
+/* Hero decorations — clipped to hero; isolated compositor layer */
+.hero-decorations {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  contain: strict;
+  pointer-events: none;
+}
+
+/* Animated background shapes (soft gradients, lighter blur for scroll performance) */
 .floating-shape {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.18;
+  filter: blur(48px);
+  opacity: 0.16;
   pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .shape-1 {
@@ -194,6 +206,8 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  isolation: isolate;
+  contain: layout style paint;
 }
 
 .hero-background::before {
@@ -301,6 +315,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .floating-shape {
+    animation: none !important;
+    opacity: 0.12;
+  }
+
   .transformation-section__heading,
   .transformation-section__card {
     animation: none !important;

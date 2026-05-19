@@ -11,6 +11,7 @@ import {
 } from "../services/authService";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "sonner";
+import AiTokenCredits from "../components/AiTokenCredits";
 
 export default function Profile() {
   const { t } = useLanguage();
@@ -260,6 +261,8 @@ export default function Profile() {
             {profileStrings.subtitle || "Manage your account information and preferences"}
           </p>
         </div>
+
+        <AiTokenCredits user={user} className="mb-6" />
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <form onSubmit={handleSubmit}>

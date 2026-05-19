@@ -39,11 +39,22 @@ export default function GuestLayout({ children, navVariant = 'default' }) {
             return;
         }
 
-        const onScroll = () => {
-            setHeroNavScrolled(window.scrollY > 480);
+        const threshold = 480;
+        let ticking = false;
+
+        const update = () => {
+            ticking = false;
+            const scrolled = window.scrollY > threshold;
+            setHeroNavScrolled((prev) => (prev === scrolled ? prev : scrolled));
         };
 
-        onScroll();
+        const onScroll = () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(update);
+        };
+
+        update();
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
     }, [navVariant, location.pathname]);
@@ -79,10 +90,10 @@ export default function GuestLayout({ children, navVariant = 'default' }) {
     return (
         <div className="min-h-screen w-full">
             <nav
-                className={`fixed z-50 w-full transition-all duration-300 ${
+                className={`fixed z-50 w-full transition-[background-color,border-color,box-shadow] duration-300 ${
                     isHeroNav
                         ? 'guest-nav-hero border-b border-white/10 shadow-lg shadow-black/25'
-                        : 'border-b border-gray-200/50 bg-white/95 shadow-lg backdrop-blur-md'
+                        : 'border-b border-gray-200 bg-white shadow-lg'
                 }`}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -169,10 +180,10 @@ export default function GuestLayout({ children, navVariant = 'default' }) {
                     isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
                 }`}>
                     <div
-                        className={`space-y-2 border-t px-4 pt-2 pb-4 backdrop-blur-md ${
+                        className={`space-y-2 border-t px-4 pt-2 pb-4 ${
                             isHeroNav
-                                ? 'border-white/10 bg-slate-950/90'
-                                : 'border-gray-200 bg-white/95'
+                                ? 'border-white/10 bg-slate-950/95'
+                                : 'border-gray-200 bg-white'
                         }`}
                     >
                         {!user ? (

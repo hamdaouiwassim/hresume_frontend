@@ -74,8 +74,10 @@ import { deriveTemplateLayout, TEMPLATE_LAYOUTS } from "../utils/templateStyles"
 import SectionOrderManager from "../components/SectionOrderManager";
 import EnhanceTextareaButton from "../components/EnhanceTextareaButton";
 import UpgradeProModal from "../components/UpgradeProModal";
+import AiTokenCredits from "../components/AiTokenCredits";
 import { getAtsScore, tailorResume } from "../services/aiService";
 import AiLoadingSkeleton from "../components/AiLoadingSkeleton";
+import { syncAiUsageFromResponse, hasAiTokenBudget, isAiUnlimited } from "../utils/aiCredits";
 
 const CV_WIZARD_PHASES = ["profile", "experience-education", "ai-improve", "ats-review", "preview-export"];
 
@@ -210,19 +212,26 @@ export default function EditResume() {
   const [draggedSectionIndex, setDraggedSectionIndex] = useState(null);
   const [dragOverSectionIndex, setDragOverSectionIndex] = useState(null);
   const aiEntitlements = useMemo(() => {
-    const unlimited = Boolean(user?.is_admin || user?.is_pro);
+    const unlimited = isAiUnlimited(user);
+    const tokenOk = hasAiTokenBudget(user);
     const q = user?.ai_quota;
     if (unlimited) {
       return { unlimited: true, canEnhance: true, canTailor: true, canAts: true, quota: q };
     }
     if (!q || q.legacy) {
-      return { unlimited: false, canEnhance: false, canTailor: false, canAts: false, quota: q };
+      return {
+        unlimited: false,
+        canEnhance: tokenOk,
+        canTailor: tokenOk,
+        canAts: tokenOk,
+        quota: q,
+      };
     }
     return {
       unlimited: false,
-      canEnhance: (q.enhance?.remaining ?? 0) > 0,
-      canTailor: (q.tailor?.remaining ?? 0) > 0,
-      canAts: (q.ats?.remaining ?? 0) > 0,
+      canEnhance: (q.enhance?.remaining ?? 0) > 0 && tokenOk,
+      canTailor: (q.tailor?.remaining ?? 0) > 0 && tokenOk,
+      canAts: (q.ats?.remaining ?? 0) > 0 && tokenOk,
       quota: q,
     };
   }, [user]);
@@ -1270,9 +1279,7 @@ const fetchResumeData = useCallback(async () => {
         resume_id: Number(id),
         job_description: atsJobDescription.trim() || null,
       });
-      if (response.data?.ai_quota) {
-        setUser((prev) => (prev ? { ...prev, ai_quota: response.data.ai_quota } : prev));
-      }
+      syncAiUsageFromResponse(response.data, setUser);
       if (response.data?.status && response.data?.data) {
         setAtsResult(response.data.data);
         toast.success("ATS score updated.");
@@ -1281,10 +1288,8 @@ const fetchResumeData = useCallback(async () => {
       }
     } catch (error) {
       const code = error.response?.data?.code;
-      if (code === "AI_QUOTA_EXCEEDED") {
-        if (error.response?.data?.ai_quota) {
-          setUser((prev) => (prev ? { ...prev, ai_quota: error.response.data.ai_quota } : prev));
-        }
+      if (code === "AI_QUOTA_EXCEEDED" || code === "AI_TOKEN_LIMIT_EXCEEDED") {
+        syncAiUsageFromResponse(error.response?.data, setUser);
         setUpgradeProModalVariant("quota");
         setShowUpgradeProModal(true);
         toast.error(error.response?.data?.message || "Free ATS credits exhausted for this month.");
@@ -1327,9 +1332,7 @@ const fetchResumeData = useCallback(async () => {
         seniority: jobTargetSeniority.trim() || null,
       });
 
-      if (response.data?.ai_quota) {
-        setUser((prev) => (prev ? { ...prev, ai_quota: response.data.ai_quota } : prev));
-      }
+      syncAiUsageFromResponse(response.data, setUser);
       if (response.data?.status && response.data?.data) {
         setJobTargetResult(response.data.data);
         toast.success("Job targeting suggestions generated.");
@@ -1338,10 +1341,8 @@ const fetchResumeData = useCallback(async () => {
       }
     } catch (error) {
       const code = error.response?.data?.code;
-      if (code === "AI_QUOTA_EXCEEDED") {
-        if (error.response?.data?.ai_quota) {
-          setUser((prev) => (prev ? { ...prev, ai_quota: error.response.data.ai_quota } : prev));
-        }
+      if (code === "AI_QUOTA_EXCEEDED" || code === "AI_TOKEN_LIMIT_EXCEEDED") {
+        syncAiUsageFromResponse(error.response?.data, setUser);
         setUpgradeProModalVariant("quota");
         setShowUpgradeProModal(true);
         toast.error(error.response?.data?.message || "Free job-targeting credits exhausted for this month.");
@@ -1838,6 +1839,7 @@ const fetchResumeData = useCallback(async () => {
               {cvWizardHint ? (
                 <p className="mt-3 text-sm text-slate-600 border-t border-slate-100 pt-3">{cvWizardHint}</p>
               ) : null}
+              <AiTokenCredits user={user} className="mt-4" />
             </section>
           )}
 
@@ -3139,6 +3141,7 @@ const fetchResumeData = useCallback(async () => {
               </div>
 
               <div className="p-6 space-y-4">
+                <AiTokenCredits user={user} compact />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
                     type="text"
@@ -3273,6 +3276,7 @@ const fetchResumeData = useCallback(async () => {
               </div>
 
               <div className="p-6 space-y-4">
+                <AiTokenCredits user={user} compact />
                 <p className="text-sm text-slate-600">
                   Analyze keyword match, structure, and content strength for this resume.
                 </p>

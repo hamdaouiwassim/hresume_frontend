@@ -204,16 +204,16 @@ export default function Welcome() {
   
   return (
     <GuestLayout navVariant="hero">
-      <div className="relative min-h-screen overflow-hidden">
-        {/* Animated Background Shapes */}
-        <div className="floating-shape shape-1"></div>
-        <div className="floating-shape shape-2"></div>
-        <div className="floating-shape shape-3"></div>
-        
+      <div className="relative min-h-screen">
         {/* Hero Section */}
         <div className="relative pt-16 pb-32 flex content-center items-center justify-center min-h-screen hero-background">
+          <div className="hero-decorations pointer-events-none" aria-hidden>
+            <div className="floating-shape shape-1" />
+            <div className="floating-shape shape-2" />
+            <div className="floating-shape shape-3" />
+          </div>
           {/* Overlay — keeps copy readable while showing the photo */}
-          <div className="absolute inset-0 z-[1] bg-gradient-to-br from-slate-950/75 via-indigo-950/65 to-purple-950/70 backdrop-blur-[2px]" aria-hidden />
+          <div className="absolute inset-0 z-[1] bg-gradient-to-br from-slate-950/75 via-indigo-950/65 to-purple-950/70" aria-hidden />
           
           <div className="container mx-auto px-4 relative z-10">
             <div className="flex flex-wrap items-center justify-center">

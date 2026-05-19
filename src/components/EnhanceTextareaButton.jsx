@@ -6,6 +6,8 @@ import { AuthContext } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import UpgradeProModal from "./UpgradeProModal";
 import AiLoadingSkeleton from "./AiLoadingSkeleton";
+import AiTokenCredits from "./AiTokenCredits";
+import { syncAiUsageFromResponse, hasAiTokenBudget, isAiUnlimited, isProPlan } from "../utils/aiCredits";
 
 export default function EnhanceTextareaButton({
   value,
@@ -23,23 +25,28 @@ export default function EnhanceTextareaButton({
   const [enhancedText, setEnhancedText] = useState("");
   const enhanceLabel = language === "fr" ? "Ameliorer avec IA" : "Enhance with IA";
   const enhancingLabel = language === "fr" ? "Amelioration..." : "Enhancing...";
-  const proTooltip =
-    language === "fr"
-      ? "Credits IA gratuits epuises — passez a Pro pour l'illimite"
-      : "Free AI credits used — upgrade to Pro for unlimited";
+  const isPro = isProPlan(user);
+  const proTooltip = isPro
+    ? language === "fr"
+      ? "Quota IA Pro epuise pour ce mois"
+      : "Pro AI token quota used for this month"
+    : language === "fr"
+      ? "Credits IA gratuits epuises — passez a Pro (50 000 tokens/mois)"
+      : "Free AI credits used — upgrade to Pro (50,000 tokens/month)";
 
   const { unlimited, canEnhance } = useMemo(() => {
-    const u = Boolean(user?.is_admin || user?.is_pro);
+    const u = isAiUnlimited(user);
     const q = user?.ai_quota;
+    const tokenOk = hasAiTokenBudget(user);
     if (u) {
       return { unlimited: true, canEnhance: true };
     }
     if (!q || q.legacy) {
-      return { unlimited: false, canEnhance: false };
+      return { unlimited: false, canEnhance: tokenOk };
     }
     return {
       unlimited: false,
-      canEnhance: (q.enhance?.remaining ?? 0) > 0,
+      canEnhance: (q.enhance?.remaining ?? 0) > 0 && tokenOk,
     };
   }, [user]);
 
@@ -63,9 +70,7 @@ export default function EnhanceTextareaButton({
         context,
       });
 
-      if (response.data?.ai_quota) {
-        setUser((prev) => (prev ? { ...prev, ai_quota: response.data.ai_quota } : prev));
-      }
+      syncAiUsageFromResponse(response.data, setUser);
 
       const enhanced = response.data?.data?.enhanced_text;
       if (!enhanced) {
@@ -82,17 +87,15 @@ export default function EnhanceTextareaButton({
       );
     } catch (error) {
       const code = error.response?.data?.code;
-      if (code === "AI_QUOTA_EXCEEDED") {
-        if (error.response?.data?.ai_quota) {
-          setUser((prev) => (prev ? { ...prev, ai_quota: error.response.data.ai_quota } : prev));
-        }
+      if (code === "AI_QUOTA_EXCEEDED" || code === "AI_TOKEN_LIMIT_EXCEEDED") {
+        syncAiUsageFromResponse(error.response?.data, setUser);
         setUpgradeVariant("quota");
         setShowUpgradeModal(true);
         toast.error(
           error.response?.data?.message ||
             (language === "fr"
-              ? "Credits IA gratuits epuises pour ce mois."
-              : "Free AI credits exhausted for this month.")
+              ? "Crédits IA épuisés pour ce mois."
+              : "AI credits exhausted for this month.")
         );
       } else {
         toast.error(error.response?.data?.message || "Unable to enhance text right now.");
@@ -117,7 +120,8 @@ export default function EnhanceTextareaButton({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
+      {!unlimited && <AiTokenCredits user={user} compact className="mb-1" />}
+      <div className="flex items-center gap-2 flex-wrap">
         <button
           type="button"
           onClick={handleEnhance}
@@ -139,7 +143,7 @@ export default function EnhanceTextareaButton({
         </button>
         {!unlimited && user?.ai_quota && !user.ai_quota.legacy && (
           <span className="text-[10px] font-medium text-slate-500">
-            {language === "fr" ? "Gratuit" : "Free"}: {user.ai_quota.enhance?.remaining ?? 0}/{user.ai_quota.enhance?.limit ?? "—"}
+            {language === "fr" ? "Améliorations" : "Enhance"}: {user.ai_quota.enhance?.remaining ?? 0}/{user.ai_quota.enhance?.limit ?? "—"}
           </span>
         )}
         <UpgradeProModal

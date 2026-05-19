@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { getAdminUser, sendAdminUserMessage, updateAdminUser } from '../../services/adminService';
+import { getAdminUser, getAdminResume, deleteAdminResume, sendAdminUserMessage, updateAdminUser } from '../../services/adminService';
 import { toast } from 'sonner';
 import EnhanceTextareaButton from '../../components/EnhanceTextareaButton';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import { AdminUserAiConsumption, AdminUserResumesList } from '../../components/admin/AdminUserDetailsPanels';
+import AdminResumePreviewModal from '../../components/admin/AdminResumePreviewModal';
 import { 
     Loader2, 
     ArrowLeft, 
@@ -16,11 +19,10 @@ import {
     Building2,
     CheckCircle,
     XCircle,
-    Globe,
     Phone,
     Linkedin,
     Clock,
-    Crown
+    Crown,
 } from 'lucide-react';
 
 export default function UserDetails() {
@@ -33,6 +35,10 @@ export default function UserDetails() {
         subject: '',
         message: '',
     });
+    const [viewingResume, setViewingResume] = useState(null);
+    const [isLoadingResume, setIsLoadingResume] = useState(false);
+    const [resumeToDelete, setResumeToDelete] = useState(null);
+    const [isDeletingResume, setIsDeletingResume] = useState(false);
 
     useEffect(() => {
         fetchUserDetails();
@@ -57,6 +63,47 @@ export default function UserDetails() {
     };
 
     const canGrantPro = user?.email_verified_at;
+
+    const handleShowResume = async (resumeId) => {
+        try {
+            setIsLoadingResume(true);
+            setViewingResume({ id: resumeId, _loading: true });
+            const response = await getAdminResume(resumeId);
+            if (response.data.status) {
+                setViewingResume(response.data.data);
+            } else {
+                toast.error('Failed to load resume');
+                setViewingResume(null);
+            }
+        } catch {
+            toast.error('Failed to load resume');
+            setViewingResume(null);
+        } finally {
+            setIsLoadingResume(false);
+        }
+    };
+
+    const handleDeleteResume = async () => {
+        if (!resumeToDelete) return;
+        try {
+            setIsDeletingResume(true);
+            const response = await deleteAdminResume(resumeToDelete.id);
+            if (response.data.status) {
+                toast.success('Resume deleted');
+                setResumeToDelete(null);
+                if (viewingResume?.id === resumeToDelete.id) {
+                    setViewingResume(null);
+                }
+                fetchUserDetails();
+            } else {
+                toast.error(response.data.message || 'Failed to delete resume');
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to delete resume');
+        } finally {
+            setIsDeletingResume(false);
+        }
+    };
 
     const togglePro = async () => {
         if (!user) return;
@@ -263,7 +310,7 @@ export default function UserDetails() {
                                             )}
                                         </div>
                                         <p className="text-xs text-gray-500 mb-3 flex-1">
-                                            Unlimited AI enhance, tailor, and ATS on resumes.
+                                            Pro: 50,000 AI tokens/month plus higher feature quotas.
                                             {!canGrantPro && !user.is_pro && (
                                                 <span className="block mt-1 text-amber-700">
                                                     Verify this user&apos;s email before granting Pro.
@@ -348,50 +395,16 @@ export default function UserDetails() {
                                 </div>
                             )}
 
-                            {/* Recent Resumes */}
-                            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-xl font-bold text-gray-900">Recent Resumes</h3>
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-sm text-gray-600">Total: {user.resumes_count || 0}</span>
-                                        {user.resumes_count > 0 && (
-                                            <Link
-                                                to={`/admin/users/${user.id}/cvs`}
-                                                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 text-sm font-semibold flex items-center"
-                                            >
-                                                <FileText className="h-4 w-4 mr-2" />
-                                                View All CVs
-                                            </Link>
-                                        )}
-                                    </div>
-                                </div>
-                                {user.resumes && user.resumes.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {user.resumes.map((resume) => (
-                                            <Link
-                                                key={resume.id}
-                                                to={`/admin/resumes/${resume.id}`}
-                                                className="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <p className="font-semibold text-gray-900">{resume.name}</p>
-                                                        {resume.template && (
-                                                            <p className="text-sm text-gray-500">Template: {resume.template.name}</p>
-                                                        )}
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-xs text-gray-500">{formatDate(resume.updated_at)}</p>
-                                                        <FileText className="h-4 w-4 text-gray-400 mt-1 ml-auto" />
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500 text-center py-4">No resumes found</p>
-                                )}
-                            </div>
+                            <AdminUserAiConsumption user={user} formatDate={formatDate} />
+
+                            <AdminUserResumesList
+                                user={user}
+                                formatDate={formatDate}
+                                isLoadingResume={isLoadingResume}
+                                onShowResume={handleShowResume}
+                                onDeleteResume={setResumeToDelete}
+                            />
+
                         </div>
 
                         {/* Sidebar */}
@@ -566,6 +579,23 @@ export default function UserDetails() {
                     </div>
                 </div>
             </div>
+
+            <AdminResumePreviewModal
+                resume={viewingResume}
+                onClose={() => setViewingResume(null)}
+                formatDate={formatDate}
+            />
+
+            <ConfirmDialog
+                isOpen={Boolean(resumeToDelete)}
+                onClose={() => !isDeletingResume && setResumeToDelete(null)}
+                onConfirm={handleDeleteResume}
+                title="Delete resume"
+                message="This permanently deletes the CV and all its sections. This cannot be undone."
+                itemName={resumeToDelete?.name}
+                confirmText={isDeletingResume ? 'Deleting…' : 'Delete'}
+                cancelText="Cancel"
+            />
         </AdminLayout>
     );
 }

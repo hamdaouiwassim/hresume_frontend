@@ -12,6 +12,32 @@ const bustPublicResumeTemplatesCache = () => {
 // Dashboard
 export const getDashboardStats = () => axiosInstance.get("/admin/dashboard");
 
+export const getAdminAiUsageSummary = (params = {}) => {
+  const queryString = new URLSearchParams(
+    Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v != null))
+  ).toString();
+  return axiosInstance.get(`/admin/ai-usage/summary${queryString ? `?${queryString}` : ""}`);
+};
+
+export const getAdminAiUsageLogs = (params = {}) => {
+  const queryString = new URLSearchParams(
+    Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v != null))
+  ).toString();
+  return axiosInstance.get(`/admin/ai-usage/logs${queryString ? `?${queryString}` : ""}`);
+};
+
+export const getAdminAiUserLimits = (params = {}) => {
+  const queryString = new URLSearchParams(
+    Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v != null))
+  ).toString();
+  return axiosInstance.get(`/admin/ai-usage/user-limits${queryString ? `?${queryString}` : ""}`);
+};
+
+export const updateAdminUserTokenLimit = (userId, ai_monthly_token_limit) =>
+  axiosInstance.patch(`/admin/ai-usage/users/${userId}/token-limit`, {
+    ai_monthly_token_limit,
+  });
+
 // Users
 export const getAdminUsers = (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
@@ -63,6 +89,7 @@ export const getAdminResumes = (params = {}) => {
 };
 
 export const getAdminResume = (id) => axiosInstance.get(`/admin/resumes/${id}`);
+export const deleteAdminResume = (id) => axiosInstance.delete(`/admin/resumes/${id}`);
 
 // Cover Letters
 export const getAdminCoverLetters = (params = {}) => {

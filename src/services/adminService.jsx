@@ -47,7 +47,38 @@ export const getAdminUsers = (params = {}) => {
 export const getAdminUser = (id) => axiosInstance.get(`/admin/users/${id}`);
 export const updateAdminUser = (id, data) => axiosInstance.put(`/admin/users/${id}`, data);
 export const deleteAdminUser = (id) => axiosInstance.delete(`/admin/users/${id}`);
+export const restoreAdminUser = (id) => axiosInstance.post(`/admin/users/${id}/restore`);
+export const forceDeleteAdminUser = (id) => axiosInstance.delete(`/admin/users/${id}/force`);
+
+export const banAdminUser = (userId, data) => axiosInstance.post(`/admin/users/${userId}/ban`, data);
+
+export const unbanAdminUser = (userId) => axiosInstance.post(`/admin/users/${userId}/unban`);
+export const restoreAdminResume = (id) => axiosInstance.post(`/admin/resumes/${id}/restore`);
+export const forceDeleteAdminResume = (id) => axiosInstance.delete(`/admin/resumes/${id}/force`);
 export const sendAdminUserMessage = (userId, data) => axiosInstance.post(`/admin/users/${userId}/message`, data);
+
+export const getAdminOutboundEmails = (params = {}) => {
+  const queryString = new URLSearchParams(
+    Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v != null))
+  ).toString();
+  return axiosInstance.get(`/admin/outbound-emails${queryString ? `?${queryString}` : ""}`);
+};
+
+export const getAdminOutboundEmailSummary = () => axiosInstance.get("/admin/outbound-emails/summary");
+
+export const sendAdminResumeReminder = (userId) =>
+  axiosInstance.post(`/admin/users/${userId}/emails/resume-reminder`);
+
+export const sendAdminVerificationReminder = (userId) =>
+  axiosInstance.post(`/admin/users/${userId}/emails/verification-reminder`);
+
+export const sendAdminBulkEmails = (data) => axiosInstance.post("/admin/outbound-emails/bulk", data);
+
+export const sendAdminNewFeaturesToUser = (userId, data) =>
+  axiosInstance.post(`/admin/users/${userId}/emails/new-features`, data);
+
+export const sendAdminNewFeaturesBulk = (data) =>
+  axiosInstance.post("/admin/outbound-emails/new-features", data);
 
 // Templates
 export const getAdminTemplates = (params = {}) => {

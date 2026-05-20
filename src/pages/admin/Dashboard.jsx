@@ -20,7 +20,9 @@ import {
     Type,
     MessageSquare,
     ChevronRight,
+    Send,
 } from 'lucide-react';
+import { formatOutboundType, statusBadge } from '../../utils/outboundEmailLabels';
 import { getDashboardStats } from '../../services/adminService';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -72,6 +74,17 @@ function StatCard({
         return <Link to={href}>{content}</Link>;
     }
     return content;
+}
+
+function MiniStat({ label, value, warn }) {
+    return (
+        <div className={`rounded-xl border px-3 py-2 ${warn && Number(value) > 0 ? 'border-amber-200 bg-amber-50' : 'border-gray-100 bg-gray-50'}`}>
+            <p className="text-xs text-gray-500">{label}</p>
+            <p className={`text-lg font-bold tabular-nums ${warn && Number(value) > 0 ? 'text-amber-800' : 'text-gray-900'}`}>
+                {value ?? 0}
+            </p>
+        </div>
+    );
 }
 
 function ActivityMeter({ label, value, max, accentClass }) {
@@ -454,6 +467,13 @@ export default function AdminDashboard() {
                         </div>
                         <div className="grid gap-3 sm:grid-cols-1">
                             <QuickActionCard
+                                to="/admin/emails"
+                                icon={Send}
+                                title="Outbound emails"
+                                description="Queue, sent & failed mail logs"
+                                variant="soft"
+                            />
+                            <QuickActionCard
                                 to="/admin/ai-usage"
                                 icon={Sparkles}
                                 title="AI usage & tokens"
@@ -509,6 +529,72 @@ export default function AdminDashboard() {
                         </div>
                     </section>
                 </div>
+
+                {stats?.outbound_emails && (
+                    <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-100/80">
+                        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50">
+                                    <Send className="h-5 w-5 text-violet-600" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900">Outbound emails</h2>
+                                    <p className="text-sm text-gray-500">Last 30 days · queue worker required</p>
+                                </div>
+                            </div>
+                            <Link to="/admin/emails" className="text-sm font-semibold text-purple-600 hover:text-purple-800">
+                                View all logs →
+                            </Link>
+                        </div>
+                        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                            <MiniStat label="Queued" value={stats.outbound_emails.queued} />
+                            <MiniStat label="Sent" value={stats.outbound_emails.sent} />
+                            <MiniStat label="Failed" value={stats.outbound_emails.failed} />
+                            <MiniStat label="Sent 24h" value={stats.outbound_emails.sent_24h} />
+                            <MiniStat label="Stale" value={stats.outbound_emails.stale_queued} warn />
+                            <MiniStat label="Jobs" value={stats.outbound_emails.jobs_pending} />
+                        </div>
+                        {(stats.recent_outbound_emails?.length ?? 0) > 0 ? (
+                            <div className="overflow-x-auto rounded-xl border border-gray-100">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                                        <tr>
+                                            <th className="px-3 py-2">Status</th>
+                                            <th className="px-3 py-2">Type</th>
+                                            <th className="px-3 py-2">To</th>
+                                            <th className="px-3 py-2">When</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {stats.recent_outbound_emails.map((row) => {
+                                            const b = statusBadge(row.status);
+                                            return (
+                                                <tr key={row.id}>
+                                                    <td className="px-3 py-2">
+                                                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${b.className}`}>
+                                                            {b.label}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2 text-gray-600">{formatOutboundType(row.type)}</td>
+                                                    <td className="px-3 py-2">
+                                                        <Link to={`/admin/users/${row.user_id}`} className="text-purple-600 hover:underline">
+                                                            {row.recipient_email}
+                                                        </Link>
+                                                    </td>
+                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                                                        {formatDate(row.created_at)}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className="py-4 text-center text-sm text-gray-500">No outbound emails yet.</p>
+                        )}
+                    </section>
+                )}
 
                 {/* Recent activity */}
                 <section>

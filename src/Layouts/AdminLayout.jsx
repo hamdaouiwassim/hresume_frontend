@@ -18,7 +18,8 @@ import {
     Bell,
     MessageSquare,
     ScrollText,
-    Sparkles
+    Sparkles,
+    Send,
 } from 'lucide-react';
 import LanguageToggle from '../components/LanguageToggle';
 import { logout } from '../services/authService';
@@ -67,6 +68,7 @@ export default function AdminLayout({ children }) {
     const navItems = [
         { path: '/admin', icon: BarChart3, label: 'Dashboard' },
         { path: '/admin/ai-usage', icon: Sparkles, label: 'AI usage' },
+        { path: '/admin/emails', icon: Send, label: 'Emails' },
         { path: '/admin/users', icon: Users, label: 'Users' },
         { path: '/admin/templates', icon: Layout, label: 'Templates' },
         { path: '/admin/cover-letter-templates', icon: Mail, label: 'CL Templates' },

@@ -19,30 +19,37 @@ import {
 import { getAdminReviews, toggleReviewPublic, deleteReview } from '../../services/adminReviewService';
 import { toast } from 'sonner';
 import { useLanguage } from '../../context/LanguageContext';
+import AdminListPagination from '../../components/admin/AdminListPagination';
+import { DEFAULT_ADMIN_PER_PAGE } from '../../constants/adminPagination';
 
 export default function ReviewsManagement() {
     const { t } = useLanguage();
     const [reviews, setReviews] = useState([]);
-    const [pagination, setPagination] = useState({});
+    const [perPage, setPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        total: 0,
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [isDeleting, setIsDeleting] = useState(null);
     const [isToggling, setIsToggling] = useState(null);
 
     useEffect(() => {
-        fetchReviews();
-    }, [search]);
+        fetchReviews(1);
+    }, [search, perPage]);
 
     const fetchReviews = async (page = 1) => {
         try {
             setIsLoading(true);
-            const response = await getAdminReviews({ page, search, per_page: 10 });
+            const response = await getAdminReviews({ page, search, per_page: perPage });
             if (response.data.status) {
                 setReviews(response.data.data.data);
                 setPagination({
                     current_page: response.data.data.current_page,
                     last_page: response.data.data.last_page,
-                    total: response.data.data.total
+                    total: response.data.data.total,
                 });
             }
         } catch (error) {
@@ -224,29 +231,16 @@ export default function ReviewsManagement() {
                         </div>
                     )}
 
-                    {/* Pagination */}
-                    {pagination.last_page > 1 && (
-                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                            <span className="text-sm text-gray-600 font-medium">
-                                Showing {reviews.length} of {pagination.total} reviews
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => fetchReviews(pagination.current_page - 1)}
-                                    disabled={pagination.current_page === 1}
-                                    className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-                                >
-                                    Previous
-                                </button>
-                                <button
-                                    onClick={() => fetchReviews(pagination.current_page + 1)}
-                                    disabled={pagination.current_page === pagination.last_page}
-                                    className="px-4 py-2 border border-blue-100 rounded-lg text-sm font-semibold bg-white text-blue-600 hover:bg-blue-50 disabled:opacity-50 transition-all shadow-sm"
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </div>
+                    {!isLoading && pagination.total > 0 && (
+                        <AdminListPagination
+                            currentPage={pagination.current_page}
+                            lastPage={pagination.last_page}
+                            perPage={perPage}
+                            total={pagination.total}
+                            onPageChange={(p) => fetchReviews(p)}
+                            onPerPageChange={setPerPage}
+                            itemLabel="reviews"
+                        />
                     )}
                 </div>
             </div>

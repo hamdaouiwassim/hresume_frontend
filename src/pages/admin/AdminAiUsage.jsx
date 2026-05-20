@@ -26,6 +26,8 @@ import {
   HorizontalBarChart,
 } from "../../components/admin/AiUsageCharts";
 import { toast } from "sonner";
+import AdminListPagination from "../../components/admin/AdminListPagination";
+import { DEFAULT_ADMIN_PER_PAGE } from "../../constants/adminPagination";
 
 const KINDS = [
   { value: "", label: "All kinds" },
@@ -64,8 +66,10 @@ export default function AdminAiUsage() {
   const [from, setFrom] = useState(initialRange.from);
   const [to, setTo] = useState(initialRange.to);
   const [page, setPage] = useState(1);
+  const [logsPerPage, setLogsPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
   const [limitsSearch, setLimitsSearch] = useState("");
   const [limitsPage, setLimitsPage] = useState(1);
+  const [limitsPerPage, setLimitsPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
   const [editingLimits, setEditingLimits] = useState({});
   const [savingUserId, setSavingUserId] = useState(null);
 
@@ -87,7 +91,7 @@ export default function AdminAiUsage() {
   const loadLogs = useCallback(async () => {
     try {
       setLogsLoading(true);
-      const params = { page, per_page: 25 };
+      const params = { page, per_page: logsPerPage };
       if (userId.trim()) params.user_id = userId.trim();
       if (kind) params.kind = kind;
       if (from) params.from = from;
@@ -99,12 +103,12 @@ export default function AdminAiUsage() {
     } finally {
       setLogsLoading(false);
     }
-  }, [page, userId, kind, from, to]);
+  }, [page, logsPerPage, userId, kind, from, to]);
 
   const loadLimits = useCallback(async () => {
     try {
       setLimitsLoading(true);
-      const params = { page: limitsPage, per_page: 15 };
+      const params = { page: limitsPage, per_page: limitsPerPage };
       if (limitsSearch.trim()) params.search = limitsSearch.trim();
       const res = await getAdminAiUserLimits(params);
       if (res.data?.status) {
@@ -123,7 +127,7 @@ export default function AdminAiUsage() {
     } finally {
       setLimitsLoading(false);
     }
-  }, [limitsPage, limitsSearch]);
+  }, [limitsPage, limitsPerPage, limitsSearch]);
 
   useEffect(() => {
     loadSummary();
@@ -172,8 +176,12 @@ export default function AdminAiUsage() {
   const fmt = (n) => (n == null ? "—" : Number(n).toLocaleString());
   const rows = logs?.data ?? [];
   const lastPage = logs?.last_page ?? 1;
+  const logsTotal = logs?.total ?? rows.length;
+  const logsCurrentPage = logs?.current_page ?? page;
   const limitRows = limits?.data ?? [];
   const limitsLastPage = limits?.last_page ?? 1;
+  const limitsTotal = limits?.total ?? limitRows.length;
+  const limitsCurrentPage = limits?.current_page ?? limitsPage;
   const defaultLimit = summary?.default_monthly_token_limit ?? 1000;
   const proDefaultLimit = summary?.pro_monthly_token_limit ?? 50000;
 
@@ -448,28 +456,19 @@ export default function AdminAiUsage() {
                       </tbody>
                     </table>
                   </div>
-                  {limitsLastPage > 1 && (
-                    <div className="flex items-center justify-between border-t px-4 py-3">
-                      <button
-                        type="button"
-                        disabled={limitsPage <= 1}
-                        onClick={() => setLimitsPage((p) => Math.max(1, p - 1))}
-                        className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm disabled:opacity-40"
-                      >
-                        <ChevronLeft className="h-4 w-4" /> Previous
-                      </button>
-                      <span className="text-sm text-gray-600">
-                        Page {limits?.current_page ?? limitsPage} of {limitsLastPage}
-                      </span>
-                      <button
-                        type="button"
-                        disabled={limitsPage >= limitsLastPage}
-                        onClick={() => setLimitsPage((p) => Math.min(limitsLastPage, p + 1))}
-                        className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm disabled:opacity-40"
-                      >
-                        Next <ChevronRight className="h-4 w-4" />
-                      </button>
-                    </div>
+                  {!limitsLoading && limitsTotal > 0 && (
+                    <AdminListPagination
+                      currentPage={limitsCurrentPage}
+                      lastPage={limitsLastPage}
+                      perPage={limitsPerPage}
+                      total={limitsTotal}
+                      onPageChange={setLimitsPage}
+                      onPerPageChange={(size) => {
+                        setLimitsPerPage(size);
+                        setLimitsPage(1);
+                      }}
+                      itemLabel="users"
+                    />
                   )}
                 </>
               )}
@@ -565,28 +564,19 @@ export default function AdminAiUsage() {
                       </tbody>
                     </table>
                   </div>
-                  {lastPage > 1 && (
-                    <div className="flex items-center justify-between border-t px-4 py-3">
-                      <button
-                        type="button"
-                        disabled={page <= 1}
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm disabled:opacity-40"
-                      >
-                        <ChevronLeft className="h-4 w-4" /> Previous
-                      </button>
-                      <span className="text-sm text-gray-600">
-                        Page {logs?.current_page ?? page} of {lastPage}
-                      </span>
-                      <button
-                        type="button"
-                        disabled={page >= lastPage}
-                        onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
-                        className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm disabled:opacity-40"
-                      >
-                        Next <ChevronRight className="h-4 w-4" />
-                      </button>
-                    </div>
+                  {!logsLoading && logsTotal > 0 && (
+                    <AdminListPagination
+                      currentPage={logsCurrentPage}
+                      lastPage={lastPage}
+                      perPage={logsPerPage}
+                      total={logsTotal}
+                      onPageChange={setPage}
+                      onPerPageChange={(size) => {
+                        setLogsPerPage(size);
+                        setPage(1);
+                      }}
+                      itemLabel="log entries"
+                    />
                   )}
                 </>
               )}

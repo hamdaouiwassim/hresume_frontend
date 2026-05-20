@@ -64,6 +64,7 @@ const AdminCoverLettersManagement = lazy(() => import('./pages/admin/CoverLetter
 const AdminWorkCertificatesManagement = lazy(() => import('./pages/admin/WorkCertificatesManagement'));
 const AdminFontManagement = lazy(() => import('./pages/admin/FontManagement'));
 const AdminReviewsManagement = lazy(() => import('./pages/admin/ReviewsManagement'));
+const AdminEmails = lazy(() => import('./pages/admin/AdminEmails'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -140,6 +141,7 @@ function App() {
             <Route path="/admin/templates" element={<AdminRoute><AdminTemplatesManagement /></AdminRoute>} />
             <Route path="/admin/cover-letter-templates" element={<AdminRoute><AdminCoverLetterTemplatesManagement /></AdminRoute>} />
             <Route path="/admin/ai-usage" element={<AdminRoute><AdminAiUsage /></AdminRoute>} />
+            <Route path="/admin/emails" element={<AdminRoute><AdminEmails /></AdminRoute>} />
             <Route path="/admin/blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
             <Route path="/admin/blog/new" element={<AdminRoute><AdminBlogPostEditor /></AdminRoute>} />
             <Route path="/admin/blog/edit/:id" element={<AdminRoute><AdminBlogPostEditor /></AdminRoute>} />

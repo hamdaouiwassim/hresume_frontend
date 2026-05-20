@@ -1,7 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { getAdminUser, getAdminResume, deleteAdminResume, sendAdminUserMessage, updateAdminUser } from '../../services/adminService';
+import {
+    getAdminUser,
+    getAdminResume,
+    deleteAdminResume,
+    sendAdminUserMessage,
+    sendAdminResumeReminder,
+    sendAdminVerificationReminder,
+    sendAdminNewFeaturesToUser,
+    updateAdminUser,
+} from '../../services/adminService';
+import AdminNewFeaturesEmailForm from '../../components/admin/AdminNewFeaturesEmailForm';
+import AdminUserBanPanel from '../../components/admin/AdminUserBanPanel';
+import { formatOutboundType, statusBadge } from '../../utils/outboundEmailLabels';
 import { toast } from 'sonner';
 import EnhanceTextareaButton from '../../components/EnhanceTextareaButton';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -23,6 +35,7 @@ import {
     Linkedin,
     Clock,
     Crown,
+    FileWarning,
 } from 'lucide-react';
 
 export default function UserDetails() {
@@ -31,6 +44,7 @@ export default function UserDetails() {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSendingEmail, setIsSendingEmail] = useState(false);
+    const [reminderLoading, setReminderLoading] = useState(null);
     const [emailForm, setEmailForm] = useState({
         subject: '',
         message: '',
@@ -467,6 +481,83 @@ export default function UserDetails() {
                                 </div>
                             </div>
 
+                            <AdminUserBanPanel user={user} onUpdated={fetchUserDetails} />
+
+                            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">Email templates</h3>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Queue automated reminders. Delivery requires the queue worker.
+                                </p>
+                                <div className="flex flex-col gap-2">
+                                    <button
+                                        type="button"
+                                        disabled={reminderLoading === 'resume'}
+                                        onClick={async () => {
+                                            try {
+                                                setReminderLoading('resume');
+                                                const res = await sendAdminResumeReminder(user.id);
+                                                toast.success(res.data?.message || 'Resume reminder queued');
+                                                fetchUserDetails();
+                                            } catch (e) {
+                                                toast.error(e.response?.data?.message || 'Failed to queue resume reminder');
+                                            } finally {
+                                                setReminderLoading(null);
+                                            }
+                                        }}
+                                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 hover:bg-violet-100 disabled:opacity-50"
+                                    >
+                                        {reminderLoading === 'resume' ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <FileWarning className="h-4 w-4" />
+                                        )}
+                                        Resume incomplete reminder
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={reminderLoading === 'verify' || Boolean(user.email_verified_at)}
+                                        onClick={async () => {
+                                            try {
+                                                setReminderLoading('verify');
+                                                const res = await sendAdminVerificationReminder(user.id);
+                                                toast.success(res.data?.message || 'Verification reminder queued');
+                                                fetchUserDetails();
+                                            } catch (e) {
+                                                toast.error(e.response?.data?.message || 'Failed to queue verification reminder');
+                                            } finally {
+                                                setReminderLoading(null);
+                                            }
+                                        }}
+                                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-900 hover:bg-blue-100 disabled:opacity-50"
+                                    >
+                                        {reminderLoading === 'verify' ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Mail className="h-4 w-4" />
+                                        )}
+                                        Email verification reminder
+                                    </button>
+                                </div>
+                                <Link
+                                    to="/admin/emails"
+                                    className="mt-3 inline-block text-sm font-medium text-purple-600 hover:text-purple-800"
+                                >
+                                    View all outbound logs →
+                                </Link>
+                            </div>
+
+                            <AdminNewFeaturesEmailForm
+                                showBulk={false}
+                                userName={user.name}
+                                onSendToUser={async (data) => {
+                                    const res = await sendAdminNewFeaturesToUser(user.id, data);
+                                    if (res.data?.status) {
+                                        toast.success(res.data.message || 'New features email queued');
+                                        fetchUserDetails();
+                                    }
+                                }}
+                            />
+
                             {/* Message User */}
                             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                                 <h3 className="text-lg font-bold text-gray-900 mb-4">Send Message</h3>
@@ -485,6 +576,7 @@ export default function UserDetails() {
                                             await sendAdminUserMessage(user.id, emailForm);
                                             toast.success('Email queued successfully.');
                                             setEmailForm({ subject: '', message: '' });
+                                            fetchUserDetails();
                                         } catch (error) {
                                             toast.error(error?.response?.data?.message || 'Failed to send email.');
                                         } finally {
@@ -550,6 +642,45 @@ export default function UserDetails() {
                                     </button>
                                 </form>
                             </div>
+
+                            {(user.recent_outbound_emails?.length ?? 0) > 0 && (
+                                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Email history</h3>
+                                    <div className="overflow-x-auto rounded-xl border border-gray-100">
+                                        <table className="w-full text-sm">
+                                            <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                                                <tr>
+                                                    <th className="px-3 py-2">Status</th>
+                                                    <th className="px-3 py-2">Type</th>
+                                                    <th className="px-3 py-2">Subject</th>
+                                                    <th className="px-3 py-2">When</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {user.recent_outbound_emails.map((row) => {
+                                                    const b = statusBadge(row.status);
+                                                    return (
+                                                        <tr key={row.id}>
+                                                            <td className="px-3 py-2">
+                                                                <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${b.className}`}>
+                                                                    {b.label}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-3 py-2 text-gray-600">{formatOutboundType(row.type)}</td>
+                                                            <td className="px-3 py-2 text-gray-700 max-w-[12rem] truncate" title={row.subject}>
+                                                                {row.subject || '—'}
+                                                            </td>
+                                                            <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                                                                {formatDate(row.created_at)}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Account Info */}
                             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">

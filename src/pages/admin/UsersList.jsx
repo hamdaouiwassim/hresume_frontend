@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { Users, Search, Trash2, Loader2, Shield, Calendar, Mail, FileText, Briefcase, Building2, CheckCircle, XCircle, Eye, Crown } from 'lucide-react';
-import { getAdminUsers, deleteAdminUser, updateAdminUser } from '../../services/adminService';
+import { Users, Search, Trash2, Loader2, Shield, Calendar, Mail, FileText, Briefcase, Building2, CheckCircle, XCircle, Eye, Crown, RotateCcw } from 'lucide-react';
+import { getAdminUsers, deleteAdminUser, restoreAdminUser, updateAdminUser } from '../../services/adminService';
 import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { useLanguage } from '../../context/LanguageContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import AdminListPagination from '../../components/admin/AdminListPagination';
+import { DEFAULT_ADMIN_PER_PAGE } from '../../constants/adminPagination';
 
 export default function UsersList() {
     const { t, language } = useLanguage();
@@ -16,13 +18,14 @@ export default function UsersList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
     const [verificationFilter, setVerificationFilter] = useState('');
+    const [trashedFilter, setTrashedFilter] = useState('');
     const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, user: null });
     const [isDeleting, setIsDeleting] = useState(false);
+    const [perPage, setPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
-        per_page: 15,
-        total: 0
+        total: 0,
     });
 
     useEffect(() => {
@@ -32,18 +35,19 @@ export default function UsersList() {
     }, [location.search]);
 
     useEffect(() => {
-        fetchUsers();
-    }, [searchQuery, roleFilter, verificationFilter]);
+        fetchUsers(1);
+    }, [searchQuery, roleFilter, verificationFilter, trashedFilter, perPage]);
 
     const fetchUsers = async (page = 1) => {
         try {
             setIsLoading(true);
             const params = {
-                per_page: 15,
+                per_page: perPage,
                 page: page,
                 ...(searchQuery && { search: searchQuery }),
                 ...(roleFilter && { role: roleFilter }),
-                ...(verificationFilter && { verification_status: verificationFilter })
+                ...(verificationFilter && { verification_status: verificationFilter }),
+                ...(trashedFilter && { trashed: trashedFilter }),
             };
             const response = await getAdminUsers(params);
             if (response.data.status) {
@@ -57,15 +61,13 @@ export default function UsersList() {
                     setPagination({
                         current_page: data.current_page || 1,
                         last_page: data.last_page || 1,
-                        per_page: data.per_page || 15,
-                        total: data.total || usersList.length
+                        total: data.total || usersList.length,
                     });
                 } else {
                     setPagination({
                         current_page: 1,
                         last_page: 1,
-                        per_page: usersList.length || 15,
-                        total: usersList.length
+                        total: usersList.length,
                     });
                 }
             } else {
@@ -87,14 +89,24 @@ export default function UsersList() {
 
         setIsDeleting(true);
         try {
-            await deleteAdminUser(deleteDialog.user.id);
-            toast.success('User deleted successfully');
-            setUsers(users.filter(u => u.id !== deleteDialog.user.id));
+            const res = await deleteAdminUser(deleteDialog.user.id);
+            toast.success(res.data?.message || 'User moved to trash');
+            fetchUsers(pagination.current_page);
             setDeleteDialog({ isOpen: false, user: null });
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to delete user');
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    const handleRestore = async (user) => {
+        try {
+            const res = await restoreAdminUser(user.id);
+            toast.success(res.data?.message || 'User restored');
+            fetchUsers(pagination.current_page);
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to restore user');
         }
     };
 
@@ -253,12 +265,26 @@ export default function UsersList() {
                                 </select>
                             </div>
 
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-medium text-gray-700">Trash:</label>
+                                <select
+                                    value={trashedFilter}
+                                    onChange={(e) => setTrashedFilter(e.target.value)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                                >
+                                    <option value="">Active only</option>
+                                    <option value="only">Deleted only</option>
+                                    <option value="with">All (incl. deleted)</option>
+                                </select>
+                            </div>
+
                             {/* Clear Filters Button */}
-                            {(roleFilter || verificationFilter) && (
+                            {(roleFilter || verificationFilter || trashedFilter) && (
                                 <button
                                     onClick={() => {
                                         setRoleFilter('');
                                         setVerificationFilter('');
+                                        setTrashedFilter('');
                                         navigate('/admin/users');
                                     }}
                                     className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -304,7 +330,7 @@ export default function UsersList() {
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
                                     {users.map((user) => (
-                                        <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                                        <tr key={user.id} className={`hover:bg-gray-50 transition-colors ${user.deleted_at ? 'bg-red-50/40' : ''}`}>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <img
@@ -456,14 +482,26 @@ export default function UsersList() {
                                                     >
                                                         <Crown className="h-4 w-4" />
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleDelete(user)}
-                                                        disabled={isDeleting}
-                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        title="Delete user"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </button>
+                                                    {user.deleted_at ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRestore(user)}
+                                                            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                                            title="Restore user"
+                                                        >
+                                                            <RotateCcw className="h-4 w-4" />
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDelete(user)}
+                                                            disabled={isDeleting}
+                                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            title="Move to trash"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -472,29 +510,16 @@ export default function UsersList() {
                             </table>
                         </div>
 
-                        {/* Pagination */}
-                        {pagination.last_page > 1 && (
-                            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                                <div className="text-sm text-gray-700">
-                                    Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} users
-                                </div>
-                                <div className="flex space-x-2">
-                                    <button
-                                        onClick={() => fetchUsers(pagination.current_page - 1)}
-                                        disabled={pagination.current_page === 1}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        Previous
-                                    </button>
-                                    <button
-                                        onClick={() => fetchUsers(pagination.current_page + 1)}
-                                        disabled={pagination.current_page >= pagination.last_page}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        Next
-                                    </button>
-                                </div>
-                            </div>
+                        {!isLoading && pagination.total > 0 && (
+                            <AdminListPagination
+                                currentPage={pagination.current_page}
+                                lastPage={pagination.last_page}
+                                perPage={perPage}
+                                total={pagination.total}
+                                onPageChange={(p) => fetchUsers(p)}
+                                onPerPageChange={setPerPage}
+                                itemLabel="users"
+                            />
                         )}
                     </div>
 
@@ -513,7 +538,7 @@ export default function UsersList() {
                 onClose={() => setDeleteDialog({ isOpen: false, user: null })}
                 onConfirm={confirmDelete}
                 title="Delete User"
-                message="Are you sure you want to delete this user? This action cannot be undone. All associated resumes will also be deleted."
+                message="Move this user to trash? Their resumes and related data are soft-deleted too. You can restore them anytime from Deleted users."
                 itemName={deleteDialog.user?.name}
                 confirmText="Yes, Delete"
                 cancelText="Cancel"

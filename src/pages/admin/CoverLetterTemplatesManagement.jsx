@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { useLanguage } from '../../context/LanguageContext';
 import EnhanceTextareaButton from '../../components/EnhanceTextareaButton';
+import AdminListPagination from '../../components/admin/AdminListPagination';
+import { DEFAULT_ADMIN_PER_PAGE } from '../../constants/adminPagination';
 
 export default function CoverLetterTemplatesManagement() {
     const { t, language } = useLanguage();
@@ -28,22 +30,33 @@ export default function CoverLetterTemplatesManagement() {
         is_active: true
     });
     const [errors, setErrors] = useState({});
+    const [perPage, setPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
 
     useEffect(() => {
-        fetchTemplates();
-    }, [searchQuery, selectedLanguage]);
+        fetchTemplates(1);
+    }, [searchQuery, selectedLanguage, perPage]);
 
-    const fetchTemplates = async () => {
+    const fetchTemplates = async (pageNum = 1) => {
         try {
             setIsLoading(true);
             const params = {
-                per_page: 100,
+                page: pageNum,
+                per_page: perPage,
                 ...(searchQuery && { search: searchQuery }),
                 ...(selectedLanguage !== 'All' && { language: selectedLanguage })
             };
             const response = await getAdminCoverLetterTemplates(params);
             if (response.data.status) {
-                setTemplates(response.data.data.data || []);
+                const data = response.data.data;
+                setTemplates(data.data || []);
+                setPagination({
+                    current_page: data.current_page ?? 1,
+                    last_page: data.last_page ?? 1,
+                    total: data.total ?? 0,
+                });
+                setPage(data.current_page ?? pageNum);
             } else {
                 toast.error('Failed to load templates');
             }
@@ -250,6 +263,17 @@ export default function CoverLetterTemplatesManagement() {
                             <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
                             <p className="text-slate-500 font-medium">No templates found</p>
                         </div>
+                    )}
+                    {!isLoading && pagination.total > 0 && (
+                        <AdminListPagination
+                            currentPage={pagination.current_page}
+                            lastPage={pagination.last_page}
+                            perPage={perPage}
+                            total={pagination.total}
+                            onPageChange={(p) => fetchTemplates(p)}
+                            onPerPageChange={setPerPage}
+                            itemLabel="templates"
+                        />
                     )}
                 </div>
             </div>

@@ -14,6 +14,8 @@ import {
     Search,
     Edit
 } from 'lucide-react';
+import AdminListPagination from '../../components/admin/AdminListPagination';
+import { DEFAULT_ADMIN_PER_PAGE } from '../../constants/adminPagination';
 
 export default function UserCVs() {
     const { id } = useParams();
@@ -24,22 +26,22 @@ export default function UserCVs() {
     const [selectedResume, setSelectedResume] = useState(null);
     const [isViewingResume, setIsViewingResume] = useState(false);
     const [userInfo, setUserInfo] = useState(null);
+    const [perPage, setPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
-        per_page: 15,
-        total: 0
+        total: 0,
     });
 
     useEffect(() => {
-        fetchUserCVs();
-    }, [id, searchQuery]);
+        fetchUserCVs(1);
+    }, [id, searchQuery, perPage]);
 
     const fetchUserCVs = async (page = 1) => {
         try {
             setIsLoading(true);
             const params = {
-                per_page: 15,
+                per_page: perPage,
                 page: page,
                 user_id: id,
                 ...(searchQuery && { search: searchQuery })
@@ -59,15 +61,13 @@ export default function UserCVs() {
                     setPagination({
                         current_page: data.current_page || 1,
                         last_page: data.last_page || 1,
-                        per_page: data.per_page || 15,
-                        total: data.total || resumesList.length
+                        total: data.total || resumesList.length,
                     });
                 } else {
                     setPagination({
                         current_page: 1,
                         last_page: 1,
-                        per_page: resumesList.length || 15,
-                        total: resumesList.length
+                        total: resumesList.length,
                     });
                 }
             } else {
@@ -412,35 +412,16 @@ export default function UserCVs() {
                                 </table>
                             </div>
 
-                            {/* Pagination */}
-                            {pagination.last_page > 1 && (
-                                <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                                    <div className="text-sm text-gray-700">
-                                        Showing{' '}
-                                        {((pagination.current_page - 1) * pagination.per_page) + 1} to{' '}
-                                        {Math.min(
-                                            pagination.current_page * pagination.per_page,
-                                            pagination.total
-                                        )}{' '}
-                                        of {pagination.total} results
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => fetchUserCVs(pagination.current_page - 1)}
-                                            disabled={pagination.current_page === 1}
-                                            className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                                        >
-                                            Previous
-                                        </button>
-                                        <button
-                                            onClick={() => fetchUserCVs(pagination.current_page + 1)}
-                                            disabled={pagination.current_page === pagination.last_page}
-                                            className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                                        >
-                                            Next
-                                        </button>
-                                    </div>
-                                </div>
+                            {!isLoading && pagination.total > 0 && (
+                                <AdminListPagination
+                                    currentPage={pagination.current_page}
+                                    lastPage={pagination.last_page}
+                                    perPage={perPage}
+                                    total={pagination.total}
+                                    onPageChange={(p) => fetchUserCVs(p)}
+                                    onPerPageChange={setPerPage}
+                                    itemLabel="resumes"
+                                />
                             )}
                         </div>
                     )}

@@ -8,20 +8,35 @@ import {
   deleteAdminWorkCertificate,
 } from "../../services/adminService";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import AdminListPagination from "../../components/admin/AdminListPagination";
+import { DEFAULT_ADMIN_PER_PAGE } from "../../constants/adminPagination";
 
 export default function WorkCertificatesManagement() {
   const [items, setItems] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [perPage, setPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, item: null });
 
-  const fetchData = async () => {
+  const fetchData = async (pageNum = page) => {
     try {
       setLoading(true);
-      const response = await getAdminWorkCertificates({ search, per_page: 30 });
+      const response = await getAdminWorkCertificates({
+        search,
+        page: pageNum,
+        per_page: perPage,
+      });
       if (response.data?.status) {
-        setItems(response.data.data?.data || []);
+        const data = response.data.data;
+        setItems(data?.data || []);
+        setPagination({
+          current_page: data?.current_page ?? 1,
+          last_page: data?.last_page ?? 1,
+          total: data?.total ?? 0,
+        });
       }
     } catch {
       toast.error("Failed to load work certificates");
@@ -31,11 +46,13 @@ export default function WorkCertificatesManagement() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(1);
+    setPage(1);
+  }, [perPage]);
 
   const handleSearch = async () => {
-    await fetchData();
+    setPage(1);
+    await fetchData(1);
   };
 
   const handleView = async (id) => {
@@ -56,7 +73,7 @@ export default function WorkCertificatesManagement() {
       toast.success("Work certificate deleted");
       setDeleteDialog({ isOpen: false, item: null });
       if (selected?.id === deleteDialog.item.id) setSelected(null);
-      fetchData();
+      fetchData(page);
     } catch {
       toast.error("Failed to delete work certificate");
     }
@@ -119,7 +136,7 @@ export default function WorkCertificatesManagement() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 font-semibold text-gray-900">
-                Certificates ({items.length})
+                Certificates ({pagination.total || items.length})
               </div>
               <div className="divide-y divide-gray-100 max-h-[540px] overflow-y-auto">
                 {items.length ? (
@@ -155,6 +172,20 @@ export default function WorkCertificatesManagement() {
                   <p className="p-6 text-center text-gray-500">No work certificates found.</p>
                 )}
               </div>
+              {!loading && pagination.total > 0 && (
+                <AdminListPagination
+                  currentPage={pagination.current_page}
+                  lastPage={pagination.last_page}
+                  perPage={perPage}
+                  total={pagination.total}
+                  onPageChange={(p) => {
+                    setPage(p);
+                    fetchData(p);
+                  }}
+                  onPerPageChange={setPerPage}
+                  itemLabel="certificates"
+                />
+              )}
             </div>
 
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 min-h-[200px]">

@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { useLanguage } from '../../context/LanguageContext';
 import EnhanceTextareaButton from '../../components/EnhanceTextareaButton';
+import AdminListPagination from '../../components/admin/AdminListPagination';
+import { DEFAULT_ADMIN_PER_PAGE } from '../../constants/adminPagination';
 
 export default function TemplatesManagement() {
     const { t, language } = useLanguage();
@@ -25,12 +27,15 @@ export default function TemplatesManagement() {
     });
     const [imagePreview, setImagePreview] = useState('');
     const [errors, setErrors] = useState({});
+    const [perPage, setPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
 
     const categories = ['All', 'Corporate', 'Creative', 'Simple'];
 
     useEffect(() => {
-        fetchTemplates();
-    }, [searchQuery, selectedCategory]);
+        fetchTemplates(1);
+    }, [searchQuery, selectedCategory, perPage]);
 
     useEffect(() => {
         return () => {
@@ -40,17 +45,25 @@ export default function TemplatesManagement() {
         };
     }, [imagePreview]);
 
-    const fetchTemplates = async () => {
+    const fetchTemplates = async (pageNum = 1) => {
         try {
             setIsLoading(true);
             const params = {
-                per_page: 100,
+                page: pageNum,
+                per_page: perPage,
                 ...(searchQuery && { search: searchQuery }),
                 ...(selectedCategory !== 'All' && { category: selectedCategory })
             };
             const response = await getAdminTemplates(params);
             if (response.data.status) {
-                setTemplates(response.data.data.data || []);
+                const data = response.data.data;
+                setTemplates(data.data || []);
+                setPagination({
+                    current_page: data.current_page ?? 1,
+                    last_page: data.last_page ?? 1,
+                    total: data.total ?? 0,
+                });
+                setPage(data.current_page ?? pageNum);
             } else {
                 toast.error('Failed to load templates');
             }
@@ -284,6 +297,19 @@ export default function TemplatesManagement() {
                             </div>
                         ))}
                     </div>
+
+                    {!isLoading && pagination.total > 0 && (
+                        <AdminListPagination
+                            currentPage={pagination.current_page}
+                            lastPage={pagination.last_page}
+                            perPage={perPage}
+                            total={pagination.total}
+                            onPageChange={(p) => fetchTemplates(p)}
+                            onPerPageChange={setPerPage}
+                            itemLabel="templates"
+                            className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-sm"
+                        />
+                    )}
 
                     {templates.length === 0 && !isLoading && (
                         <div className="text-center py-12 bg-white rounded-2xl shadow-lg border border-gray-100">

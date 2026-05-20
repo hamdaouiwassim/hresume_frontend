@@ -19,6 +19,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { buildResumeTemplateData } from '../../utils/resumeTemplateMapper';
 import ResumeTemplatePreview from '../../components/ResumeTemplatePreview';
 import { deriveTemplateLayout } from '../../utils/templateStyles';
+import AdminListPagination from '../../components/admin/AdminListPagination';
+import { DEFAULT_ADMIN_PER_PAGE } from '../../constants/adminPagination';
 
 export default function GeneratedCV() {
     const navigate = useNavigate();
@@ -30,23 +32,23 @@ export default function GeneratedCV() {
     const [isViewingResume, setIsViewingResume] = useState(false);
     const [previewResume, setPreviewResume] = useState(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [perPage, setPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
-        per_page: 15,
-        total: 0
+        total: 0,
     });
     const locale = language === "fr" ? "fr-FR" : "en-US";
 
     useEffect(() => {
-        fetchResumes();
-    }, [searchQuery]);
+        fetchResumes(1);
+    }, [searchQuery, perPage]);
 
     const fetchResumes = async (page = 1) => {
         try {
             setIsLoading(true);
             const params = {
-                per_page: 15,
+                per_page: perPage,
                 page: page,
                 ...(searchQuery && { search: searchQuery })
             };
@@ -60,15 +62,13 @@ export default function GeneratedCV() {
                     setPagination({
                         current_page: data.current_page || 1,
                         last_page: data.last_page || 1,
-                        per_page: data.per_page || 15,
-                        total: data.total || resumesList.length
+                        total: data.total || resumesList.length,
                     });
                 } else {
                     setPagination({
                         current_page: 1,
                         last_page: 1,
-                        per_page: resumesList.length || 15,
-                        total: resumesList.length
+                        total: resumesList.length,
                     });
                 }
             } else {
@@ -425,29 +425,16 @@ export default function GeneratedCV() {
                                 </table>
                             </div>
 
-                            {/* Pagination */}
-                            {pagination.last_page > 1 && (
-                                <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                                    <div className="text-sm text-gray-700">
-                                        Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} results
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => fetchResumes(pagination.current_page - 1)}
-                                            disabled={pagination.current_page === 1}
-                                            className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                                        >
-                                            Previous
-                                        </button>
-                                        <button
-                                            onClick={() => fetchResumes(pagination.current_page + 1)}
-                                            disabled={pagination.current_page === pagination.last_page}
-                                            className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                                        >
-                                            Next
-                                        </button>
-                                    </div>
-                                </div>
+                            {!isLoading && pagination.total > 0 && (
+                                <AdminListPagination
+                                    currentPage={pagination.current_page}
+                                    lastPage={pagination.last_page}
+                                    perPage={perPage}
+                                    total={pagination.total}
+                                    onPageChange={(p) => fetchResumes(p)}
+                                    onPerPageChange={setPerPage}
+                                    itemLabel="resumes"
+                                />
                             )}
                         </div>
                     )}

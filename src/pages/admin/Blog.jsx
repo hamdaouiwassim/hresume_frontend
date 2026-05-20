@@ -6,6 +6,8 @@ import { getAdminBlogPosts, deleteBlogPost } from '../../services/blogService';
 import { toast } from 'sonner';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { useLanguage } from '../../context/LanguageContext';
+import AdminListPagination from '../../components/admin/AdminListPagination';
+import { DEFAULT_ADMIN_PER_PAGE } from '../../constants/adminPagination';
 
 export default function AdminBlog() {
   const { t } = useLanguage();
@@ -17,22 +19,33 @@ export default function AdminBlog() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, post: null });
   const [isDeleting, setIsDeleting] = useState(false);
+  const [perPage, setPerPage] = useState(DEFAULT_ADMIN_PER_PAGE);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
 
   useEffect(() => {
-    fetchPosts();
-  }, [searchQuery, statusFilter]);
+    fetchPosts(1);
+  }, [searchQuery, statusFilter, perPage]);
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (pageNum = 1) => {
     try {
       setIsLoading(true);
       const params = {
-        per_page: 50,
+        page: pageNum,
+        per_page: perPage,
         ...(searchQuery && { search: searchQuery }),
         ...(statusFilter !== 'all' && { status: statusFilter }),
       };
       const response = await getAdminBlogPosts(params);
       if (response.data.status) {
-        setPosts(response.data.data.data || []);
+        const data = response.data.data;
+        setPosts(data.data || []);
+        setPagination({
+          current_page: data.current_page ?? 1,
+          last_page: data.last_page ?? 1,
+          total: data.total ?? 0,
+        });
+        setPage(data.current_page ?? pageNum);
       } else {
         toast.error(blog.fetchError || 'Failed to load blog posts');
       }
@@ -52,7 +65,7 @@ export default function AdminBlog() {
       if (response.data.status) {
         toast.success(blog.deleteSuccess || 'Blog post deleted successfully');
         setDeleteDialog({ isOpen: false, post: null });
-        fetchPosts();
+        fetchPosts(page);
       }
     } catch {
       toast.error(blog.deleteError || 'Failed to delete blog post');
@@ -239,6 +252,17 @@ export default function AdminBlog() {
                   </tbody>
                 </table>
               </div>
+              {!isLoading && pagination.total > 0 && (
+                <AdminListPagination
+                  currentPage={pagination.current_page}
+                  lastPage={pagination.last_page}
+                  perPage={perPage}
+                  total={pagination.total}
+                  onPageChange={(p) => fetchPosts(p)}
+                  onPerPageChange={setPerPage}
+                  itemLabel="posts"
+                />
+              )}
             </div>
           )}
         </div>
